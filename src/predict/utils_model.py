@@ -28,6 +28,8 @@ def parse_args():
                         type=str)
     parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
+    parser.add_argument("--dummy_input", dest='dummy_input',
+                        type=str, required=False)
     
     # parse args
     args = parser.parse_args()

@@ -221,13 +221,15 @@ def build_pipeline_base_func(periodos, model_periodo, script_types, compute, env
                         --target_version ${{{{inputs.target_version}}}} \
                         --periodo {periodo} \
                         --model_periodo {model_periodo} \
-                        --experiment_name ${{{{inputs.experiment_name}}}}",
+                        --experiment_name ${{{{inputs.experiment_name}}}} \
+                        --dummy_input ${{{{inputs.dummy_input}}}}",
                         inputs={
                             "input_feats_datastore": Input(type=AssetTypes.URI_FOLDER),
                             "input_target_datastore": Input(type=AssetTypes.URI_FOLDER),
                             "feats_version": Input(type="string"),
                             "target_version": Input(type="string"),
-                            "experiment_name": Input(type="string")
+                            "experiment_name": Input(type="string"),
+                            "dummy_input": Input(type=AssetTypes.URI_FOLDER, optional=True)
                         },
                         outputs={
                             "output_predict_datastore": Output(type=AssetTypes.URI_FOLDER)
@@ -236,22 +238,26 @@ def build_pipeline_base_func(periodos, model_periodo, script_types, compute, env
                         display_name=f"Predict {tipo} {periodo}"
                     )
                     
+                    # Prepare optional dependency input
+                    dependency_input = None
+                    if tipo in model_steps:
+                         dependency_input = model_steps[tipo].outputs.output_model_datastore
+
                     predict_step = predict_component(
                         input_feats_datastore=feat_inf_step.outputs.output_feats_datastore,
                         input_target_datastore=feat_inf_step.outputs.output_target_datastore,
                         feats_version=v_feats,
                         target_version=v_target,
-                        experiment_name=exp_predict_name
+                        experiment_name=exp_predict_name,
+                        dummy_input=dependency_input
                     )
                     predict_step.compute = compute
                     predict_step.name = predict_name
                     predict_step.outputs.output_predict_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/predict")
 
-                    # Enforce dependency on training step if applicable
-                    if tipo in model_steps:
-                        # Ensures model is trained/registered before prediction runs
-                        # Since predict loads from MLflow Registry
-                        predict_step.run_after(model_steps[tipo])
+                    # Enforce dependency via data input instead of run_after
+                    # if tipo in model_steps:
+                    #     predict_step.run_after(model_steps[tipo])
 
                     # Evaluation Step
                     eval_name = f"eval_{tipo}_{periodo}"

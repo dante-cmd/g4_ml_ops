@@ -66,6 +66,10 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
         )
         etl_step.compute = compute
         etl_step.name = "etl_step"
+        etl_step.outputs.output_datastore = Output(
+            type=AssetTypes.URI_FOLDER, 
+            path="azureml://datastores/ml_data/paths/platinumdata",
+            mode="rw_mount")
         
         # This output maps to platinumdata for subsequent steps
         platinum_data_output = etl_step.outputs.output_datastore
@@ -121,9 +125,9 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                 feat_step.name = feat_step_name
                 
                 # Output paths to global store
-                feat_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/features")
+                feat_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/features")
                 # Target not strictly needed to map if not used by others, but good practice if concurrent
-                # feat_step.outputs.output_target_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/target")
+                # feat_step.outputs.output_target_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/target")
 
                 # --- Models Train (Dev) ---
                 model_step_name = f"model_train_{tipo}"
@@ -154,7 +158,7 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                 )
                 model_step.compute = compute
                 model_step.name = model_step_name
-                model_step.outputs.output_model_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/models")
+                model_step.outputs.output_model_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/models")
                 
                 model_steps[tipo] = model_step
 
@@ -183,7 +187,7 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                     feat_champ_step.compute = compute
                     feat_champ_step.name = feat_champ_name
                     feat_champ_step.display_name = f"Feat Champ {tipo} {periodo}"
-                    feat_champ_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/features")
+                    feat_champ_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/features")
 
                     # 2. Predict (Champ)
                     predict_component = command(
@@ -196,13 +200,15 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                         --target_version ${{{{inputs.target_version}}}} \
                         --periodo {periodo} \
                         --model_periodo {model_periodo} \
-                        --experiment_name ${{{{inputs.experiment_name}}}}",
+                        --experiment_name ${{{{inputs.experiment_name}}}} \
+                        --dummy_input ${{{{inputs.dummy_input}}}}",
                         inputs={
                             "input_feats_datastore": Input(type=AssetTypes.URI_FOLDER),
                             "input_target_datastore": Input(type=AssetTypes.URI_FOLDER),
                             "feats_version": Input(type="string"),
                             "target_version": Input(type="string"),
-                            "experiment_name": Input(type="string")
+                            "experiment_name": Input(type="string"),
+                            "dummy_input": Input(type=AssetTypes.URI_FOLDER, optional=True)
                         },
                         outputs={
                             "output_predict_datastore": Output(type=AssetTypes.URI_FOLDER)
@@ -217,12 +223,13 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                         input_target_datastore=feat_champ_step.outputs.output_target_datastore,
                         feats_version=v_feats_champ,
                         target_version=v_target_champ,
-                        experiment_name=exp_predict_name
+                        experiment_name=exp_predict_name,
+                        dummy_input=None # Champion path uses registered model, no dependency on current training
                     )
                     pred_champ_step.compute = compute
                     pred_champ_step.name = pred_champ_name
                     pred_champ_step.display_name = f"Pred Champ {tipo} {periodo}"
-                    pred_champ_step.outputs.output_predict_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/predict")
+                    pred_champ_step.outputs.output_predict_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/predict")
 
                     # 3. Eval (Champ)
                     eval_component = command(
@@ -255,7 +262,7 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                     eval_champ_step.compute = compute
                     eval_champ_step.name = eval_champ_name
                     eval_champ_step.display_name = f"Eval Champ {tipo} {periodo}"
-                    eval_champ_step.outputs.output_evaluation_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/evaluation")
+                    eval_champ_step.outputs.output_evaluation_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/evaluation")
 
 
                     # === DEV PATH === (New Version)
@@ -275,25 +282,27 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                     feat_dev_step.compute = compute
                     feat_dev_step.name = feat_dev_name
                     feat_dev_step.display_name = f"Feat Dev {tipo} {periodo}"
-                    feat_dev_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/features")
+                    feat_dev_step.outputs.output_feats_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/features")
 
                     # 2. Predict (Dev) - MUST WAIT FOR MODEL TRAIN
+                    # Prepare optional dependency input
+                    dependency_input = None
+                    if tipo in model_steps:
+                         dependency_input = model_steps[tipo].outputs.output_model_datastore
+
                     pred_dev_name = f"pred_dev_{tipo}_{periodo}"
                     pred_dev_step = predict_component(
                         input_feats_datastore=feat_dev_step.outputs.output_feats_datastore,
                         input_target_datastore=feat_dev_step.outputs.output_target_datastore,
                         feats_version=v_feats_dev,
                         target_version=v_target_dev,
-                        experiment_name=exp_predict_name
+                        experiment_name=exp_predict_name,
+                        dummy_input=dependency_input
                     )
                     pred_dev_step.compute = compute
                     pred_dev_step.name = pred_dev_name
                     pred_dev_step.display_name = f"Pred Dev {tipo} {periodo}"
-                    pred_dev_step.outputs.output_predict_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/predict")
-
-                    # Dependency: Predict Dev can only run after Model Train Dev finishes
-                    if tipo in model_steps:
-                        pred_dev_step.run_after(model_steps[tipo])
+                    pred_dev_step.outputs.output_predict_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/predict")
 
                     # 3. Eval (Dev)
                     eval_dev_name = f"eval_dev_{tipo}_{periodo}"
@@ -305,7 +314,16 @@ def build_pipeline_better_func(periodos, model_periodo, script_types, compute, e
                     eval_dev_step.compute = compute
                     eval_dev_step.name = eval_dev_name
                     eval_dev_step.display_name = f"Eval Dev {tipo} {periodo}"
-                    eval_dev_step.outputs.output_evaluation_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/platinumdata/paths/evaluation")
+                    eval_dev_step.outputs.output_evaluation_datastore = Output(type=AssetTypes.URI_FOLDER, path="azureml://datastores/ml_data/paths/evaluation")
+
+        # ---------------------------- Compare & Update (Placeholder) ----------------------------
+        # Logic to compare models and update champion
+        # Note: Scripts src/model/{tipo}.py were requested but not found in src/models. 
+        # Also placement after loop suggests comparing for last period?
+        
+        # for tipo in script_types:
+        #     # Placeholder for Compare Step
+        #     pass
 
     return pipeline_better_func
 
@@ -323,10 +341,6 @@ if __name__ == '__main__':
     compute = 'mldevci'
     
     # FETCH VERSIONS
-    # We attempt to run the version scripts to get JSON output
-    # This assumes the runner has access to 'az login' credential or similar if scripts touch Azure, 
-    # OR that we are just reading local files/simulating.
-    # The PS1 script runs: python .\src\version\fetch_version.py ...
     
     version_data = {}
     new_version_data = {}
@@ -350,7 +364,6 @@ if __name__ == '__main__':
         print("Versions fetched successfully.")
     except Exception as e:
         print(f"Warning: Could not fetch versions via subprocess ({e}). Using empty defaults.")
-        # Fallback meant for testing if scripts fail or data missing locally
     
     # Initialize ML Client
     try:
