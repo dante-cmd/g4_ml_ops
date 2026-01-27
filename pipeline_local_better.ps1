@@ -275,3 +275,35 @@ foreach ($periodo in $periodos) {
         }
     }
 }
+
+# Compare models
+foreach ($tipo in $script_types) {
+    if ($mapping_tipos[$tipo]) {
+        $model_args = @(
+            "--input_evaluation_datastore", "./data/ml_data/evaluation/",
+            "--input_target_datastore", "./data/ml_data/target/",
+            "--output_model_datastore", "./data/ml_data/model/",
+            "--target_version", "$target_version",
+            "--periodo", "$periodo",
+            "--model_periodo", "$model_periodo"
+            )
+        $script = "./src/model/$tipo.py"
+        Run-PythonScript -ScriptPath $script -ScriptArgs $model_args
+    }
+}
+
+# If the new model is better than current model, update the new model to champion
+foreach ($tipo in $script_types) {
+    if ($mapping_tipos[$tipo]) {
+        $model_args = @(
+            "--input_evaluation_datastore", "./data/ml_data/evaluation/",
+            "--input_target_datastore", "./data/ml_data/target/",
+            "--output_model_datastore", "./data/ml_data/model/",
+            "--target_version", "$target_version",
+            "--periodo", "$periodo",
+            "--model_periodo", "$model_periodo"
+            )
+        $script = "./src/model/$tipo.py"
+        Run-PythonScript -ScriptPath $script -ScriptArgs $model_args
+    }
+}
