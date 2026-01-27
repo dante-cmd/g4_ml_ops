@@ -18,11 +18,19 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/platinumdata
     mode: rw_mount
-  output_feats_datastore:
+  output_feats_continuidad_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/featsdata
     mode: rw_mount
-  output_target_datastore:
+  output_target_continuidad_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/targetdata
+    mode: rw_mount
+  output_feats_inicial_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/featsdata
+    mode: rw_mount
+  output_target_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/targetdata
     mode: rw_mount
@@ -51,22 +59,8 @@ jobs:
       target_version: "v1"
       periodo: 202511
     outputs:
-      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
-      output_target_datastore: ${{parent.outputs.output_target_datastore}}
-  
-  inicial_estacional_job:
-    type: command
-    component: file:./src/features/inicial_estacional.yml
-    inputs:
-      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
-      ult_periodo: 202511
-      platinum_version: "v1"
-      feats_version: "v1"
-      target_version: "v1"
-      periodo: 202511
-    outputs:
-      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
-      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+      output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
+      output_target_inicial_datastore: ${{parent.outputs.output_target_inicial_datastore}}
   
   continuidad_regular_job:
     type: command
@@ -79,20 +73,5 @@ jobs:
       target_version: "v1"
       periodo: 202511
     outputs:
-      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
-      output_target_datastore: ${{parent.outputs.output_target_datastore}}
-  
-  continuidad_estacional_job:
-    type: command
-    component: file:./src/features/continuidad_estacional.yml
-    inputs:
-      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
-      ult_periodo: 202511
-      platinum_version: "v1"
-      feats_version: "v1"
-      target_version: "v1"
-      periodo: 202511
-    outputs:
-      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
-      output_target_datastore: ${{parent.outputs.output_target_datastore}}
-
+      output_feats_continuidad_datastore: ${{parent.outputs.output_feats_continuidad_datastore}}
+      output_target_continuidad_datastore: ${{parent.outputs.output_target_continuidad_datastore}}
