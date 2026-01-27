@@ -109,6 +109,9 @@ if __name__ == '__main__':
         subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
         resource_group = os.environ.get("AZURE_RESOURCE_GROUP")
         workspace_name = os.environ.get("AZURE_WORKSPACE_NAME")
+        print("subscription_id",subscription_id)
+        print("resource_group",resource_group)
+        print("workspace_name",workspace_name)
 
         if subscription_id and resource_group and workspace_name:
             print("Initializing MLClient using environment variables...")
