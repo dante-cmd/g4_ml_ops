@@ -2,6 +2,23 @@ name: Run Pipeline Base (Replica)
 
 on:
   workflow_dispatch:
+    inputs:
+      ult_periodo:
+        description: 'Último período (ej: 202511)'
+        required: false
+        default: '202511'
+      n_periodos:
+        description: 'Número de períodos'
+        required: false
+        default: 'None'
+      all_periodos:
+        description: 'Todos los períodos (True/False)'
+        required: false
+        default: 'True'
+      platinum_version:
+        description: 'Versión de platinum data'
+        required: false
+        default: 'v1'
   push:
     branches:
       - prod
@@ -35,8 +52,18 @@ jobs:
         AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
         AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
       run: |
+          # Use workflow inputs if available, otherwise use defaults
+          ULT_PERIODO="${{ github.event.inputs.ult_periodo || '202511' }}"
+          N_PERIODOS="${{ github.event.inputs.n_periodos || 'None' }}"
+          ALL_PERIODOS="${{ github.event.inputs.all_periodos || 'True' }}"
+          PLATINUM_VERSION="${{ github.event.inputs.platinum_version || 'v1' }}"
+          
           JOB_ID=$(az ml job create \
             --file pipeline_bas_v2.yml \
+            --set jobs.etl_job.inputs.ult_periodo=$ULT_PERIODO \
+            --set jobs.etl_job.inputs.n_periodos="$N_PERIODOS" \
+            --set jobs.etl_job.inputs.all_periodos="$ALL_PERIODOS" \
+            --set jobs.etl_job.inputs.platinum_version="$PLATINUM_VERSION" \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
