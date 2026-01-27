@@ -1,0 +1,98 @@
+# pipeline_ml.yml
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: ML Pipeline - ETL and Feature Engineering
+experiment_name: ml_pipeline_experiment
+
+settings:
+  default_compute: azureml:clusterai
+  default_datastore: azureml:workspaceblobstore
+
+inputs:
+  input_datastore:
+    type: uri_folder
+    path: azureml://datastores/base_data/paths/rawdata
+
+outputs:
+  output_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/platinumdata
+    mode: rw_mount
+  output_feats_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/featsdata
+    mode: rw_mount
+  output_target_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/targetdata
+    mode: rw_mount
+
+jobs:
+  etl_job:
+    type: command
+    component: file:./src/data/etl.yml
+    inputs:
+      input_datastore: ${{parent.inputs.input_datastore}}
+      ult_periodo: 202511
+      n_periodos: "None"
+      all_periodos: "True"
+      platinum_version: "v1"
+    outputs:
+      output_datastore: ${{parent.outputs.output_datastore}}
+  
+  inicial_regular_job:
+    type: command
+    component: file:./src/features/inicial_regular.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+  
+  inicial_estacional_job:
+    type: command
+    component: file:./src/features/inicial_estacional.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+  
+  continuidad_regular_job:
+    type: command
+    component: file:./src/features/continuidad_regular.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+  
+  continuidad_estacional_job:
+    type: command
+    component: file:./src/features/continuidad_estacional.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+

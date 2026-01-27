@@ -1,4 +1,4 @@
-name: Run Pipeline Base (Replica3)
+name: Run Pipeline ML
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
     - name: Submit diabetes pipeline job (no stream)
       run: |
           JOB_ID=$(az ml job create \
-            --file pipeline_bas_v2.yml \
+            --file pipeline_ml.yml \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
