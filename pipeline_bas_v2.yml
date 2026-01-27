@@ -1,0 +1,45 @@
+# pipeline_bas_v2.yml
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: ETL Pipeline Base v2
+experiment_name: etl_pipeline_experiment
+
+settings:
+  default_compute: azureml:cibnew
+  default_datastore: azureml:workspaceblobstore
+
+inputs:
+  input_datastore:
+    type: uri_folder
+    path: azureml://datastores/base_data/paths/rawdata
+  ult_periodo:
+    type: integer
+    default: 202511
+  n_periodos:
+    type: string
+    default: "None"
+  all_periodos:
+    type: string
+    default: "True"
+  platinum_version:
+    type: string
+    default: "v1"
+
+outputs:
+  output_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/platinumdata
+    mode: rw_mount
+
+jobs:
+  etl_job:
+    type: command
+    component: file:./src/data/etl.yml
+    inputs:
+      input_datastore: ${{parent.inputs.input_datastore}}
+      ult_periodo: ${{parent.inputs.ult_periodo}}
+      n_periodos: ${{parent.inputs.n_periodos}}
+      all_periodos: ${{parent.inputs.all_periodos}}
+      platinum_version: ${{parent.inputs.platinum_version}}
+    outputs:
+      output_datastore: ${{parent.outputs.output_datastore}}

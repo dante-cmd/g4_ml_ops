@@ -1,0 +1,43 @@
+{
+    "name": "etl_component",
+    "version": "1.0.0",
+    "type": "command",
+    "description": "ETL component for data processing",
+    "inputs": [
+        {
+            "name": "input_datastore",
+            "type": "uri_folder",
+            "description": "Input datastore path"
+        },
+        {
+            "name": "platinum_version",
+            "type": "string",
+            "description": "Platinum version tag"
+        },
+        {
+            "name": "ult_periodo",
+            "type": "integer",
+            "description": "Last period value"
+        },
+        {
+            "name": "n_periodos",
+            "type": "string",
+            "description": "Number of periods"
+        },
+        {
+            "name": "all_periodos",
+            "type": "string",
+            "description": "All periods flag"
+        }
+    ],
+    "outputs": [
+        {
+            "name": "output_datastore",
+            "type": "uri_folder",
+            "description": "Output datastore path"
+        }
+    ],
+    "code": "./src/data",
+    "command": "python etl.py --input_datastore {input_datastore} --output_datastore {output_datastore} --platinum_version {platinum_version} --ult_periodo {ult_periodo} --n_periodos {n_periodos} --all_periodos {all_periodos}",
+    "environment": "customized-env:1"
+}

@@ -1,0 +1,52 @@
+# src/components/prep/prep.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: etl
+version: 1
+display_name: ETL Data
+type: command
+
+inputs:
+  input_datastore:
+    type: uri_file
+  ult_periodo:
+    type: integer
+  n_periodos:
+    type: string
+  all_periodos:
+    type: string
+  platinum_version:
+    type: string
+
+outputs:
+  output_datastore:
+    type: uri_folder
+  
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - numpy
+          - openpyxl
+          - pyarrow
+          - Unidecode
+          - scikit-learn
+          - PyYAML
+          - joblib
+
+command: >-
+  python etl.py 
+  --input_datastore ${{inputs.input_datastore}}
+  --output_datastore ${{outputs.output_datastore}}
+  --ult_periodo ${{inputs.ult_periodo}} 
+  --n_periodos ${{inputs.n_periodos}}
+  --all_periodos ${{inputs.all_periodos}}
+  --platinum_version ${{inputs.platinum_version}}

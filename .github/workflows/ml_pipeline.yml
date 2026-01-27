@@ -1,0 +1,67 @@
+name: MLOps Pipeline Deployment
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.9'
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+  WORKSPACE_NAME: ${{ secrets.WORKSPACE_NAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install azure-ai-ml azure-identity
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Azure ML CLI v2
+      run: |
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        az extension add -n ml -y
+
+    - name: Configure ML Workspace
+      run: |
+        az configure --defaults \
+          group=${{ secrets.RESOURCE_GROUP }} \
+          workspace=${{ secrets.WORKSPACE_NAME }} \
+          subscription=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Run ML Pipeline
+      run: |
+        python pipelines/run_pipeline.py
+      env:
+        AML_ENVIRONMENT: ${{ secrets.AML_ENVIRONMENT }}
+        AML_COMPUTE_TARGET: ${{ secrets.AML_COMPUTE_TARGET }}
+        PLATINUM_VERSION: ${{ secrets.PLATINUM_VERSION }}
+        FEATS_VERSION: ${{ secrets.FEATS_VERSION }}
+        TARGET_VERSION: ${{ secrets.TARGET_VERSION }}
+        AML_EXPERIMENT_NAME: ${{ secrets.AML_EXPERIMENT_NAME }}
+
+    - name: Upload pipeline outputs
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: pipeline-outputs
+        path: outputs/

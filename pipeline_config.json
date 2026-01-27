@@ -1,0 +1,21 @@
+{
+  "aml_environment": "customized-env:1",
+  "aml_compute_target": "cibnew",
+  "experiment_names": {
+    "model_training": "Train Models",
+    "predictions": "Predict Models"
+  },
+  "dataset_versions": {
+    "platinum": "v1",
+    "features": "v1",
+    "target": "v1"
+  },
+  "pipeline_params": {
+    "periodos": [202506, 202507, 202508, 202509, 202510, 202511],
+    "script_types": ["continuidad_regular", "inicial_regular", "continuidad_estacional", "inicial_estacional"]
+  },
+  "data_paths": {
+    "input_datastore": "azureml://datastores/base_data/paths/rawdata",
+    "output_datastore": "azureml://datastores/ml_data/paths/platinumdata"
+  }
+}
