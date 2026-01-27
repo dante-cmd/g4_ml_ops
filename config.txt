@@ -1,0 +1,1 @@
+git config --global --add safe.directory /mnt/batch/tasks/shared/LS_root/mounts/clusters/cimlops/code/g4_ops

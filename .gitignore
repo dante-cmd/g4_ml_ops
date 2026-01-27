@@ -1,0 +1,15 @@
+mlops_forecasting
+venv
+.idea
+.terraform
+key.tf
+.env
+terraform.tfstate
+.ipynb_checkpoints
+mlruns
+mlartifacts
+mlflow.db
+mlruns.db
+catboost_info
+venv
+__pycache__

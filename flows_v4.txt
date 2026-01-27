@@ -1,0 +1,52 @@
+
+Technologies: GitHub Actions and Azure
+
+Create a pipeline CI/CD for MLOPS based on folders of this project
+
+When someone commit (merge) to main
+
+Set 
+- read evaluate_periodos.csv and get the evaluate_periodos in the project. This will be used to iterate.
+- model_periodo = MIN(evaluate_periodos)
+[DEV workflow]
+Install dependencies (previously collect all the packages (or libreries) used in the project),
+- Running linter (Pylint) and Black for formatting. The file must be rated greater than 9.4
+- Security scans: we use bandit, pip-audit-extra (only high vulnerabilities) and detect-secrets with zero tolerance.
+- For unittest: Pytest, Doctest and coverage (to measure the coverage of test)
+- Read the current version (versions.json) located in /ml_data/version/ (in Azure cloud)
+- For each platinum,feats, target, updated "dev" to next version. {"platinum":{"champion":"v1", "dev":"v1"}}  
+	-> {"platinum":{"champion":"v1", "dev":"v2"}}
+  This step can be done in Python script or as a step in the pipeline
+- Get the new versions and run azure pipeline.
+  - src/etl/etl.py is added a new version ml_data/raw and ml_data/platinum.
+  - src/features/*.py is added a new version ml_data/features/*/ and ml_data/target/*/
+  - scr/models/*.py is added a new version of model (in mlflow), and this new model is set like a "dev" (last version is dev). 
+    On the other hand, the version for model_version located in located in /ml_data/version/ (in Azure cloud) is also apdated 
+	{"model_version": {"inicial_regular":{"champion":"v1", "dev":"v1"}}} -> {"model_version": {"inicial_regular":{"champion":"v1", "dev":"v2"}}}
+  - read the version of "champion" and new version of "dev"
+  - scr/predict/* run the prediction for "dev"
+  - scr/evaluation/* run the evaluation compare "dev" vs "champion". If for evaluation_periodos .
+   - %score (@champion) + 1% <= % Score (@dev)
+   - Creacion (@champion) > Creacion (@dev)
+   - Cancelacion (@champion) > Cancelacion (@dev)
+   - %MAPE (@champion) >= % MAPE (@dev) +1% 
+[PROD workflow]
+- If the new version is better updated this new version like "champion"
+ - Read the current version (versions.json) located in /ml_data/version/ (in Azure cloud)
+ - update the current version that we get in last DEV to "champion"
+ - run for champion version
+ - src/etl/etl.py
+ - src/features/*.py
+ - scr/models/*.py
+ 
+ [DEPLOY WORKFLOW]
+- If today is the day for predict, it triges the workflow. the dates for validate if today triges is in dates.csv
+- If yes:
+ - Set periodo, periodo_model (get from git_hub_env)
+ - get the version, 
+   - src/etl/etl.py
+   - src/features/*.py
+   - src/predict/*.py -> saved in champion
+   
+   
+   python src/data/etl.py --input_datastore './data/base_data/rawdata/'  --output_datastore  './data/ml_data/platinumdata'  --ult_periodo 202601  --n_periodos "None"  --all_periodos "True"  --platinum_version "v1"
