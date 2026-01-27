@@ -5,7 +5,7 @@ display_name: ETL Pipeline Base v2
 experiment_name: etl_pipeline_experiment
 
 settings:
-  default_compute: azureml:cibnew
+  default_compute: azureml:clusterai
   default_datastore: azureml:workspaceblobstore
 
 inputs:
