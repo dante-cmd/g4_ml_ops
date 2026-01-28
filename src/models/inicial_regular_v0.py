@@ -1,12 +1,8 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import mlflow
-import mlflow.sklearn
-# from catboost import CatBoostRegressor
-from utils_model import get_mapping_tipos
-import argparse
-from sklearn.linear_model import LinearRegression
+from catboost import CatBoostRegressor
+from utils_model import parse_args, get_mapping_tipos
 # from utils_metrics import calculate_classes, calculate_metrics
 # import mlflow
 # import mlflow.catboost
@@ -70,30 +66,21 @@ class TrainInicial:
 
         X_train = data_model_train[x].copy()
         y_train = data_model_train[y].copy()
-        print(X_train.head())
 
-        with mlflow.start_run():
-            # LinearRegression
-            model = LinearRegression()
-            model.fit(X_train, y_train)
+        model = CatBoostRegressor(
+            iterations=500,
+            learning_rate=0.1,
+            depth=6,
+            loss_function='RMSE',
+            verbose=False, # Set to True to see training progress,
+            min_data_in_leaf=5,
+        )
 
-        # return model
-
-
-        # model = CatBoostRegressor(
-        #     iterations=500,
-        #     learning_rate=0.1,
-        #     depth=6,
-        #     loss_function='RMSE',
-        #     verbose=False, # Set to True to see training progress,
-        #     min_data_in_leaf=5,
-        # )
-
-        # # X_train, y_train = data_train_01[x].copy(), data_train[y].copy()
+        # X_train, y_train = data_train_01[x].copy(), data_train[y].copy()
         
-        # model.fit(X_train, y_train, cat_features=cat_features)
+        model.fit(X_train, y_train, cat_features=cat_features)
 
-        # return model
+        return model
 
     # def register_model(self, model, periodo:int):
         
@@ -118,11 +105,7 @@ class TrainInicial:
 
 
 def main(args):
-
-    # 1. Habilitar Autologging (Clave para Azure ML v2)
-    mlflow.sklearn.autolog()
-
-    input_feats_inicial_datastore = args.input_feats_inicial_datastore
+    input_feats_datastore = args.input_feats_datastore
     experiment_name = args.experiment_name
     feats_version = args.feats_version
     model_periodo = args.model_periodo
@@ -150,8 +133,9 @@ def main(args):
     
     
     train_inicial = TrainInicial(
-        input_feats_inicial_datastore, 
-        feats_version
+        input_feats_datastore, 
+        feats_version,
+        # client
         )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
@@ -162,29 +146,6 @@ def main(args):
         # train_inicial.register_model(model, model_periodo)
     
     # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
-
-
-def parse_args():
-    # setup arg parser
-    parser = argparse.ArgumentParser()
-
-    # add arguments
-    parser.add_argument("--input_feats_inicial_datastore", dest='input_feats_inicial_datastore',
-                        type=str)
-    parser.add_argument("--feats_version", dest='feats_version',
-                        type=str)
-    parser.add_argument("--model_periodo", dest='model_periodo',
-                        type=int)
-    parser.add_argument("--experiment_name", dest='experiment_name',
-                        type=str)
-    
-    # parse args
-    args = parser.parse_args()
-
-    # return args
-    return args
-
-
 
 if __name__ == '__main__':
         # add space in logs

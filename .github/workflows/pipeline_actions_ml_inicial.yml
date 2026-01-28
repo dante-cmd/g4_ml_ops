@@ -1,0 +1,53 @@
+name: Run Pipeline ML Inicial Regular
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - prod
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install azure-ai-ml azure-identity
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install Azure ML CLI extension
+      run: |
+          az extension add -n ml -y || az extension update -n ml
+          az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
+
+    - name: Submit diabetes pipeline job (no stream)
+      run: |
+          JOB_ID=$(az ml job create \
+            --file pipeline_ml_inicial.yml \
+            --query name -o tsv)
+
+          echo "Submitted job: $JOB_ID"
+        
+
+    # - name: Run Pipeline Script
+    #   env:
+    #     AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+    #     AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
+    #     AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+    #   run: |
+    #     python pipeline_cloud_base_v2_actions.py
+    #  opcional: exponerlo como output del step
+         # echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT

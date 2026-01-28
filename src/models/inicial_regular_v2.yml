@@ -1,12 +1,12 @@
-# src/models/continuidad_estacional.yml
-$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: model_continuidad_estacional
+# src/models/inicial_regular_v3.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+name: model_inicial_regular
 version: 1
-display_name: Model Training - Continuidad Estacional
+display_name: Model Training - Inicial Regular
 type: command
 
 inputs:
-  input_feats_datastore:
+  input_feats_inicial_datastore:
     type: uri_folder
   feats_version:
     type: string
@@ -27,14 +27,14 @@ environment:
       - pip
       - pip:
           - pandas
+          - pyarrow
+          - PyYAML
+          - Unidecode
           - numpy
-          - catboost
-          - scikit-learn
-          - mlflow
 
 command: >-
-  python continuidad_estacional.py 
-  --input_feats_datastore ${{inputs.input_feats_datastore}}
+  python inicial_regular_v2.py 
+  --input_feats_inicial_datastore ${{inputs.input_feats_inicial_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
   --experiment_name ${{inputs.experiment_name}}

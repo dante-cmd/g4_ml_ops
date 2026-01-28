@@ -1,0 +1,82 @@
+name: MLOps Production Pipeline
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write  # Requerido para OIDC (Login sin contraseñas)
+  contents: read
+
+env:
+  RG: "mi-resource-group"
+  WS: "mi-workspace-ml"
+
+jobs:
+  train-register-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout del código
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Login en Azure (Recomendamos usar OIDC Federated Credentials)
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 3. Instalar la extensión de ML para el CLI
+      - name: Install ML Extension
+        run: az extension add -n ml -y
+
+      # ---------------------------------------------------------
+      # PASO A: ENTRENAMIENTO
+      # Lanzamos el job y capturamos el ID del Run (Run ID)
+      # ---------------------------------------------------------
+      - name: Submit Training Job
+        id: train_job
+        run: |
+          run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+          
+          echo "Job submitted with ID: $run_id"
+          
+          # Esperar a que termine (stream logs)
+          az ml job stream --name $run_id --resource-group $RG --workspace-name $WS
+          
+          # Guardar el ID como output para el siguiente paso
+          echo "RUN_ID=$run_id" >> $GITHUB_OUTPUT
+
+      # ---------------------------------------------------------
+      # PASO B: REGISTRO DEL MODELO
+      # Registramos el modelo apuntando directamente a los artifacts del Job
+      # ---------------------------------------------------------
+      - name: Register Model
+        id: register_model
+        run: |
+          # Usamos la sintaxis 'azureml://jobs/{id}/outputs/artifacts/...'
+          model_path="azureml://jobs/${{ steps.train_job.outputs.RUN_ID }}/outputs/artifacts/paths/model"
+          
+          # Creamos una nueva versión del modelo
+          az ml model create --name iris-model \
+                             --path $model_path \
+                             --type mlflow_model \
+                             --resource-group $RG \
+                             --workspace-name $WS
+          
+          echo "Model registered successfully."
+
+      # ---------------------------------------------------------
+      # PASO C: DESPLIEGUE (DEPLOYMENT)
+      # Actualizamos el deployment 'blue' con el modelo recién registrado
+      # ---------------------------------------------------------
+      - name: Deploy to Endpoint
+        run: |
+          # Actualizar el deployment existente con la ultima versión del modelo
+          az ml online-deployment update --name blue-deployment \
+                                         --endpoint-name my-iris-endpoint-2026 \
+                                         --model iris-model@latest \
+                                         --resource-group $RG \
+                                         --workspace-name $WS \
+                                         --all-traffic

@@ -1,8 +1,8 @@
-# src/models/inicial_estacional.yml
-$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: model_inicial_estacional
+# src/models/inicial_regular_v3.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+name: model_inicial_regular
 version: 1
-display_name: Model Training - Inicial Estacional
+display_name: Model Training - Inicial Regular
 type: command
 
 inputs:
@@ -27,13 +27,15 @@ environment:
       - pip
       - pip:
           - pandas
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          - openpyxl
           - numpy
           - catboost
-          - scikit-learn
-          - mlflow
 
 command: >-
-  python inicial_estacional.py 
+  python inicial_regular_v3.py 
   --input_feats_datastore ${{inputs.input_feats_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
