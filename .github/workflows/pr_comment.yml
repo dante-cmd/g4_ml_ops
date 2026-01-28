@@ -1,0 +1,26 @@
+name: Reusable PR Comment
+
+on:
+  workflow_call:
+    inputs:
+      message:
+        required: true
+        type: string
+    secrets:
+      GIT_TOKEN:
+        required: false
+
+jobs:
+  comment:
+    name: Create PR Comment
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Add Comment to PR
+        uses: mshick/add-pr-comment@v2.8.1
+        with:
+          repo-token: ${{ secrets.GIT_TOKEN }}
+          message: ${{ inputs.message }}
+          message-id: ${{ github.event.pull_request.number }}

@@ -1,4 +1,8 @@
 
+"""
+Feature Engineering - Continuidad Regular
+"""
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -7,7 +11,7 @@ import re
 from pathlib import Path
 from unidecode import unidecode
 import argparse
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args, get_mapping_tipos
 # from sklearn.ensemble import RandomForestRegressor # type: ignore
 # from sklearn.ensemble import HistGradientBoostingRegressor, GradientBoostingRegressor # type: ignore
 from parser_regular import Utils
@@ -943,43 +947,62 @@ def main(args):
     # Continuidad a nivel de curso
     continuidad = Continuidad(tablas)
     
+    continuidad_horario = ContinuidadToHorario(tablas)
+    
     # Create directories for Continuidad
     tipo_continuidad = continuidad.tipo
-    feats_train_path_cont = Path(output_feats_datastore) / tipo_continuidad / "train" / feats_version
-    feats_test_path_cont = Path(output_feats_datastore) / tipo_continuidad / "test" / feats_version
-    target_test_path_cont = Path(output_target_datastore) / tipo_continuidad / "test" / target_version
-    
-    feats_train_path_cont.mkdir(parents=True, exist_ok=True)
-    feats_test_path_cont.mkdir(parents=True, exist_ok=True)
-    target_test_path_cont.mkdir(parents=True, exist_ok=True)
 
-    continuidad.load_features(periodo, feats_version, output_feats_datastore)
-    
-    continuidad.load_target(periodo, target_version, output_target_datastore)
-    
     # Continuidad a nivel de curso y horario
-
-    continuidad_horario = ContinuidadToHorario(tablas)
     
     # Create directories for ContinuidadToHorario
     tipo_horario = continuidad_horario.tipo
-    feats_train_path_hor = Path(output_feats_datastore) / tipo_horario / "train" / feats_version
-    feats_test_path_hor = Path(output_feats_datastore) / tipo_horario / "test" / feats_version
-    target_test_path_hor = Path(output_target_datastore) / tipo_horario / "test" / target_version
     
-    feats_train_path_hor.mkdir(parents=True, exist_ok=True)
-    feats_test_path_hor.mkdir(parents=True, exist_ok=True)
-    target_test_path_hor.mkdir(parents=True, exist_ok=True)
+    mapping_tipos = get_mapping_tipos(periodo)
+    
+    if mapping_tipos[tipo_continuidad]:
+        feats_train_path_cont = Path(output_feats_datastore) / tipo_continuidad / "train" / feats_version
+        feats_test_path_cont = Path(output_feats_datastore) / tipo_continuidad / "test" / feats_version
+        target_test_path_cont = Path(output_target_datastore) / tipo_continuidad / "test" / target_version
+        
+        feats_train_path_cont.mkdir(parents=True, exist_ok=True)
+        feats_test_path_cont.mkdir(parents=True, exist_ok=True)
+        target_test_path_cont.mkdir(parents=True, exist_ok=True)
 
-    continuidad_horario.load_features(
-        periodo, 
-        feats_version,
-        output_feats_datastore)
+        continuidad.load_features(
+            periodo, 
+            feats_version,
+            output_feats_datastore)
     
-    continuidad_horario.load_target(
-        periodo, 
-        target_version,
-        output_target_datastore)
+        continuidad.load_target(
+            periodo, 
+            target_version,
+            output_target_datastore)
+    else:
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+    
+
+    # mapping_tipos = get_mapping_tipos(periodo)
+    
+    if mapping_tipos[tipo_horario]:
+        feats_train_path_hor = Path(output_feats_datastore) / tipo_horario / "train" / feats_version
+        feats_test_path_hor = Path(output_feats_datastore) / tipo_horario / "test" / feats_version
+        target_test_path_hor = Path(output_target_datastore) / tipo_horario / "test" / target_version
+        
+        feats_train_path_hor.mkdir(parents=True, exist_ok=True)
+        feats_test_path_hor.mkdir(parents=True, exist_ok=True)
+        target_test_path_hor.mkdir(parents=True, exist_ok=True)
+
+        continuidad_horario.load_features(
+            periodo, 
+            feats_version,
+            output_feats_datastore)
+    
+        continuidad_horario.load_target(
+            periodo, 
+            target_version,
+            output_target_datastore)
+    else:
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
     
 
 
@@ -997,3 +1020,4 @@ if __name__ == '__main__':
     # add space in logs
     print("*" * 60)
     print("\n\n")
+    

@@ -1,7 +1,7 @@
 # pipeline_ml.yml
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-display_name: ML Pipeline - ETL and Feature Engineering
+display_name: ML Pipeline - Complete End-to-End
 experiment_name: ml_pipeline_experiment
 
 settings:
@@ -18,24 +18,17 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/platinumdata
     mode: rw_mount
-  output_feats_continuidad_datastore:
+  output_feats_datastore:
     type: uri_folder
-    path: azureml://datastores/ml_data/paths/featsdata
+    path: azureml://datastores/ml_data/paths/features
     mode: rw_mount
-  output_target_continuidad_datastore:
+  output_target_datastore:
     type: uri_folder
-    path: azureml://datastores/ml_data/paths/targetdata
-    mode: rw_mount
-  output_feats_inicial_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/featsdata
-    mode: rw_mount
-  output_target_inicial_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/targetdata
+    path: azureml://datastores/ml_data/paths/target
     mode: rw_mount
 
 jobs:
+  # ETL Job
   etl_job:
     type: command
     component: file:./src/data/etl.yml
@@ -48,9 +41,10 @@ jobs:
     outputs:
       output_datastore: ${{parent.outputs.output_datastore}}
   
-  inicial_regular_job:
+  # Feature Engineering Jobs (run in parallel after ETL)
+  features_job:
     type: command
-    component: file:./src/features/inicial_regular.yml
+    component: file:./src/features/features.yml
     inputs:
       input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
       ult_periodo: 202511
@@ -59,19 +53,5 @@ jobs:
       target_version: "v1"
       periodo: 202511
     outputs:
-      output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
-      output_target_inicial_datastore: ${{parent.outputs.output_target_inicial_datastore}}
-  
-  continuidad_regular_job:
-    type: command
-    component: file:./src/features/continuidad_regular.yml
-    inputs:
-      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
-      ult_periodo: 202511
-      platinum_version: "v1"
-      feats_version: "v1"
-      target_version: "v1"
-      periodo: 202511
-    outputs:
-      output_feats_continuidad_datastore: ${{parent.outputs.output_feats_continuidad_datastore}}
-      output_target_continuidad_datastore: ${{parent.outputs.output_target_continuidad_datastore}}
+      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      output_target_datastore: ${{parent.outputs.output_target_datastore}}

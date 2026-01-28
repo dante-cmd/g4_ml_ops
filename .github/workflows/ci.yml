@@ -1,0 +1,42 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Code Quality
+    uses: ./.github/workflows/lint.yml
+    with:
+      pyProjectDirectory: "pyproject.toml"
+      python-version: "['3.10']"
+      checkBlack: true
+      checkFlake8: true
+      checkIsort: true
+      checkPylint: true
+      checkMypy: true
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pr_comment:
+    name: PR Status
+    needs: [lint]
+    if: always()
+    uses: ./.github/workflows/pr_comment.yml
+    with:
+      message: |
+        ## CI Pipeline Results
+
+        | Check | Status |
+        |-------|--------|
+        | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+
+        **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}

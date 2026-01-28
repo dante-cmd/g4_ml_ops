@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from catboost import CatBoostRegressor, Pool
-from utils_model import parse_args
+from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes , calculate_metrics
 import mlflow
 from mlflow.tracking import MlflowClient
@@ -98,17 +98,18 @@ def main(args):
     client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
 
     mlflow.set_experiment(experiment_name)
+
+    mapping_tipos = get_mapping_tipos(model_periodo)
     
     train_continuidad = TrainContinuidad(
         input_feats_datastore,
         feats_version,
         client
         )
-        # input_feats_test_datastore,
-        # input_target_test_datastore)
     
-    model = train_continuidad.train_model(model_periodo)
-    train_continuidad.register_model(model, model_periodo)
+    if mapping_tipos[train_continuidad.tipo]:
+        model = train_continuidad.train_model(model_periodo)
+        train_continuidad.register_model(model, model_periodo)
     
     
 

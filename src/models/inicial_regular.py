@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from catboost import CatBoostRegressor
-from utils_model import parse_args
-from utils_metrics import calculate_classes , calculate_metrics
+from utils_model import parse_args, get_mapping_tipos
+from utils_metrics import calculate_classes, calculate_metrics
 import mlflow
 from mlflow.tracking import MlflowClient
 
@@ -123,8 +123,12 @@ def main(args):
         feats_version,
         client)
     
-    model = train_inicial.train_model(model_periodo)
-    train_inicial.register_model(model, model_periodo)
+    mapping_tipos = get_mapping_tipos(model_periodo)
+    
+    if mapping_tipos[train_inicial.tipo]:
+        model = train_inicial.train_model(model_periodo)
+        train_inicial.register_model(model, model_periodo)
+    
     # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
 
 if __name__ == '__main__':

@@ -1,0 +1,93 @@
+name: Reusable Lint Python
+
+on:
+  workflow_call:
+    inputs:
+      pyProjectDirectory:
+        default: "pyproject.toml"
+        required: false
+        type: string
+      checkBlack:
+        required: false
+        type: boolean
+        default: true
+      checkFlake8:
+        required: false
+        type: boolean
+        default: true
+      checkIsort:
+        required: false
+        type: boolean
+        default: true
+      checkPylint:
+        required: false
+        type: boolean
+        default: true
+      checkMypy:
+        required: false
+        type: boolean
+        default: true
+      python-version:
+        required: false
+        type: string
+        default: "['3.10']"
+    secrets:
+      GIT_TOKEN:
+        required: false
+
+jobs:
+  lint_validator:
+    runs-on: ubuntu-22.04
+    name: Lint Validator
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Python Files
+        id: changed_files
+        run: |
+          set +e
+          changed_files=$(git diff --diff-filter=d --name-only $(git merge-base HEAD origin/main) HEAD | grep ".*\.py$")
+          if [ ! -z "$changed_files" ]; then
+            changed_files=$(echo $changed_files | tr '\n' ' ')
+            echo "files=$changed_files" >> "$GITHUB_OUTPUT"
+          else
+            echo "files=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        shell: bash
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: ${{ fromJson(inputs.python-version)[0] }}
+
+      - name: Install Dependencies
+        if: steps.changed_files.outputs.files != '0'
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Black
+        if: inputs.checkBlack && steps.changed_files.outputs.files != '0'
+        run: black --check --config ${{ inputs.pyProjectDirectory }} ${{ steps.changed_files.outputs.files }}
+
+      - name: Run Flake8
+        if: inputs.checkFlake8 && always() && steps.changed_files.outputs.files != '0'
+        run: flake8 --color always --toml-config ${{ inputs.pyProjectDirectory }} ${{ steps.changed_files.outputs.files }}
+
+      - name: Run Isort
+        if: inputs.checkIsort && always() && steps.changed_files.outputs.files != '0'
+        run: isort --check-only --sp ${{ inputs.pyProjectDirectory }} --color --diff ${{ steps.changed_files.outputs.files }}
+
+      - name: Run Mypy
+        if: inputs.checkMypy && always() && steps.changed_files.outputs.files != '0'
+        run: |
+          mypy --config-file ${{ inputs.pyProjectDirectory }} ${{ steps.changed_files.outputs.files }} || true
+
+      - name: Run Pylint
+        if: inputs.checkPylint && always() && steps.changed_files.outputs.files != '0'
+        run: pylint --rcfile ${{ inputs.pyProjectDirectory }} ${{ steps.changed_files.outputs.files }}

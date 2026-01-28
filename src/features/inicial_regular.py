@@ -1,4 +1,8 @@
 
+"""
+Feature Engineering - Inicial Regular
+"""
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -7,7 +11,7 @@ import re
 import argparse
 from pathlib import Path
 from unidecode import unidecode
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args, get_mapping_tipos
 from parser_regular import Utils
 from loader import Loader
 
@@ -281,6 +285,7 @@ class Inicial(Utils):
 
 
 def main(args):
+    
     # python src/features/inicial_regular.py --input_datastore "./data/ml_data/platinumdata/v1/" --output_feats_datastore "./data/ml_data/features/" --output_target_datastore "./data/ml_data/target/" --feats_version "v1" --target_version "v1" --periodo 202506 --ult_periodo 202506
     # for Loader
     input_datastore=args.input_datastore
@@ -293,9 +298,6 @@ def main(args):
     feats_version=args.feats_version
     target_version = args.target_version
     periodo=args.periodo
-    
-    # n_periodos=args.n_periodos
-    # # output_feats_test_datastore = args.output_feats_test_datastore
 
     loader = Loader(
         input_datastore, 
@@ -306,20 +308,25 @@ def main(args):
 
     # Continuidad a nivel de curso
     inicial = Inicial(tablas)
-    
-    # Create directories if they don't exist
     tipo = inicial.tipo
-    feats_train_path = Path(output_feats_datastore) / tipo / "train" / feats_version
-    feats_test_path = Path(output_feats_datastore) / tipo / "test" / feats_version
-    target_test_path = Path(output_target_datastore) / tipo / "test" / target_version
-    
-    feats_train_path.mkdir(parents=True, exist_ok=True)
-    feats_test_path.mkdir(parents=True, exist_ok=True)
-    target_test_path.mkdir(parents=True, exist_ok=True)
 
-    inicial.load_features(periodo, feats_version, output_feats_datastore)
+    mapping_tipos = get_mapping_tipos(periodo)
     
-    inicial.load_target(periodo, target_version, output_target_datastore)
+    if mapping_tipos[tipo]:
+        # Create directories if they don't exist
+        feats_train_path = Path(output_feats_datastore) / tipo / "train" / feats_version
+        feats_test_path = Path(output_feats_datastore) / tipo / "test" / feats_version
+        target_test_path = Path(output_target_datastore) / tipo / "test" / target_version
+        
+        feats_train_path.mkdir(parents=True, exist_ok=True)
+        feats_test_path.mkdir(parents=True, exist_ok=True)
+        target_test_path.mkdir(parents=True, exist_ok=True)
+
+        inicial.load_features(periodo, feats_version, output_feats_datastore)
+        
+        inicial.load_target(periodo, target_version, output_target_datastore)
+    else:
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
 
 
 if __name__ == '__main__':

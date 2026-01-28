@@ -1,0 +1,40 @@
+# src/models/continuidad_regular.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: model_continuidad_regular
+version: 1
+display_name: Model Training - Continuidad Regular
+type: command
+
+inputs:
+  input_feats_datastore:
+    type: uri_folder
+  feats_version:
+    type: string
+  model_periodo:
+    type: integer
+  experiment_name:
+    type: string
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - numpy
+          - catboost
+          - scikit-learn
+          - mlflow
+
+command: >-
+  python continuidad_regular.py 
+  --input_feats_datastore ${{inputs.input_feats_datastore}}
+  --feats_version ${{inputs.feats_version}}
+  --model_periodo ${{inputs.model_periodo}}
+  --experiment_name ${{inputs.experiment_name}}

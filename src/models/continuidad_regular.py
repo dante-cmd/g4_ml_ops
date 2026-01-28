@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor, Pool
 from pathlib import Path
-from utils_model import parse_args
+from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes , calculate_metrics, fac_to_cant
 import mlflow
 from mlflow.tracking import MlflowClient
@@ -229,6 +229,8 @@ def main(args):
     client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
     mlflow.set_experiment(experiment_name)
     
+    mapping_tipos = get_mapping_tipos(model_periodo)
+    
     train_continuidad = TrainContinuidad(
         input_feats_datastore,
         feats_version,
@@ -237,8 +239,9 @@ def main(args):
         # input_feats_test_datastore,
         # input_target_test_datastore)
     
-    model = train_continuidad.train_model(model_periodo)
-    train_continuidad.register_model(model, model_periodo)
+    if mapping_tipos[train_continuidad.tipo]:
+        model = train_continuidad.train_model(model_periodo)
+        train_continuidad.register_model(model, model_periodo)
 
     # df_model_predict = train_continuidad.get_data_predict(periodo, model)
     # train_continuidad.logging_metrics(periodo, model, df_model_predict)
@@ -249,8 +252,9 @@ def main(args):
         client
         )
     
-    model_horario = train_continuidad_horario.train_model(model_periodo)
-    train_continuidad_horario.register_model(model_horario, model_periodo)
+    if mapping_tipos[train_continuidad_horario.tipo]:
+        model_horario = train_continuidad_horario.train_model(model_periodo)
+        train_continuidad_horario.register_model(model_horario, model_periodo)
     
 
 if __name__ == '__main__':

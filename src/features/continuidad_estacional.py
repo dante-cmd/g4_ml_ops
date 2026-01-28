@@ -1,9 +1,14 @@
+
+"""
+Feature Engineering - Continuidad Estacional
+"""
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
-from utils_feats import get_n_lags, get_all_periodos, get_training_periodos_estacionales, filter_by_hora_atencion, parse_args
+from utils_feats import get_n_lags, get_all_periodos, get_training_periodos_estacionales, filter_by_hora_atencion, parse_args, get_mapping_tipos
 from loader import Loader
 from parser_estacional import Utils
 
@@ -266,29 +271,22 @@ def main(args):
     
     # Create directories if they don't exist
     tipo = continuidad.tipo
-    feats_train_path = Path(output_feats_datastore) / tipo / "train" / feats_version
-    feats_test_path = Path(output_feats_datastore) / tipo / "test" / feats_version
-    target_test_path = Path(output_target_datastore) / tipo / "test" / target_version
+
+    mapping_tipos = get_mapping_tipos(periodo)
     
-    feats_train_path.mkdir(parents=True, exist_ok=True)
-    feats_test_path.mkdir(parents=True, exist_ok=True)
-    target_test_path.mkdir(parents=True, exist_ok=True)
+    if mapping_tipos[tipo]:
+        feats_train_path = Path(output_feats_datastore) / tipo / "train" / feats_version
+        feats_test_path = Path(output_feats_datastore) / tipo / "test" / feats_version
+        target_test_path = Path(output_target_datastore) / tipo / "test" / target_version
+        
+        feats_train_path.mkdir(parents=True, exist_ok=True)
+        feats_test_path.mkdir(parents=True, exist_ok=True)
+        target_test_path.mkdir(parents=True, exist_ok=True)
     
-    continuidad.load_features(periodo, feats_version, output_feats_datastore)
-    continuidad.load_target(periodo, target_version, output_target_datastore)
-    
-    # loader = Loader(
-    #     input_datastore, 
-    #     ult_periodo)
-    
-    # tablas = loader.fetch_all()
-    
-    # tablas = loader.fetch_all()
-    # continuidad = Continuidad(tablas)
-    # continuidad.load_features(periodo, output_feats_train_datastore, output_feats_test_datastore)
-    
-    
-    # continuidad.load_target(periodo, output_target_test_datastore)
+        continuidad.load_features(periodo, feats_version, output_feats_datastore)
+        continuidad.load_target(periodo, target_version, output_target_datastore)
+    else:
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
     
 
 if __name__ == '__main__':

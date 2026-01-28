@@ -13,3 +13,4 @@ mlruns.db
 catboost_info
 venv
 __pycache__
+data

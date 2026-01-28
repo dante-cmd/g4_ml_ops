@@ -5,7 +5,7 @@ import pandas as pd
 from catboost import CatBoostRegressor
 #  from utils import calculate_classes, calculate_metrics, join_target, filter_by_hora_atencion
 from pathlib import Path
-from utils_model import parse_args
+from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes , calculate_metrics
 import mlflow
 from mlflow.client import MlflowClient
@@ -107,8 +107,11 @@ def main(args):
         feats_version,
         client)
     
-    model = train_inicial.train_model(model_periodo)
-    train_inicial.register_model(model, model_periodo)
+    mapping_tipos = get_mapping_tipos(model_periodo)
+    
+    if mapping_tipos[train_inicial.tipo]:
+        model = train_inicial.train_model(model_periodo)
+        train_inicial.register_model(model, model_periodo)
     
 
 if __name__ == '__main__':

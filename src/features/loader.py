@@ -1,3 +1,8 @@
+
+"""
+Loader - Carga de datos desde el datastore
+"""
+
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -149,3 +154,4 @@ if __name__ == '__main__':
     # add space in logs
     print("*" * 60)
     print("\n\n")
+    
