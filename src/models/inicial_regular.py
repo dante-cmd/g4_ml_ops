@@ -84,13 +84,17 @@ class TrainInicial:
 
     def register_model(self, model, periodo:int):
         
-        with mlflow.start_run():
-            model_name = self.tipo + "_" + str(periodo)
-            model_info = mlflow.catboost.log_model(
-                    cb_model=model,
-                    name=self.tipo,
-                    registered_model_name=model_name
-                )
+        # with mlflow.start_run():
+        model_name = self.tipo + "_" + str(periodo)
+        mlflow.catboost.log_model(
+                    model,
+                    artifact_path=self.tipo)
+        
+        mlflow.register_model(
+        model_uri="runs:/{}/model".format(mlflow.active_run().info.run_id),
+        name=model_name)
+
+        mlflow.end_run()
             # versions = self.client.get_registered_model(model_name)
                 
             # if 'champion' not in versions.aliases.keys():
