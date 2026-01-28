@@ -31,6 +31,7 @@ environment:
           - catboost
           - scikit-learn
           - mlflow
+          - azureml-mlflow
 
 command: >-
   python inicial_regular.py 

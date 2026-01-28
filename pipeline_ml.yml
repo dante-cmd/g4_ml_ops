@@ -29,32 +29,32 @@ outputs:
 
 jobs:
   # ETL Job
-  etl_job:
-    type: command
-    component: file:./src/data/etl.yml
-    inputs:
-      input_datastore: ${{parent.inputs.input_datastore}}
-      ult_periodo: 202511
-      n_periodos: "None"
-      all_periodos: "True"
-      platinum_version: "v1"
-    outputs:
-      output_datastore: ${{parent.outputs.output_datastore}}
+  # etl_job:
+  #   type: command
+  #   component: file:./src/data/etl.yml
+  #   inputs:
+  #     input_datastore: ${{parent.inputs.input_datastore}}
+  #     ult_periodo: 202511
+  #     n_periodos: "None"
+  #     all_periodos: "True"
+  #     platinum_version: "v1"
+  #   outputs:
+  #     output_datastore: ${{parent.outputs.output_datastore}}
   
-  # Feature Engineering Jobs (run in parallel after ETL)
-  features_job:
-    type: command
-    component: file:./src/features/features.yml
-    inputs:
-      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
-      ult_periodo: 202511
-      platinum_version: "v1"
-      feats_version: "v1"
-      target_version: "v1"
-      periodo: 202511
-    outputs:
-      output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
-      output_target_datastore: ${{parent.outputs.output_target_datastore}}
+  # # Feature Engineering Jobs (run in parallel after ETL)
+  # features_job:
+  #   type: command
+  #   component: file:./src/features/features.yml
+  #   inputs:
+  #     input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+  #     ult_periodo: 202511
+  #     platinum_version: "v1"
+  #     feats_version: "v1"
+  #     target_version: "v1"
+  #     periodo: 202511
+  #   outputs:
+  #     output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+  #     output_target_datastore: ${{parent.outputs.output_target_datastore}}
 
 
   # Model train
@@ -62,7 +62,8 @@ jobs:
     type: command
     component: file:./src/models/inicial_regular.yml
     inputs:
-      input_feats_datastore: ${{parent.jobs.features_job.outputs.output_feats_datastore}}
+      input_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      # input_feats_datastore: ${{parent.jobs.features_job.outputs.output_feats_datastore}}
       experiment_name: ml_pipeline_experiment
       feats_version: "v1"
       model_periodo: 202511

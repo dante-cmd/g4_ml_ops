@@ -6,7 +6,7 @@ from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes, calculate_metrics
 import mlflow
 import mlflow.catboost
-# import azureml.mlflow
+import azureml.mlflow
 from mlflow.tracking import MlflowClient
 from azure.ai.ml import MLClient
 
@@ -83,14 +83,14 @@ class TrainInicial:
         return model
 
     def register_model(self, model, periodo:int):
-        with mlflow.start_run():
-            model_name = self.tipo + "_" + str(periodo)
-            model_info = mlflow.catboost.log_model(
+        # with mlflow.start_run():
+        model_name = self.tipo + "_" + str(periodo)
+        model_info = mlflow.catboost.log_model(
                 cb_model=model,
                 name=self.tipo,
                 registered_model_name=model_name
             )
-            versions = self.client.get_registered_model(model_name)
+        versions = self.client.get_registered_model(model_name)
             
             if 'champion' not in versions.aliases.keys():
                 self.client.set_registered_model_alias(
