@@ -27,6 +27,10 @@ environment:
       - pip
       - pip:
           - pandas
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          - openpyxl
           - numpy
           - catboost
 
