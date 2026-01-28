@@ -8,6 +8,9 @@ from catboost import CatBoostRegressor
 from utils_model import parse_args, get_dev_version
 from utils_metrics import calculate_classes , calculate_metrics
 import mlflow
+import mlflow.catboost
+import azureml.mlflow
+
 
 
 class TrainInicial:
@@ -16,7 +19,8 @@ class TrainInicial:
                  input_target_datastore:str,
                  output_predict_datastore:str,
                  feats_version:str,
-                 target_version:str
+                 target_version:str,
+                 client
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
@@ -25,6 +29,7 @@ class TrainInicial:
         self.tipo = 'inicial_regular'
         self.feats_version = feats_version
         self.target_version = target_version
+        self.client = client
 
     def get_data_test(self, periodo:int):
         data_model_test = pd.read_parquet(
@@ -94,7 +99,7 @@ class TrainInicial:
             
     def upload_data_predict(self, model_periodo:int, periodo:int, df_model_predict:pd.DataFrame):
         name = f"{self.tipo}_{model_periodo}"
-        model_version = get_dev_version(name)
+        model_version = get_dev_version(name, self.client)
         print(f"Model Version for {name}: {model_version}")
         
         path_model_version = self.output_predict_datastore/self.tipo/"test"/f"v{model_version}"
@@ -155,6 +160,7 @@ def main(args):
     
     # listening to port 5000
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    client = MlflowClient("http://127.0.0.1:5000")
     mlflow.set_experiment(experiment_name)
     
     train_inicial = TrainInicial(

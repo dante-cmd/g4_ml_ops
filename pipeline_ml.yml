@@ -13,6 +13,10 @@ inputs:
     type: uri_folder
     path: azureml://datastores/base_data/paths/rawdata
 
+  input_feats_datastore:
+    type: uri_folder
+    path: azureml://datastores/base_data/paths/rawdata
+
 outputs:
   output_datastore:
     type: uri_folder
@@ -62,7 +66,7 @@ jobs:
     type: command
     component: file:./src/models/inicial_regular.yml
     inputs:
-      input_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+      input_feats_datastore: ${{parent.inputs.input_feats_datastore}}
       # input_feats_datastore: ${{parent.jobs.features_job.outputs.output_feats_datastore}}
       experiment_name: ml_pipeline_experiment
       feats_version: "v1"

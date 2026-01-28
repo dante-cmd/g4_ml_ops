@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import argparse
 # import mlflow
-from mlflow.tracking import MlflowClient
+# from mlflow.tracking import MlflowClient
 
 
 def parse_args():
@@ -78,9 +78,7 @@ def get_mapping_tipos(periodo: int) -> dict:
 
 # Get all versions of the model
 
-def get_dev_version(model_name) -> str:
-    
-    client = MlflowClient("http://127.0.0.1:5000")
+def get_dev_version(model_name, client) -> str:
     
     versions = client.get_registered_model(model_name)
     # versions = client.search_model_versions(f"name='{model_name}'")
