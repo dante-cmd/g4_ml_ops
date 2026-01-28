@@ -60,7 +60,6 @@ jobs:
       output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
       output_target_inicial_datastore: ${{parent.outputs.output_target_inicial_datastore}}
 
-
   # Model train
   model_train_job:
     type: command
@@ -70,9 +69,7 @@ jobs:
       experiment_name: ml_pipeline_experiment
       feats_version: "v1"
       model_periodo: 202511
-      platinum_version: "v1"
-    outputs:
-      model_output: ${{parent.jobs.model_train_job.outputs.model_output}}
+
 
   # Model predict
   model_predict_job:

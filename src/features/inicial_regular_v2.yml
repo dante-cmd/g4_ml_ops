@@ -7,7 +7,7 @@ type: command
 
 inputs:
   input_datastore:
-    type: uri_file
+    type: uri_folder
   ult_periodo:
     type: integer
   platinum_version:
