@@ -72,9 +72,7 @@ jobs:
       model_periodo: 202511
       platinum_version: "v1"
     outputs:
-      model_output:
-        type: mlflow_model
-        mode: upload
+      model_output: ${{parent.jobs.model_train_job.outputs.model_output}}
 
   # Model predict
   model_predict_job:

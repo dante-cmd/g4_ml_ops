@@ -15,6 +15,11 @@ inputs:
   experiment_name:
     type: string
 
+outputs:
+  model_output:
+    type: mlflow_model
+    mode: upload
+
 code: .
 
 environment:
