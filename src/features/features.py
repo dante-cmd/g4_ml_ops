@@ -96,7 +96,7 @@ def main(args):
     continuidad_to_horario_regular = ContinuidadToHorarioRegular(tablas)
     tipo_continuidad_to_horario_regular = continuidad_to_horario_regular.tipo
     
-    if mapping_tipos[tipo_continuidad_to_horario_regular]:
+    if mapping_tipos[tipo_continuidad_regular]:
         # Create directories if they don't exist
         feats_train_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "train" / feats_version
         feats_test_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "test" / feats_version
