@@ -32,7 +32,7 @@ outputs:
     mode: rw_mount
 
 jobs:
-  ETL Job
+  # ETL Job
   etl_job:
     type: command
     component: file:./src/data/etl.yml
@@ -45,7 +45,7 @@ jobs:
     outputs:
       output_datastore: ${{parent.outputs.output_datastore}}
   
-  Feature Engineering Jobs (run in parallel after ETL)
+  # Feature Engineering Jobs (run in parallel after ETL)
   features_job:
     type: command
     component: file:./src/features/inicial_regular_v2.yml
@@ -61,7 +61,7 @@ jobs:
       output_target_inicial_datastore: ${{parent.outputs.output_target_inicial_datastore}}
 
 
-  Model train
+  # Model train
   model_train_job:
     type: command
     component: file:./src/models/inicial_regular_v2.yml
@@ -76,7 +76,7 @@ jobs:
         type: mlflow_model
         mode: upload
 
-  Model predict
+  # Model predict
   model_predict_job:
     type: command
     component: file:./src/predict/inicial_regular_v2.yml
