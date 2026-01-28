@@ -1,0 +1,98 @@
+# pipeline_ml.yml
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: ML Pipeline - Complete End-to-End
+experiment_name: ml_pipeline_experiment
+
+settings:
+  default_compute: azureml:clusterai
+  default_datastore: azureml:workspaceblobstore
+
+inputs:
+  input_datastore:
+    type: uri_folder
+    path: azureml://datastores/base_data/paths/rawdata
+  input_feats_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/features
+  input_target_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target
+
+outputs:
+  output_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/platinumdata
+    mode: rw_mount
+  output_feats_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/features
+    mode: rw_mount
+  output_target_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target
+    mode: rw_mount
+  output_predict_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict
+    mode: rw_mount
+
+jobs:
+  # ETL Job
+  # etl_job:
+  #   type: command
+  #   component: file:./src/data/etl.yml
+  #   inputs:
+  #     input_datastore: ${{parent.inputs.input_datastore}}
+  #     ult_periodo: 202511
+  #     n_periodos: "None"
+  #     all_periodos: "True"
+  #     platinum_version: "v1"
+  #   outputs:
+  #     output_datastore: ${{parent.outputs.output_datastore}}
+  
+  # # Feature Engineering Jobs (run in parallel after ETL)
+  # features_job:
+  #   type: command
+  #   component: file:./src/features/features.yml
+  #   inputs:
+  #     input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+  #     ult_periodo: 202511
+  #     platinum_version: "v1"
+  #     feats_version: "v1"
+  #     target_version: "v1"
+  #     periodo: 202511
+  #   outputs:
+  #     output_feats_datastore: ${{parent.outputs.output_feats_datastore}}
+  #     output_target_datastore: ${{parent.outputs.output_target_datastore}}
+
+
+  # Model train
+  model_train_job:
+    type: command
+    component: file:./src/models/inicial_regular.yml
+    inputs:
+      input_feats_datastore: ${{parent.inputs.input_feats_datastore}}
+      # input_feats_datastore: ${{parent.jobs.features_job.outputs.output_feats_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202511
+      n_periodos: "None"
+      all_periodos: "True"
+      platinum_version: "v1"
+
+  # Model predict
+  # model_predict_job:
+  #   type: command
+  #   component: file:./src/predict/inicial_regular.yml
+  #   inputs:
+  #     input_feats_datastore: ${{parent.inputs.input_feats_datastore}}
+  #     input_target_datastore: ${{parent.outputs.output_target_datastore}}
+  #     output_predict_datastore: ${{parent.outputs.output_datastore}}
+  #     experiment_name: ml_pipeline_experiment
+  #     feats_version: "v1"
+  #     target_version: "v1"
+  #     periodo: 202511
+  #     model_periodo: 202511
+  #   outputs:
+  #     output_predict_datastore: ${{parent.outputs.output_datastore}}
