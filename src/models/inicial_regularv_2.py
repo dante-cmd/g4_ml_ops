@@ -83,24 +83,25 @@ class TrainInicial:
         return model
 
     def register_model(self, model, periodo:int):
-        # with mlflow.start_run():
-        model_name = self.tipo + "_" + str(periodo)
-        model_info = mlflow.catboost.log_model(
-                cb_model=model,
-                name=self.tipo,
-                registered_model_name=model_name
-            )
-        versions = self.client.get_registered_model(model_name)
-            
-        if 'champion' not in versions.aliases.keys():
+        
+        with mlflow.start_run():
+            model_name = self.tipo + "_" + str(periodo)
+            model_info = mlflow.catboost.log_model(
+                    cb_model=model,
+                    name=self.tipo,
+                    registered_model_name=model_name
+                )
+            versions = self.client.get_registered_model(model_name)
+                
+            if 'champion' not in versions.aliases.keys():
+                self.client.set_registered_model_alias(
+                    model_name, "champion", version=model_info.registered_model_version)
+                
+            # Assign '@champion' to Version 1
+            # client.set_registered_model_alias(self.tipo, "champion", version="1")
+            # Assign '@dev' to Version 1
             self.client.set_registered_model_alias(
-                model_name, "champion", version=model_info.registered_model_version)
-            
-        # Assign '@champion' to Version 1
-        # client.set_registered_model_alias(self.tipo, "champion", version="1")
-        # Assign '@dev' to Version 1
-        self.client.set_registered_model_alias(
-                model_name, "dev", version=model_info.registered_model_version)
+                    model_name, "dev", version=model_info.registered_model_version)
 
 
 def main(args):
