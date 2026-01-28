@@ -1,12 +1,14 @@
-import pandas as pd
 import numpy as np
-from pathlib import Path
+import pandas as pd
+# from sklearn.ensemble import RandomForestRegressor # type: ignore
+# from sklearn.ensemble import HistGradientBoostingRegressor, GradientBoostingRegressor # type: ignore
 from catboost import CatBoostRegressor
+#  from utils import calculate_classes, calculate_metrics, join_target, filter_by_hora_atencion
+from pathlib import Path
 from utils_model import parse_args, get_mapping_tipos
-from utils_metrics import calculate_classes, calculate_metrics
+from utils_metrics import calculate_classes , calculate_metrics
 import mlflow
-#  from mlflow.tracking import MlflowClient
-from azure.ai.ml import MLClient
+from mlflow.client import MlflowClient
 
 
 class TrainInicial:
@@ -14,18 +16,13 @@ class TrainInicial:
                  input_feats_datastore:str,
                  feats_version:str,
                  client: MlflowClient
-                #  input_feats_test_datastore:str,
-                #  input_target_test_datastore:str
                  ):
-
+        
         self.input_feats_datastore = Path(input_feats_datastore)
         self.feats_version = feats_version
         self.client = client
-        # self.input_feats_test_datastore = Path(input_feats_test_datastore)
-        # self.input_target_test_datastore = Path(input_target_test_datastore)
-        # self.periodo = periodo
-        self.tipo = 'inicial_regular'
-    
+        self.tipo = 'inicial_estacional'
+        
     def apply_filter(self, df_train:pd.DataFrame):
         return df_train
     
@@ -35,41 +32,26 @@ class TrainInicial:
         return data_model_train  
 
     def train_model(self, periodo:int):
-        data_model_train = self.get_data_train(periodo)
         
+        data_model_train = self.get_data_train(periodo)
         data_model_train = self.apply_filter(data_model_train)
 
-        meses = [1, 2, 3]
-        # granular = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL', 'IDX',
-        #             'PE', 'VAC_ACAD_ESTANDAR']
+        # granular = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 
+        #             'HORARIO_ACTUAL', 'IDX', 'PE', 'VAC_ACAD_ESTANDAR']
         
-        cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE', 'FRECUENCIA', 'DURACION']
-        target = 'CANT_ALUMNOS'
-
-        if periodo % 100 in meses:
-            num_features = ['CANT_ALUMNOS_LAG_12', 'CANT_ALUMNOS_LAG_01', 
-                            'CANT_ALUMNOS_LAG_02', 'CANT_ALUMNOS_LAG_03']
-            
-            data_model_train = data_model_train[
-                # (data_model_train['PERIODO_TARGET']<periodo) & 
-                (data_model_train['PERIODO_TARGET']%100).isin([periodo%100])
-                ].copy()
-            
+        cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE']
+        
+        if periodo % 100 in [1]:
+            num_features = ['CANT_ALUMNOS_LAG_12']
         else:
-            num_features  = ['CANT_ALUMNOS_LAG_01', 'CANT_ALUMNOS_LAG_02', 
-                             'CANT_ALUMNOS_LAG_03']
-            
-            data_model_train = data_model_train[
-                # (data_model_train['PERIODO_TARGET'] < periodo) & 
-                ~(data_model_train['PERIODO_TARGET']%100).isin(meses)
-                ].copy()
-            
-        x = num_features + cat_features
+            num_features = ['CANT_ALUMNOS_LAG_01']
+        
+        target = 'CANT_ALUMNOS'
         y = target
-
+        x = cat_features + num_features
         X_train = data_model_train[x].copy()
         y_train = data_model_train[y].copy()
-
+        
         model = CatBoostRegressor(
             iterations=500,
             learning_rate=0.1,
@@ -82,9 +64,8 @@ class TrainInicial:
         # X_train, y_train = data_train_01[x].copy(), data_train[y].copy()
         
         model.fit(X_train, y_train, cat_features=cat_features)
-
         return model
-
+    
     def register_model(self, model, periodo:int):
         with mlflow.start_run():
             model_name = self.tipo + "_" + str(periodo)
@@ -106,21 +87,23 @@ class TrainInicial:
 
 
 def main(args):
+    
     input_feats_datastore = args.input_feats_datastore
-    experiment_name = args.experiment_name
     feats_version = args.feats_version
+    experiment_name = args.experiment_name
     model_periodo = args.model_periodo
     
     # listening to port 5000
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    # 1. Initialize client
+    
     client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
     
     mlflow.set_experiment(experiment_name)
+    # 1. Initialize client
     
     
     train_inicial = TrainInicial(
-        input_feats_datastore, 
+        input_feats_datastore,
         feats_version,
         client)
     
@@ -130,7 +113,6 @@ def main(args):
         model = train_inicial.train_model(model_periodo)
         train_inicial.register_model(model, model_periodo)
     
-    # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
 
 if __name__ == '__main__':
         # add space in logs
