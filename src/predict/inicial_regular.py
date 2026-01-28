@@ -10,6 +10,7 @@ from utils_metrics import calculate_classes , calculate_metrics
 import mlflow
 import mlflow.catboost
 import azureml.mlflow
+from mlflow.tracking import MlflowClient
 
 
 
@@ -159,8 +160,10 @@ def main(args):
     # python src/predict/inicial_regular.py --input_feats_datastore $input_feats_datastore --input_target_datastore $input_target_datastore --output_predict_datastore $output_predict_datastore --experiment_name $experiment_name --model_periodo $model_periodo --periodo $periodo
     
     # listening to port 5000
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    client = MlflowClient("http://127.0.0.1:5000")
+    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    # client = MlflowClient("http://127.0.0.1:5000")
+    client = MlflowClient()
+    
     mlflow.set_experiment(experiment_name)
     
     train_inicial = TrainInicial(
@@ -168,7 +171,8 @@ def main(args):
         input_target_datastore,
         output_predict_datastore,
         feats_version,
-        target_version
+        target_version,
+        client
         )
     
     model = train_inicial.load_model(model_periodo)

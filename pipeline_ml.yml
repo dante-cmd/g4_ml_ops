@@ -12,10 +12,12 @@ inputs:
   input_datastore:
     type: uri_folder
     path: azureml://datastores/base_data/paths/rawdata
-
   input_feats_datastore:
     type: uri_folder
-    path: azureml://datastores/base_data/paths/rawdata
+    path: azureml://datastores/ml_data/paths/features
+  input_target_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target
 
 outputs:
   output_datastore:
@@ -29,6 +31,10 @@ outputs:
   output_target_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/target
+    mode: rw_mount
+  output_predict_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict
     mode: rw_mount
 
 jobs:
@@ -74,3 +80,19 @@ jobs:
       n_periodos: "None"
       all_periodos: "True"
       platinum_version: "v1"
+
+  # Model predict
+  # model_predict_job:
+  #   type: command
+  #   component: file:./src/predict/inicial_regular.yml
+  #   inputs:
+  #     input_feats_datastore: ${{parent.inputs.input_feats_datastore}}
+  #     input_target_datastore: ${{parent.outputs.output_target_datastore}}
+  #     output_predict_datastore: ${{parent.outputs.output_datastore}}
+  #     experiment_name: ml_pipeline_experiment
+  #     feats_version: "v1"
+  #     target_version: "v1"
+  #     periodo: 202511
+  #     model_periodo: 202511
+  #   outputs:
+  #     output_predict_datastore: ${{parent.outputs.output_datastore}}
