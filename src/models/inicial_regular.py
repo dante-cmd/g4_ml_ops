@@ -6,7 +6,7 @@ from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes, calculate_metrics
 import mlflow
 import mlflow.catboost
-import azureml.mlflow
+# import azureml.mlflow
 from mlflow.tracking import MlflowClient
 from azure.ai.ml import MLClient
 
