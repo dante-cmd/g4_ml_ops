@@ -5,7 +5,9 @@ from catboost import CatBoostRegressor
 from utils_model import parse_args, get_mapping_tipos
 from utils_metrics import calculate_classes, calculate_metrics
 import mlflow
-#  from mlflow.tracking import MlflowClient
+import mlflow.catboost
+import azureml.mlflow
+from mlflow.tracking import MlflowClient
 from azure.ai.ml import MLClient
 
 
@@ -14,16 +16,11 @@ class TrainInicial:
                  input_feats_datastore:str,
                  feats_version:str,
                  client: MlflowClient
-                #  input_feats_test_datastore:str,
-                #  input_target_test_datastore:str
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
         self.feats_version = feats_version
         self.client = client
-        # self.input_feats_test_datastore = Path(input_feats_test_datastore)
-        # self.input_target_test_datastore = Path(input_target_test_datastore)
-        # self.periodo = periodo
         self.tipo = 'inicial_regular'
     
     def apply_filter(self, df_train:pd.DataFrame):
@@ -94,6 +91,7 @@ class TrainInicial:
                 registered_model_name=model_name
             )
             versions = self.client.get_registered_model(model_name)
+            
             if 'champion' not in versions.aliases.keys():
                 self.client.set_registered_model_alias(
                     model_name, "champion", version=model_info.registered_model_version)
@@ -112,9 +110,10 @@ def main(args):
     model_periodo = args.model_periodo
     
     # listening to port 5000
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
     # 1. Initialize client
-    client = MlflowClient(tracking_uri="http://127.0.0.1:5000")
+    # tracking_uri="http://127.0.0.1:5000"
+    client = MlflowClient()
     
     mlflow.set_experiment(experiment_name)
     
