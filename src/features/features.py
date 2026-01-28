@@ -64,7 +64,7 @@ def main(args):
         
         inicial_regular.load_target(periodo, target_version, output_target_datastore)
     else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo_inicial_regular}")
 
     # =================================================================
     # ======================== Continuidad Regular ====================
@@ -72,6 +72,9 @@ def main(args):
     
     continuidad_regular = ContinuidadRegular(tablas)
     tipo_continuidad_regular = continuidad_regular.tipo
+
+    continuidad_to_horario_regular = ContinuidadToHorarioRegular(tablas)
+    tipo_continuidad_to_horario_regular = continuidad_to_horario_regular.tipo
     
     if mapping_tipos[tipo_continuidad_regular]:
         # Create directories if they don't exist
@@ -86,31 +89,27 @@ def main(args):
         continuidad_regular.load_features(periodo, feats_version, output_feats_datastore)
         
         continuidad_regular.load_target(periodo, target_version, output_target_datastore)
-    else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+    # else:
+    #     print(f"No se generaron features para el periodo {periodo} y tipo {tipo_continuidad_regular}")
 
-    # =================================================================
-    # ======================== Continuidad Regular Horario ============
-    # =================================================================
+        # =================================================================
+        # ======================== Continuidad Regular Horario ============
+        # =================================================================
     
-    continuidad_to_horario_regular = ContinuidadToHorarioRegular(tablas)
-    tipo_continuidad_to_horario_regular = continuidad_to_horario_regular.tipo
-    
-    if mapping_tipos[tipo_continuidad_regular]:
         # Create directories if they don't exist
-        feats_train_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "train" / feats_version
-        feats_test_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "test" / feats_version
-        target_test_path = Path(output_target_datastore) / tipo_continuidad_to_horario_regular / "test" / target_version
+        feats_train_horario_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "train" / feats_version
+        feats_test_horario_path = Path(output_feats_datastore) / tipo_continuidad_to_horario_regular / "test" / feats_version
+        target_test_horario_path = Path(output_target_datastore) / tipo_continuidad_to_horario_regular / "test" / target_version
         
-        feats_train_path.mkdir(parents=True, exist_ok=True)
-        feats_test_path.mkdir(parents=True, exist_ok=True)
-        target_test_path.mkdir(parents=True, exist_ok=True)
+        feats_train_horario_path.mkdir(parents=True, exist_ok=True)
+        feats_test_horario_path.mkdir(parents=True, exist_ok=True)
+        target_test_horario_path.mkdir(parents=True, exist_ok=True)
 
         continuidad_to_horario_regular.load_features(periodo, feats_version, output_feats_datastore)
         
         continuidad_to_horario_regular.load_target(periodo, target_version, output_target_datastore)
     else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo_continuidad_regular}")
 
 
     # =================================================================
@@ -134,7 +133,7 @@ def main(args):
         
         inicial_estacional.load_target(periodo, target_version, output_target_datastore)
     else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo_inicial_estacional}")
 
     # =================================================================
     # ======================== Continuidad Estacional =================
@@ -157,7 +156,7 @@ def main(args):
         
         continuidad_estacional.load_target(periodo, target_version, output_target_datastore)
     else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+        print(f"No se generaron features para el periodo {periodo} y tipo {tipo_continuidad_estacional}")
 
 
 if __name__ == '__main__':
