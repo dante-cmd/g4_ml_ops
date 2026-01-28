@@ -29,12 +29,9 @@ environment:
           - pandas
           - numpy
           - catboost
-          - scikit-learn
-          - mlflow
-          - azureml-mlflow
 
 command: >-
-  python inicial_regular.py 
+  python inicial_regular_v2.py 
   --input_feats_datastore ${{inputs.input_feats_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}

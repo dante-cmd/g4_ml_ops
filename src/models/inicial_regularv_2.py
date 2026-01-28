@@ -3,24 +3,24 @@ import numpy as np
 from pathlib import Path
 from catboost import CatBoostRegressor
 from utils_model import parse_args, get_mapping_tipos
-from utils_metrics import calculate_classes, calculate_metrics
-import mlflow
-import mlflow.catboost
-import azureml.mlflow
-from mlflow.tracking import MlflowClient
-from azure.ai.ml import MLClient
+# from utils_metrics import calculate_classes, calculate_metrics
+# import mlflow
+# import mlflow.catboost
+# import azureml.mlflow
+# from azure.identity import DefaultAzureCredential
+# # from mlflow.tracking import MlflowClient
+# from azure.ai.ml import MLClient
 
 
 class TrainInicial:
     def __init__(self, 
                  input_feats_datastore:str,
-                 feats_version:str,
-                 client: MlflowClient
+                 feats_version:str
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
         self.feats_version = feats_version
-        self.client = client
+        # self.client = client
         self.tipo = 'inicial_regular'
     
     def apply_filter(self, df_train:pd.DataFrame):
@@ -82,26 +82,26 @@ class TrainInicial:
 
         return model
 
-    def register_model(self, model, periodo:int):
+    # def register_model(self, model, periodo:int):
         
-        with mlflow.start_run():
-            model_name = self.tipo + "_" + str(periodo)
-            model_info = mlflow.catboost.log_model(
-                    cb_model=model,
-                    name=self.tipo,
-                    registered_model_name=model_name
-                )
-            versions = self.client.get_registered_model(model_name)
+    #     with mlflow.start_run():
+    #         model_name = self.tipo + "_" + str(periodo)
+    #         model_info = mlflow.catboost.log_model(
+    #                 cb_model=model,
+    #                 name=self.tipo,
+    #                 registered_model_name=model_name
+    #             )
+            # versions = self.client.get_registered_model(model_name)
                 
-            if 'champion' not in versions.aliases.keys():
-                self.client.set_registered_model_alias(
-                    model_name, "champion", version=model_info.registered_model_version)
+            # if 'champion' not in versions.aliases.keys():
+            #     self.client.set_registered_model_alias(
+            #         model_name, "champion", version=model_info.registered_model_version)
                 
-            # Assign '@champion' to Version 1
-            # client.set_registered_model_alias(self.tipo, "champion", version="1")
-            # Assign '@dev' to Version 1
-            self.client.set_registered_model_alias(
-                    model_name, "dev", version=model_info.registered_model_version)
+            # # Assign '@champion' to Version 1
+            # # client.set_registered_model_alias(self.tipo, "champion", version="1")
+            # # Assign '@dev' to Version 1
+            # self.client.set_registered_model_alias(
+            #         model_name, "dev", version=model_info.registered_model_version)
 
 
 def main(args):
@@ -110,25 +110,40 @@ def main(args):
     feats_version = args.feats_version
     model_periodo = args.model_periodo
     
-    # listening to port 5000
-    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    # 1. Initialize client
-    # tracking_uri="http://127.0.0.1:5000"
-    client = MlflowClient()
+    # # listening to port 5000
+    # # mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    # # 1. Initialize client
+    # # tracking_uri="http://127.0.0.1:5000"
+    # # client = MlflowClient()
+    # print("Autenticando con Azure...")
+    # credential = DefaultAzureCredential()
+
+    # print("Conectando al workspace de Azure ML...")
+    # ml_client = MLClient(
+    #         credential=credential,
+    #         subscription_id=subscription_id,
+    #         resource_group_name=resource_group,
+    #         workspace_name=workspace_name,
+    #     )
+
+    # print("Configurando MLflow tracking URI...")
+    # mlflow.set_tracking_uri(ml_client.tracking_uri)
     
-    mlflow.set_experiment(experiment_name)
+    # mlflow.set_experiment(experiment_name)
     
     
     train_inicial = TrainInicial(
         input_feats_datastore, 
         feats_version,
-        client)
+        # client
+        )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
     
     if mapping_tipos[train_inicial.tipo]:
         model = train_inicial.train_model(model_periodo)
-        train_inicial.register_model(model, model_periodo)
+        print("Training for:",model_periodo)
+        # train_inicial.register_model(model, model_periodo)
     
     # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
 
