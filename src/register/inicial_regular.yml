@@ -9,12 +9,6 @@ inputs:
         type: uri_folder
     model_periodo:
         type: integer
-    subscription_id:
-        type: string
-    resource_group:
-        type: string
-    workspace_name:
-        type: string
 
 outputs:
     output_model_inicial_version:
@@ -39,8 +33,4 @@ command: >-
       --input_model_inicial_path ${{inputs.input_model_inicial_path}} 
       --model_periodo ${{inputs.model_periodo}}
       --output_model_version ${{outputs.output_model_inicial_version}}
-environment_variables:
-  AZURE_SUBSCRIPTION_ID: ${{inputs.subscription_id}}
-  AZURE_RESOURCE_GROUP: ${{inputs.resource_group}}
-  AZURE_WORKSPACE_NAME: ${{inputs.workspace_name}}
           

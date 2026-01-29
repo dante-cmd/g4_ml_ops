@@ -19,6 +19,25 @@ def get_ml_client():
     try:
         credential = DefaultAzureCredential()
         
+        # First, try to use the Azure ML Run context (when running inside Azure ML)
+        try:
+            from azureml.core import Run
+            run = Run.get_context()
+            
+            # Check if we're running in Azure ML (not offline run)
+            if hasattr(run, 'experiment'):
+                print("Running in Azure ML. Using workspace from Run context...")
+                workspace = run.experiment.workspace
+                ml_client = MLClient(
+                    credential=credential,
+                    subscription_id=workspace.subscription_id,
+                    resource_group_name=workspace.resource_group,
+                    workspace_name=workspace.name
+                )
+                return ml_client
+        except Exception as run_context_error:
+            print(f"Could not use Run context: {run_context_error}")
+        
         # Check for environment variables for explicit configuration (Actions Support)
         subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
         resource_group = os.environ.get("AZURE_RESOURCE_GROUP")
