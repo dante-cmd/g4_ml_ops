@@ -77,7 +77,7 @@ class TrainInicial:
             model = LinearRegression()
             model.fit(X_train, y_train)
 
-        # return model
+        return model
 
 
         # model = CatBoostRegressor(
@@ -159,6 +159,11 @@ def main(args):
     if mapping_tipos[train_inicial.tipo]:
         model = train_inicial.train_model(model_periodo)
         print("Training for:",model_periodo)
+        
+        # Save model explicitly to the output path
+        print(f"Saving model to {args.model_output}...")
+        mlflow.sklearn.save_model(model, args.model_output)
+        
         # train_inicial.register_model(model, model_periodo)
     
     # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
@@ -176,6 +181,8 @@ def parse_args():
     parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
     parser.add_argument("--experiment_name", dest='experiment_name',
+                        type=str)
+    parser.add_argument("--model_output", dest='model_output',
                         type=str)
     
     # parse args

@@ -45,3 +45,4 @@ command: >-
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
   --experiment_name ${{inputs.experiment_name}}
+  --model_output ${{outputs.model_output}}
