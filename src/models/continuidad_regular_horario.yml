@@ -6,7 +6,7 @@ display_name: Model Training - Inicial Regular
 type: command
 
 inputs:
-  input_feats_datastore:
+  input_feats_continuidad_horario_datastore:
     type: uri_folder
   feats_version:
     type: string
@@ -14,6 +14,11 @@ inputs:
     type: integer
   experiment_name:
     type: string
+
+outputs:
+  model_output_continuidad_horario:
+    type: mlflow_model
+    mode: upload
 
 code: .
 
@@ -30,13 +35,14 @@ environment:
           - pyarrow
           - PyYAML
           - Unidecode
-          - openpyxl
           - numpy
-          - catboost
+          - mlflow
+          - azureml-mlflow
 
 command: >-
-  python inicial_regular_v3.py 
-  --input_feats_datastore ${{inputs.input_feats_datastore}}
+  python inicial_regular_horario.py 
+  --input_feats_datastore ${{inputs.input_feats_continuidad_horario_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
   --experiment_name ${{inputs.experiment_name}}
+  --model_output ${{outputs.model_output_continuidad_horario}}

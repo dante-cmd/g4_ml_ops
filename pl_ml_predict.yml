@@ -110,14 +110,32 @@ jobs:
       output_target_continuidad_horario_datastore: ${{parent.outputs.output_target_continuidad_horario_datastore}}
 
   # # Model train
-  # model_train_job:
-  #   type: command
-  #   component: file:./src/models/inicial_regular_v2.yml
-  #   inputs:
-  #     input_feats_inicial_datastore: ${{parent.jobs.features_job.outputs.output_feats_inicial_datastore}}
-  #     experiment_name: ml_pipeline_experiment
-  #     feats_version: "v1"
-  #     model_periodo: 202511
+  model_train_inicial_job:
+    type: command
+    component: file:./src/models/inicial_regular.yml
+    inputs:
+      input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202511
+
+  model_train_continuidad_job:
+    type: command
+    component: file:./src/models/continuidad_regular.yml
+    inputs:
+      input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202511
+
+  model_train_continuidad_horario_job:
+    type: command
+    component: file:./src/models/continuidad_regular_horario.yml
+    inputs:
+      input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202511
 
 
   # # Model predict

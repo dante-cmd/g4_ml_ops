@@ -6,7 +6,7 @@ display_name: Model Training - Inicial Regular
 type: command
 
 inputs:
-  input_feats_inicial_datastore:
+  input_feats_continuidad_datastore:
     type: uri_folder
   feats_version:
     type: string
@@ -16,7 +16,7 @@ inputs:
     type: string
 
 outputs:
-  model_output:
+  model_output_continuidad:
     type: mlflow_model
     mode: upload
 
@@ -40,9 +40,9 @@ environment:
           - azureml-mlflow
 
 command: >-
-  python inicial_regular_v2.py 
-  --input_feats_inicial_datastore ${{inputs.input_feats_inicial_datastore}}
+  python inicial_continuidad_regular.py 
+  --input_feats_datastore ${{inputs.input_feats_continuidad_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
   --experiment_name ${{inputs.experiment_name}}
-  --model_output ${{outputs.model_output}}
+  --model_output ${{outputs.model_output_continuidad}}

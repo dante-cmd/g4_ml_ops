@@ -18,6 +18,8 @@ def parse_args():
                         type=int)
     parser.add_argument("--experiment_name", dest='experiment_name',
                         type=str)
+    parser.add_argument("--model_output", dest='model_output',
+                        type=str)
     
     # parse args
     args = parser.parse_args()
@@ -39,7 +41,9 @@ def get_mapping_tipos(periodo: int) -> dict:
             'inicial_estacional':True, 
             'continuidad_estacional':False, 
             'inicial_regular':True, 
-            'continuidad_regular':True}
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True
+            }
         
         return tipos
     elif periodo%100 == 2:
@@ -48,13 +52,14 @@ def get_mapping_tipos(periodo: int) -> dict:
             'continuidad_estacional':True,
             'inicial_regular':True, 
             'continuidad_regular':True, 
-            }
+            'continuidad_regular_horario':True}
         return tipos
     else:
         tipos = {
             'inicial_estacional':False, 
             'continuidad_estacional':False, 
             'inicial_regular':True, 
-            'continuidad_regular':True}
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True}
         return tipos
-        
+

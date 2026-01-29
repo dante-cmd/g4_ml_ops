@@ -1,21 +1,25 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from catboost import CatBoostRegressor
-from utils_model import parse_args, get_mapping_tipos
-from utils_metrics import calculate_classes, calculate_metrics
 import mlflow
 import mlflow.catboost
-import azureml.mlflow
-from mlflow.tracking import MlflowClient
+from catboost import CatBoostRegressor
+from utils_model import parse_args, get_mapping_tipos
+# import argparse
+# from sklearn.linear_model import LinearRegression
+# from utils_metrics import calculate_classes, calculate_metrics
+# import mlflow
+# import mlflow.catboost
+# import azureml.mlflow
+# from azure.identity import DefaultAzureCredential
+# # from mlflow.tracking import MlflowClient
 # from azure.ai.ml import MLClient
 
 
 class TrainInicial:
     def __init__(self, 
                  input_feats_datastore:str,
-                 feats_version:str,
-                #  client: MlflowClient
+                 feats_version:str
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
@@ -28,7 +32,7 @@ class TrainInicial:
     
     def get_data_train(self, periodo:int):
         data_model_train = pd.read_parquet(
-            self.input_feats_datastore/self.tipo/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
+            self.input_feats_datastore/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
         return data_model_train  
 
     def train_model(self, periodo:int):
@@ -66,35 +70,35 @@ class TrainInicial:
 
         X_train = data_model_train[x].copy()
         y_train = data_model_train[y].copy()
-
-        model = CatBoostRegressor(
+        # print(X_train.head())
+        # return model
+        
+        with mlflow.start_run():
+            model = CatBoostRegressor(
             iterations=500,
             learning_rate=0.1,
             depth=6,
             loss_function='RMSE',
             verbose=False, # Set to True to see training progress,
             min_data_in_leaf=5,
-        )
+            )
 
-        # X_train, y_train = data_train_01[x].copy(), data_train[y].copy()
-        
-        model.fit(X_train, y_train, cat_features=cat_features)
+            model.fit(X_train, y_train, cat_features=cat_features)
+            # # LinearRegression
+            # model = LinearRegression()
+            # model.fit(X_train, y_train)
 
         return model
 
-    def register_model(self, model, periodo:int):
+    # def register_model(self, model, periodo:int):
         
-        # with mlflow.start_run():
-        model_name = self.tipo + "_" + str(periodo)
-        mlflow.catboost.log_model(
-                    model,
-                    artifact_path=self.tipo)
-        
-        mlflow.register_model(
-        model_uri="runs:/{}/model".format(mlflow.active_run().info.run_id),
-        name=model_name)
-
-        mlflow.end_run()
+    #     with mlflow.start_run():
+    #         model_name = self.tipo + "_" + str(periodo)
+    #         model_info = mlflow.catboost.log_model(
+    #                 cb_model=model,
+    #                 name=self.tipo,
+    #                 registered_model_name=model_name
+    #             )
             # versions = self.client.get_registered_model(model_name)
                 
             # if 'champion' not in versions.aliases.keys():
@@ -109,33 +113,57 @@ class TrainInicial:
 
 
 def main(args):
+
+    # 1. Habilitar Autologging (Clave para Azure ML v2)
+    mlflow.sklearn.autolog()
+
     input_feats_datastore = args.input_feats_datastore
     experiment_name = args.experiment_name
     feats_version = args.feats_version
     model_periodo = args.model_periodo
+    model_output = args.model_output
     
-    # listening to port 5000
-    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    # 1. Initialize client
-    # tracking_uri="http://127.0.0.1:5000"
-    # client = MlflowClient()
+    # # listening to port 5000
+    # # mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    # # 1. Initialize client
+    # # tracking_uri="http://127.0.0.1:5000"
+    # # client = MlflowClient()
+    # print("Autenticando con Azure...")
+    # credential = DefaultAzureCredential()
+
+    # print("Conectando al workspace de Azure ML...")
+    # ml_client = MLClient(
+    #         credential=credential,
+    #         subscription_id=subscription_id,
+    #         resource_group_name=resource_group,
+    #         workspace_name=workspace_name,
+    #     )
+
+    # print("Configurando MLflow tracking URI...")
+    # mlflow.set_tracking_uri(ml_client.tracking_uri)
     
-    mlflow.set_experiment(experiment_name)
+    # mlflow.set_experiment(experiment_name)
     
     
     train_inicial = TrainInicial(
         input_feats_datastore, 
-        feats_version,
-        # client
+        feats_version
         )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
     
     if mapping_tipos[train_inicial.tipo]:
         model = train_inicial.train_model(model_periodo)
-        train_inicial.register_model(model, model_periodo)
+        print("Training for:", model_periodo)
+        
+        # Save model explicitly to the output path
+        print(f"Saving model to {model_output}...")
+        mlflow.catboost.save_model(model, model_output)
+        
+        # train_inicial.register_model(model, model_periodo)
     
     # python src/models/inicial_regular.py --input_feats_train_datastore $input_feats_train_datastore --periodo $model_periodo --experiment_name $experiment_name
+
 
 if __name__ == '__main__':
         # add space in logs
