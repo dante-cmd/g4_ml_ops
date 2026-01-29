@@ -6,7 +6,7 @@ type: command
 
 inputs:
     model_input_path:
-        type: string
+        type: uri_folder
     model_periodo:
         type: integer
 
