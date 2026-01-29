@@ -45,6 +45,10 @@ jobs:
 
           echo "Submitted job: $JOB_ID"
           
+          # Wait for the job to complete
+          echo "Waiting for job to complete..."
+          az ml job stream --name $JOB_ID
+          
           # Ahora consultamos los outputs específicos definidos en tu YAML
           echo "--- Resultados del Pipeline ---"
           
