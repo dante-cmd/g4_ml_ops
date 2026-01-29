@@ -588,6 +588,8 @@ def main(args):
     
     # Create directories for ContinuidadToHorario
     mapping_tipos = get_mapping_tipos(periodo)
+
+    continuidad_horario = ContinuidadToHorario(tablas)
     
     tipo_continuidad_horario = continuidad_horario.tipo
     
