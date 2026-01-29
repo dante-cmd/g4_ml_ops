@@ -150,7 +150,7 @@ jobs:
     type: command
     component: file:./src/register/inicial_regular.yml
     inputs:
-      input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output}}
+      input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
       model_periodo: 202511
     outputs:
       output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
@@ -159,7 +159,7 @@ jobs:
     type: command
     component: file:./src/register/continuidad_regular.yml
     inputs:
-      model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output}}
+      model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output_continuidad}}
       model_periodo: 202511
     outputs:
       output_model_continuidad_version: ${{parent.outputs.output_model_continuidad_version}}
@@ -168,7 +168,7 @@ jobs:
     type: command
     component: file:./src/register/continuidad_regular_horario.yml
     inputs:
-      model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output}}
+      model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output_continuidad_horario}}
       model_periodo: 202511
     outputs:
       output_model_continuidad_horario_version: ${{parent.outputs.output_model_continuidad_horario_version}}
