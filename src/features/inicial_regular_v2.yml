@@ -44,7 +44,7 @@ environment:
           - Unidecode
 
 command: >-
-  python features.py 
+  python inicial_regular.py 
   --input_datastore ${{inputs.input_datastore}}
   --ult_periodo ${{inputs.ult_periodo}}
   --output_feats_inicial_datastore ${{outputs.output_feats_inicial_datastore}}

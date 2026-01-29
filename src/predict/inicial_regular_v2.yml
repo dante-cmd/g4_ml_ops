@@ -45,7 +45,7 @@ environment:
           # - azure-identity
 
 command: >-
-  python inicial_regular.py 
+  python inicial_regular_v2.py 
   --input_model_inicial_path ${{inputs.input_model_inicial_path}}
   --input_feats_inicial_datastore ${{inputs.input_feats_inicial_datastore}}
   --input_target_inicial_datastore ${{inputs.input_target_inicial_datastore}}
