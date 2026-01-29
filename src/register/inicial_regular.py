@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 
 
 def parse_args():
@@ -48,8 +49,16 @@ def main(args):
             print("Running in Azure ML. Using workspace from Run context...")
             workspace = run.experiment.workspace
             
-            # Register using v1 SDK
-            version = register_model_v1(workspace, input_model_inicial_path, model_name)
+            # Copy model files to local directory
+            local_model_dir = "model_temp"
+            if os.path.exists(local_model_dir):
+                shutil.rmtree(local_model_dir)
+            
+            print(f"Copying model from {input_model_inicial_path} to {local_model_dir}...")
+            shutil.copytree(input_model_inicial_path, local_model_dir)
+            
+            # Register using v1 SDK from local path
+            version = register_model_v1(workspace, local_model_dir, model_name)
             
             # Guardar la versión en el output path
             if output_model_version:
