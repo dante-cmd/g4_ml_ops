@@ -569,8 +569,8 @@ def main(args):
     ult_periodo=args.ult_periodo
     
     # for Continuidad
-    output_feats_continuidad_horario_datastore = args.output_feats_continuidad_horario_datastore
-    output_target_continuidad_horario_datastore = args.output_target_continuidad_horario_datastore
+    output_feats_continuidad_horario_datastore = args.output_feats_datastore
+    output_target_continuidad_horario_datastore = args.output_target_datastore
     platinum_version = args.platinum_version
     feats_version=args.feats_version
     target_version=args.target_version

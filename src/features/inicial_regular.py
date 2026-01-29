@@ -11,7 +11,7 @@ import re
 import argparse
 from pathlib import Path
 from unidecode import unidecode
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, get_mapping_tipos
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, get_mapping_tipos, parse_args
 from parser_regular import Utils
 from loader import Loader
 
@@ -292,8 +292,8 @@ def main(args):
     ult_periodo=args.ult_periodo
     
     # for Inicial
-    output_feats_inicial_datastore = args.output_feats_inicial_datastore
-    output_target_inicial_datastore = args.output_target_inicial_datastore
+    output_feats_inicial_datastore = args.output_feats_datastore
+    output_target_inicial_datastore = args.output_target_datastore
     platinum_version = args.platinum_version
     feats_version=args.feats_version
     target_version = args.target_version

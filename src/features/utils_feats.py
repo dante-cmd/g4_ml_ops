@@ -53,9 +53,9 @@ def parse_args():
     # add arguments
     parser.add_argument("--input_datastore", dest='input_datastore',
                         type=str)
-    parser.add_argument("--output_feats_inicial_datastore", dest='output_feats_inicial_datastore',
+    parser.add_argument("--output_feats_datastore", dest='output_feats_datastore',
                         type=str)
-    parser.add_argument("--output_target_inicial_datastore", dest='output_target_inicial_datastore',
+    parser.add_argument("--output_target_datastore", dest='output_target_datastore',
                         type=str)
     parser.add_argument("--platinum_version", dest='platinum_version',
                         type=str)
