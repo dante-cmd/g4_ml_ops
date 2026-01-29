@@ -27,6 +27,7 @@ environment:
       - pip:
           - azure-ai-ml
           - azure-identity
+          - azureml-core
 
 command: >-
       python continuidad_regular.py 
