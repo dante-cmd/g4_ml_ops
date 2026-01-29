@@ -36,7 +36,7 @@ jobs:
     - name: Submit diabetes pipeline job (no stream)
       run: |
           JOB_ID=$(az ml job create \
-            --file pipeline_ml_inicial.yml \
+            --file pl_ml_predict.yml \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"

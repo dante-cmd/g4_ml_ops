@@ -1,0 +1,31 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: register_inicial_regular
+version: 1
+display_name: Register Inicial Regular
+type: command
+
+inputs:
+    input_model_inicial_path:
+        type: string
+    model_periodo:
+        type: integer
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - azure-ai-ml
+          - azure-identity
+
+command: >-
+      python inicial_regular.py 
+      --input_model_inicial_path ${{inputs.input_model_inicial_path}} 
+      --model_periodo ${{inputs.model_periodo}}
+          

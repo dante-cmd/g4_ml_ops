@@ -1,0 +1,138 @@
+# pipeline_ml.yml
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: ML Pipeline - Inicial Regular
+experiment_name: ml_pipeline_experiment
+
+settings:
+  default_compute: azureml:clusterai
+  default_datastore: azureml:workspaceblobstore
+
+inputs:
+  input_datastore:
+    type: uri_folder
+    path: azureml://datastores/base_data/paths/rawdata
+
+outputs:
+  output_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/platinumdata
+    mode: rw_mount
+  output_feats_inicial_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/features/inicial_regular
+    mode: rw_mount
+  output_target_inicial_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target/inicial_regular
+    mode: rw_mount
+  # output_predict_inicial_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/predict/inicial_regular
+  #   mode: rw_mount
+  output_feats_continuidad_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/features/continuidad_regular
+    mode: rw_mount
+  output_target_continuidad_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target/continuidad_regular
+    mode: rw_mount
+
+  output_feats_continuidad_horario_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/features/continuidad_regular_horario
+    mode: rw_mount
+  output_target_continuidad_horario_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
+    mode: rw_mount
+
+
+jobs:
+  # ETL Job
+  etl_job:
+    type: command
+    component: file:./src/data/etl.yml
+    inputs:
+      input_datastore: ${{parent.inputs.input_datastore}}
+      ult_periodo: 202511
+      n_periodos: "None"
+      all_periodos: "True"
+      platinum_version: "v1"
+    outputs:
+      output_datastore: ${{parent.outputs.output_datastore}}
+  
+  # Feature Engineering Jobs (run in parallel after ETL)
+  features_inicial_job:
+    type: command
+    component: file:./src/features/inicial_regular.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
+      output_target_inicial_datastore: ${{parent.outputs.output_target_inicial_datastore}}
+
+
+  # Feature Engineering Jobs (run in parallel after ETL)
+  features_continuidad_job:
+    type: command
+    component: file:./src/features/continuidad_regular.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_continuidad_datastore: ${{parent.outputs.output_feats_continuidad_datastore}}
+      output_target_continuidad_datastore: ${{parent.outputs.output_target_continuidad_datastore}}
+
+  # Feature Engineering Jobs (run in parallel after ETL)
+  features_continuidad_horario_job:
+    type: command
+    component: file:./src/features/continuidad_regular_horario.yml
+    inputs:
+      input_datastore: ${{parent.jobs.etl_job.outputs.output_datastore}}
+      ult_periodo: 202511
+      platinum_version: "v1"
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+    outputs:
+      output_feats_continuidad_horario_datastore: ${{parent.outputs.output_feats_continuidad_horario_datastore}}
+      output_target_continuidad_horario_datastore: ${{parent.outputs.output_target_continuidad_horario_datastore}}
+
+  # # Model train
+  # model_train_job:
+  #   type: command
+  #   component: file:./src/models/inicial_regular_v2.yml
+  #   inputs:
+  #     input_feats_inicial_datastore: ${{parent.jobs.features_job.outputs.output_feats_inicial_datastore}}
+  #     experiment_name: ml_pipeline_experiment
+  #     feats_version: "v1"
+  #     model_periodo: 202511
+
+
+  # # Model predict
+  # model_predict_job:
+  #   type: command
+  #   component: file:./src/predict/inicial_regular_v2.yml
+  #   inputs:
+  #     input_model_inicial_path: ${{parent.jobs.model_train_job.outputs.model_output}}
+  #     input_feats_inicial_datastore: ${{parent.jobs.features_job.outputs.output_feats_inicial_datastore}}
+  #     input_target_inicial_datastore: ${{parent.jobs.features_job.outputs.output_target_inicial_datastore}}
+  #     experiment_name: ml_pipeline_experiment
+  #     feats_version: "v1"
+  #     target_version: "v1"
+  #     periodo: 202511
+  #     model_periodo: 202511
+  #     model_version: "v1"
+  #   outputs:
+  #     output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}

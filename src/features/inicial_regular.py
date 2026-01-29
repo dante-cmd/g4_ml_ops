@@ -11,7 +11,7 @@ import re
 import argparse
 from pathlib import Path
 from unidecode import unidecode
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args, get_mapping_tipos
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, get_mapping_tipos
 from parser_regular import Utils
 from loader import Loader
 
@@ -266,10 +266,10 @@ class Inicial(Utils):
         
         # ./data/ml_data/features/{self.tipo}/{version}/train/{periodo}/data_feats_{self.tipo}_{periodo}.parquet
         data_model_train.to_parquet(
-            f"{output_feats_datastore}/{self.tipo}/train/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
+            f"{output_feats_datastore}/train/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
             index=False)
         data_model_test.to_parquet(
-            f"{output_feats_datastore}/{self.tipo}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
+            f"{output_feats_datastore}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
             index=False)
     
     def load_target(self, periodo:int, version:str, output_target_datastore:str):
@@ -277,7 +277,7 @@ class Inicial(Utils):
         try:
             df_real_09 = self.get_target(periodo)
             df_real_09.to_parquet(
-                f"{output_target_datastore}/{self.tipo}/test/{version}/data_target_{self.tipo}_{periodo}.parquet", 
+                f"{output_target_datastore}/test/{version}/data_target_{self.tipo}_{periodo}.parquet", 
                 index=False)
         except Exception as e:
             print(f"Error al cargar target para periodo {periodo}")
@@ -292,8 +292,8 @@ def main(args):
     ult_periodo=args.ult_periodo
     
     # for Inicial
-    output_feats_datastore = args.output_feats_datastore
-    output_target_datastore = args.output_target_datastore
+    output_feats_inicial_datastore = args.output_feats_inicial_datastore
+    output_target_inicial_datastore = args.output_target_inicial_datastore
     platinum_version = args.platinum_version
     feats_version=args.feats_version
     target_version = args.target_version
@@ -314,17 +314,17 @@ def main(args):
     
     if mapping_tipos[tipo]:
         # Create directories if they don't exist
-        feats_train_path = Path(output_feats_datastore) / tipo / "train" / feats_version
-        feats_test_path = Path(output_feats_datastore) / tipo / "test" / feats_version
-        target_test_path = Path(output_target_datastore) / tipo / "test" / target_version
+        feats_train_path = Path(output_feats_inicial_datastore) / "train" / feats_version
+        feats_test_path = Path(output_feats_inicial_datastore) / "test" / feats_version
+        target_test_path = Path(output_target_inicial_datastore) / "test" / target_version
         
         feats_train_path.mkdir(parents=True, exist_ok=True)
         feats_test_path.mkdir(parents=True, exist_ok=True)
         target_test_path.mkdir(parents=True, exist_ok=True)
 
-        inicial.load_features(periodo, feats_version, output_feats_datastore)
+        inicial.load_features(periodo, feats_version, output_feats_inicial_datastore)
         
-        inicial.load_target(periodo, target_version, output_target_datastore)
+        inicial.load_target(periodo, target_version, output_target_inicial_datastore)
     else:
         print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
 

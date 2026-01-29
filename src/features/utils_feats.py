@@ -23,7 +23,9 @@ def get_mapping_tipos(periodo: int) -> dict:
             'inicial_estacional':True, 
             'continuidad_estacional':False, 
             'inicial_regular':True, 
-            'continuidad_regular':True}
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True
+            }
         
         return tipos
     elif periodo%100 == 2:
@@ -32,14 +34,15 @@ def get_mapping_tipos(periodo: int) -> dict:
             'continuidad_estacional':True,
             'inicial_regular':True, 
             'continuidad_regular':True, 
-            }
+            'continuidad_regular_horario':True}
         return tipos
     else:
         tipos = {
             'inicial_estacional':False, 
             'continuidad_estacional':False, 
             'inicial_regular':True, 
-            'continuidad_regular':True}
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True}
         return tipos
 
 
@@ -47,13 +50,12 @@ def parse_args():
     # setup arg parser
     parser = argparse.ArgumentParser()
     
-
     # add arguments
     parser.add_argument("--input_datastore", dest='input_datastore',
                         type=str)
-    parser.add_argument("--output_feats_datastore", dest='output_feats_datastore',
+    parser.add_argument("--output_feats_inicial_datastore", dest='output_feats_inicial_datastore',
                         type=str)
-    parser.add_argument("--output_target_datastore", dest='output_target_datastore',
+    parser.add_argument("--output_target_inicial_datastore", dest='output_target_inicial_datastore',
                         type=str)
     parser.add_argument("--platinum_version", dest='platinum_version',
                         type=str)
