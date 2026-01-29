@@ -40,8 +40,8 @@ environment:
       - pip:
           - pandas
           - numpy
-          # - mlflow
-          - mlflow-azureml
+          - mlflow
+          # - mlflow-azureml
           # - scikit-learn
           # - azure-ai-ml
           # - azure-identity
