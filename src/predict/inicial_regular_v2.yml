@@ -20,6 +20,8 @@ inputs:
     type: integer
   model_periodo:
     type: integer
+  model_version:
+    type: string
   experiment_name:
     type: string
 
@@ -56,4 +58,5 @@ command: >-
   --target_version ${{inputs.target_version}}
   --periodo ${{inputs.periodo}}
   --model_periodo ${{inputs.model_periodo}}
+  --model_version ${{inputs.model_version}}
   --experiment_name ${{inputs.experiment_name}}
