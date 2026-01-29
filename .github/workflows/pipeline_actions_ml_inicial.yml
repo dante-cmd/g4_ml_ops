@@ -44,6 +44,20 @@ jobs:
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
+
+    - name: Print Custom Pipeline Outputs
+      run: |
+          
+          # Ahora consultamos los outputs específicos definidos en tu YAML
+          echo "--- Resultados del Pipeline ---"
+          
+          # 1. Output del Modelo Inicial
+          model_inicial=$(az ml job show --name $JOB_ID --query outputs.output_model_inicial_version.path -o tsv)
+          echo "Modelo Inicial guardado en: $model_inicial"
+          
+          # 2. Output del Target Continuidad
+          target_path=$(az ml job show --name $JOB_ID --query outputs.output_target_continuidad_datastore.path -o tsv)
+          echo "Target Continuidad en: $target_path"
         
 
     # - name: Run Pipeline Script
