@@ -41,7 +41,7 @@ environment:
           - catboost
 
 command: >-
-  python inicial_continuidad_regular.py 
+  python continuidad_regular.py 
   --input_feats_datastore ${{inputs.input_feats_continuidad_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
