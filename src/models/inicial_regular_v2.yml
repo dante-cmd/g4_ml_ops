@@ -36,6 +36,8 @@ environment:
           - PyYAML
           - Unidecode
           - numpy
+          # - mlflow
+          - mlflow-azureml
 
 command: >-
   python inicial_regular_v2.py 
