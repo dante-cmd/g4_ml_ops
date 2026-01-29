@@ -12,6 +12,12 @@ inputs:
   input_datastore:
     type: uri_folder
     path: azureml://datastores/base_data/paths/rawdata
+  subscription_id:
+    type: string
+  resource_group:
+    type: string
+  workspace_name:
+    type: string
 
 outputs:
   output_datastore:
@@ -152,6 +158,9 @@ jobs:
     inputs:
       input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
       model_periodo: 202511
+      subscription_id: ${{parent.inputs.subscription_id}}
+      resource_group: ${{parent.inputs.resource_group}}
+      workspace_name: ${{parent.inputs.workspace_name}}
     outputs:
       output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
 
@@ -161,6 +170,9 @@ jobs:
     inputs:
       model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output_continuidad}}
       model_periodo: 202511
+      subscription_id: ${{parent.inputs.subscription_id}}
+      resource_group: ${{parent.inputs.resource_group}}
+      workspace_name: ${{parent.inputs.workspace_name}}
     outputs:
       output_model_continuidad_version: ${{parent.outputs.output_model_continuidad_version}}
 
@@ -170,6 +182,9 @@ jobs:
     inputs:
       model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output_continuidad_horario}}
       model_periodo: 202511
+      subscription_id: ${{parent.inputs.subscription_id}}
+      resource_group: ${{parent.inputs.resource_group}}
+      workspace_name: ${{parent.inputs.workspace_name}}
     outputs:
       output_model_continuidad_horario_version: ${{parent.outputs.output_model_continuidad_horario_version}}
 
