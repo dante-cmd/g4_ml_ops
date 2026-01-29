@@ -5,6 +5,7 @@ from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml.entities import Model
 import os
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_input_path", type=str, help="Ruta donde está el modelo entrenado")
