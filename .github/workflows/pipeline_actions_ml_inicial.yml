@@ -33,7 +33,7 @@ jobs:
           az extension add -n ml -y || az extension update -n ml
           az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
 
-    - name: Submit diabetes pipeline job (no stream)
+    - name: Submit pipeline job and print outputs
       env:
         AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
         AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
@@ -44,9 +44,6 @@ jobs:
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
-
-    - name: Print Custom Pipeline Outputs
-      run: |
           
           # Ahora consultamos los outputs específicos definidos en tu YAML
           echo "--- Resultados del Pipeline ---"
