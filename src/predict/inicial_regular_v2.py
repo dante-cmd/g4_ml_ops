@@ -20,25 +20,25 @@ import mlflow.sklearn
 class TrainInicial:
     def __init__(
         self,
-        input_model_path: str,
-        input_feats_datastore: str,
-        input_target_datastore: str,
-        output_predict_datastore: str,
+        input_model_inicial_path: str,
+        input_feats_inicial_datastore: str,
+        input_target_inicial_datastore: str,
+        output_predict_inicial_datastore: str,
         feats_version: str,
         target_version: str,
     ):
 
-        self.input_model_path = input_model_path
-        self.input_feats_datastore = Path(input_feats_datastore)
-        self.input_target_datastore = Path(input_target_datastore)
-        self.output_predict_datastore = Path(output_predict_datastore)
+        self.input_model_inicial_path = input_model_inicial_path
+        self.input_feats_inicial_datastore = Path(input_feats_inicial_datastore)
+        self.input_target_inicial_datastore = Path(input_target_inicial_datastore)
+        self.output_predict_inicial_datastore = Path(output_predict_inicial_datastore)
         self.tipo = "inicial_regular"
         self.feats_version = feats_version
         self.target_version = target_version
 
     def get_data_test(self, periodo: int):
         data_model_test = pd.read_parquet(
-            self.input_feats_datastore
+            self.input_feats_inicial_datastore
             / "test"
             / self.feats_version
             / f"data_feats_{self.tipo}_{periodo}.parquet"
@@ -47,7 +47,7 @@ class TrainInicial:
 
     def get_data_target(self, periodo: int):
         data_model_target = pd.read_parquet(
-            self.input_target_datastore
+            self.input_target_inicial_datastore
             / "test"
             / self.target_version
             / f"data_target_{self.tipo}_{periodo}.parquet"
@@ -55,9 +55,9 @@ class TrainInicial:
         return data_model_target
 
     def load_model(self, periodo: int):
-        print(f"Cargando modelo desde: {self.input_model_path}")
+        print(f"Cargando modelo desde: {self.input_model_inicial_path}")
         model = mlflow.sklearn.load_model(
-            self.input_model_path
+            self.input_model_inicial_path
             # f"models:/{self.tipo}_{periodo}@dev"
         )
         return model
