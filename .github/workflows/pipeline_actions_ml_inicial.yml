@@ -48,9 +48,14 @@ jobs:
           # Ahora consultamos los outputs específicos definidos en tu YAML
           echo "--- Resultados del Pipeline ---"
           
-          # 1. Output del Modelo Inicial
-          model_inicial=$(az ml job show --name $JOB_ID --query outputs.output_model_inicial_version.path -o tsv)
-          echo "Modelo Inicial guardado en: $model_inicial"
+          # 1. Output del Modelo Inicial - Get the version number
+          version_file_path=$(az ml job show --name $JOB_ID --query outputs.output_model_inicial_version.path -o tsv)
+          echo "Version file path: $version_file_path"
+          
+          # Download the file and read its content
+          az ml job download --name $JOB_ID --output-name output_model_inicial_version --download-path ./outputs
+          model_version=$(cat ./outputs/named-outputs/output_model_inicial_version)
+          echo "Modelo Inicial Version: $model_version"
           
           # 2. Output del Target Continuidad
           target_path=$(az ml job show --name $JOB_ID --query outputs.output_target_continuidad_datastore.path -o tsv)
