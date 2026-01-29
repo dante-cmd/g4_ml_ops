@@ -58,7 +58,10 @@ jobs:
           
           # Download the file and read its content
           az ml job download --name $JOB_ID --output-name output_model_inicial_version --download-path ./outputs
-          model_version=$(cat ./outputs/named-outputs/output_model_inicial_version)
+          
+          # The downloaded output is a directory, find the actual file inside
+          version_file=$(find ./outputs/named-outputs/output_model_inicial_version -type f | head -n 1)
+          model_version=$(cat "$version_file")
           echo "Modelo Inicial Version: $model_version"
           
           # 2. Output del Target Continuidad
