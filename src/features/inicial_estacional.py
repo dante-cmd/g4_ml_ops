@@ -12,8 +12,6 @@ import argparse
 from pathlib import Path
 from unidecode import unidecode
 from utils_feats import get_n_lags, get_all_periodos, get_training_periodos_estacionales, filter_by_hora_atencion, parse_args, get_mapping_tipos
-from sklearn.ensemble import RandomForestRegressor # type: ignore
-from sklearn.ensemble import HistGradientBoostingRegressor, GradientBoostingRegressor # type: ignore
 from loader import Loader
 from parser_estacional import Utils
 
