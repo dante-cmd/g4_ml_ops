@@ -38,6 +38,7 @@ environment:
           - numpy
           - mlflow
           - azureml-mlflow
+          - catboost
 
 command: >-
   python inicial_regular.py 
