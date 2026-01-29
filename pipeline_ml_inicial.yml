@@ -84,5 +84,6 @@ jobs:
       target_version: "v1"
       periodo: 202511
       model_periodo: 202511
+      model_version: "v1"
     outputs:
       output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
