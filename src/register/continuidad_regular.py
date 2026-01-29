@@ -1,10 +1,5 @@
 import argparse
 import os
-from azure.ai.ml import MLClient
-from azure.identity import DefaultAzureCredential
-from azure.ai.ml.constants import AssetTypes
-from azure.ai.ml.entities import Model
-from utils_register import get_ml_client
 
 
 def parse_args():
@@ -16,68 +11,58 @@ def parse_args():
     return args
 
 
-class Continuidad:
-    def __init__(self, model_input_path, model_periodo:int, ml_client):
-        self.model_input_path = model_input_path
-        self.tipo = 'continuidad_regular'
-        self.model_periodo = model_periodo
-        self.ml_client = ml_client
-
-    def register(self):
-
-        # 2. Lógica: ¿Existe ya el modelo?
-        # Listamos los modelos que tengan ese nombre
-        model_list = self.ml_client.models.list(name=self.tipo + '_' + str(self.model_periodo))
+def register_model_v1(workspace, model_path, model_name):
+    """Register model using azureml v1 SDK"""
+    from azureml.core import Model as V1Model
     
-        # Verificamos si el iterador tiene al menos un elemento
-        try:
-            # Si esto funciona, es que ya existe al menos una versión
-            _ = next(model_list)
-            current_stage = "dev"
-            print(f"El modelo '{self.tipo + '_' + str(self.model_periodo)}' YA EXISTE. Asignando etiqueta: {current_stage}")
-        except StopIteration:
-            # Si falla el next(), es que la lista estaba vacía
-            current_stage = "champion"
-            print(f"El modelo '{self.tipo + '_' + str(self.model_periodo)}' ES NUEVO. Asignando etiqueta: {current_stage}")
-
-        # 3. Registrar con la etiqueta calculada
-        model = Model(
-            path=self.model_input_path,
-            name=self.tipo + '_' + str(self.model_periodo),
-            description=f"Modelo registrado automáticamente como {current_stage}",
-            type=AssetTypes.MLFLOW_MODEL,
-            tags={
-                "stage": current_stage,
-                "framework": "sklearn"
-            }
-        )
-
-        # Registrar en Azure ML
-        registered_model = self.ml_client.models.create_or_update(model)
-        print(f"Modelo registrado versión: {registered_model.version}")
-        return registered_model.version
+    # Register the model
+    registered_model = V1Model.register(
+        workspace=workspace,
+        model_path=model_path,
+        model_name=model_name,
+        description=f"Modelo {model_name} registrado automáticamente",
+        tags={"framework": "sklearn"}
+    )
+    
+    print(f"Modelo registrado versión: {registered_model.version}")
+    return str(registered_model.version)
 
 
 def main(args):
-    
     model_input_path = args.model_input_path
     model_periodo = args.model_periodo
     output_model_version = args.output_model_version
+    
+    tipo = 'continuidad_regular'
+    model_name = tipo + '_' + str(model_periodo)
 
     print(f"Registrando modelo desde: {model_input_path}")
-    print(f"Registrando modelo con nombre: {model_periodo}")
+    print(f"Registrando modelo con nombre: {model_name}")
 
-    ml_client = get_ml_client()
-
-    continuidad = Continuidad(model_input_path, model_periodo, ml_client)
-    version = continuidad.register()
-
-    # Guardar la versión en el output path
-    if output_model_version:
-        # Assuming output_model_version is a file path (uri_file)
-        with open(output_model_version, "w") as f:
-            f.write(version)
-        print(f"Versión {version} guardada en {output_model_version}")
+    # Get workspace from Run context
+    try:
+        from azureml.core import Run
+        run = Run.get_context()
+        
+        # Check if we're running in Azure ML (not offline run)
+        if hasattr(run, 'experiment'):
+            print("Running in Azure ML. Using workspace from Run context...")
+            workspace = run.experiment.workspace
+            
+            # Register using v1 SDK
+            version = register_model_v1(workspace, model_input_path, model_name)
+            
+            # Guardar la versión en el output path
+            if output_model_version:
+                with open(output_model_version, "w") as f:
+                    f.write(version)
+                print(f"Versión {version} guardada en {output_model_version}")
+        else:
+            raise Exception("Not running in Azure ML environment")
+            
+    except Exception as e:
+        print(f"Error registering model: {e}")
+        raise
 
 
 if __name__ == "__main__":
