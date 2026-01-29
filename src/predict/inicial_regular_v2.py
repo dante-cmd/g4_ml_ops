@@ -122,6 +122,10 @@ class TrainInicial:
         # name = f"{self.tipo}_{model_periodo}"
         # model_version = get_dev_version(name, self.client)
         # print(f"Model Version for {name}: {model_version}")
+        print(self.output_predict_inicial_datastore)
+        print(model_version)
+        print(periodo)
+        print(df_model_predict)
 
         path_model_version = (
             self.output_predict_inicial_datastore / "test" / model_version
