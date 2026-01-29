@@ -266,10 +266,10 @@ class Inicial(Utils):
         
         # ./data/ml_data/features/{self.tipo}/{version}/train/{periodo}/data_feats_{self.tipo}_{periodo}.parquet
         data_model_train.to_parquet(
-            f"{output_feats_datastore}/{self.tipo}/train/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
+            f"{output_feats_datastore}/train/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
             index=False)
         data_model_test.to_parquet(
-            f"{output_feats_datastore}/{self.tipo}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
+            f"{output_feats_datastore}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
             index=False)
     
     def load_target(self, periodo:int, version:str, output_target_datastore:str):
@@ -277,7 +277,7 @@ class Inicial(Utils):
         try:
             df_real_09 = self.get_target(periodo)
             df_real_09.to_parquet(
-                f"{output_target_datastore}/{self.tipo}/test/{version}/data_target_{self.tipo}_{periodo}.parquet", 
+                f"{output_target_datastore}/test/{version}/data_target_{self.tipo}_{periodo}.parquet", 
                 index=False)
         except Exception as e:
             print(f"Error al cargar target para periodo {periodo}")

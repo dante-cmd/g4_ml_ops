@@ -32,7 +32,7 @@ class TrainInicial:
     
     def get_data_train(self, periodo:int):
         data_model_train = pd.read_parquet(
-            self.input_feats_datastore/self.tipo/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
+            self.input_feats_datastore/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
         return data_model_train  
 
     def train_model(self, periodo:int):

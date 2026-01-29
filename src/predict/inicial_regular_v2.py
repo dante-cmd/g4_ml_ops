@@ -34,12 +34,12 @@ class TrainInicial:
 
     def get_data_test(self, periodo:int):
         data_model_test = pd.read_parquet(
-            self.input_feats_datastore/self.tipo/"test"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
+            self.input_feats_datastore/"test"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
         return data_model_test
 
     def get_data_target(self, periodo:int):
         data_model_target = pd.read_parquet(
-            self.input_target_datastore/self.tipo/"test"/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
+            self.input_target_datastore/"test"/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
         return data_model_target
 
     def load_model(self, periodo:int):
