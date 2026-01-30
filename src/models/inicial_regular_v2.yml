@@ -1,0 +1,48 @@
+# src/models/inicial_regular_v3.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+name: model_inicial_regular
+version: 1
+display_name: Model Training - Inicial Regular
+type: command
+
+inputs:
+  input_feats_inicial_datastore:
+    type: uri_folder
+  feats_version:
+    type: string
+  model_periodo:
+    type: integer
+  model_version:
+    type: string
+
+outputs:
+  output_model_inicial_datastore:
+    type: uri_folder
+    
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          - numpy
+          - mlflow
+          - azureml-mlflow
+          - catboost
+
+command: >-
+  python inicial_regular_v2.py 
+  --input_feats_datastore ${{inputs.input_feats_inicial_datastore}}
+  --output_model_datastore ${{outputs.output_model_inicial_datastore}}
+  --feats_version ${{inputs.feats_version}}
+  --model_periodo ${{inputs.model_periodo}}
+  --model_version ${{inputs.model_version}}

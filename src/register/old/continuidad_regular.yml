@@ -1,17 +1,17 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: register_inicial_regular
+name: register_continuidad_regular
 version: 1
-display_name: Register Inicial Regular
+display_name: Register Continuidad Regular
 type: command
 
 inputs:
-    input_model_inicial_path:
+    model_input_path:
         type: uri_folder
     model_periodo:
         type: integer
 
 outputs:
-    output_model_inicial_version:
+    output_model_continuidad_version:
         type: uri_file
 
 code: .
@@ -30,8 +30,7 @@ environment:
           - azureml-core
 
 command: >-
-      python inicial_regular_v2.py 
-      --input_model_inicial_path ${{inputs.input_model_inicial_path}} 
+      python continuidad_regular.py 
+      --model_input_path ${{inputs.model_input_path}} 
       --model_periodo ${{inputs.model_periodo}}
-      --output_model_version ${{outputs.output_model_inicial_version}}
-          
+      --output_model_version ${{outputs.output_model_continuidad_version}}

@@ -1,10 +1,11 @@
-name: Run Pipeline ML Inicial Regular V2
+name: Run Pipeline ML Train
 
 on:
   workflow_dispatch:
   push:
     branches:
       - dev
+    
 
 jobs:
   run-pipeline:
@@ -41,7 +42,7 @@ jobs:
       run: |
           # Submit job with only the provided parameters
           JOB_ID=$(az ml job create \
-            --file pl_ml_predict_v2.yml \
+            --file pl_ml_train.yml \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
@@ -50,7 +51,22 @@ jobs:
           echo "Waiting for job to complete..."
           az ml job stream --name $JOB_ID
 
-          az ml model create --name my-model --version 2 --path azureml://datastores/ml_data/paths/models/inicial_regular/1/linear_model.pkl
+          # read version.json
+          
+          inicial_regular_version=$(jq -r '.model_version.inicial_regular.champion' version.json)
+          continuidad_regular_version=$(jq -r '.model_version.continuidad_regular.champion' version.json)
+          continuidad_regular_horario_version=$(jq -r '.model_version.continuidad_regular_horario.champion' version.json)
+          model_periodo=$(jq -r '.model_periodo' params.json)
+
+          echo "Inicial Regular Version: $inicial_regular_version"
+          echo "Continuidad Regular Version: $continuidad_regular_version"
+          echo "Continuidad Regular Horario Version: $continuidad_regular_horario_version"
+          echo "Model Periodo: $model_periodo"
+          
+
+          az ml model create --name "inicial_regular_$model_periodo" --version "$inicial_regular_version" --path "azureml://datastores/ml_data/paths/models/inicial_regular/inicial_regular_$model_periodo.cbl"
+          # az ml model create --name "continuidad_regular_$model_periodo" --version "$continuidad_regular_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular/continuidad_regular_$model_periodo.cbl"
+          # az ml model create --name "continuidad_regular_horario_$model_periodo" --version "$continuidad_regular_horario_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular_horario/continuidad_regular_horario_$model_periodo.cbl"
 
       
         

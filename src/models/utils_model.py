@@ -12,14 +12,18 @@ def parse_args():
     # add arguments
     parser.add_argument("--input_feats_datastore", dest='input_feats_datastore',
                         type=str)
+    parser.add_argument("--output_model_datastore", dest='output_model_datastore',
+                        type=str)
     parser.add_argument("--feats_version", dest='feats_version',
                         type=str)
     parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
-    parser.add_argument("--experiment_name", dest='experiment_name',
+    parser.add_argument("--model_version", dest='model_version',
                         type=str)
-    parser.add_argument("--model_output", dest='model_output',
-                        type=str)
+    # parser.add_argument("--experiment_name", dest='experiment_name',
+    #                     type=str)
+    # parser.add_argument("--model_output", dest='model_output',
+    #                     type=str)
     
     # parse args
     args = parser.parse_args()
