@@ -49,12 +49,12 @@ outputs:
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
 
-  # output_model_inicial_version:
-  #   type: uri_file
-  # output_model_continuidad_version:
-  #   type: uri_file
-  # output_model_continuidad_horario_version:
-  #   type: uri_file
+  output_model_inicial_version:
+    type: uri_file
+  output_model_continuidad_version:
+    type: uri_file
+  output_model_continuidad_horario_version:
+    type: uri_file
 
 
 jobs:
@@ -121,61 +121,61 @@ jobs:
       output_target_continuidad_horario_datastore: ${{parent.outputs.output_target_continuidad_horario_datastore}}
 
 
-  # # # Model train
-  # model_train_inicial_job:
-  #   type: command
-  #   component: file:./src/models/inicial_regular.yml
-  #   inputs:
-  #     input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
-  #     experiment_name: ml_pipeline_experiment
-  #     feats_version: "v1"
-  #     model_periodo: 202511
+  # Model train
+  model_train_inicial_job:
+    type: command
+    component: file:./src/models/inicial_regular.yml
+    inputs:
+      input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202506
 
-  # model_train_continuidad_job:
-  #   type: command
-  #   component: file:./src/models/continuidad_regular.yml
-  #   inputs:
-  #     input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
-  #     experiment_name: ml_pipeline_experiment
-  #     feats_version: "v1"
-  #     model_periodo: 202511
+  model_train_continuidad_job:
+    type: command
+    component: file:./src/models/continuidad_regular.yml
+    inputs:
+      input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202506
 
-  # model_train_continuidad_horario_job:
-  #   type: command
-  #   component: file:./src/models/continuidad_regular_horario.yml
-  #   inputs:
-  #     input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
-  #     experiment_name: ml_pipeline_experiment
-  #     feats_version: "v1"
-  #     model_periodo: 202511
+  model_train_continuidad_horario_job:
+    type: command
+    component: file:./src/models/continuidad_regular_horario.yml
+    inputs:
+      input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
+      experiment_name: ml_pipeline_experiment
+      feats_version: "v1"
+      model_periodo: 202506
 
-  # # Model Register Jobs
-  # register_inicial_job:
-  #   type: command
-  #   component: file:./src/register/inicial_regular.yml
-  #   inputs:
-  #     input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
-  #     model_periodo: 202511
-  #   outputs:
-  #     output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
+  # Model Register Jobs
+  register_inicial_job:
+    type: command
+    component: file:./src/register/inicial_regular.yml
+    inputs:
+      input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
+      model_periodo: 202506
+    outputs:
+      output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
 
-  # register_continuidad_job:
-  #   type: command
-  #   component: file:./src/register/continuidad_regular.yml
-  #   inputs:
-  #     model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output_continuidad}}
-  #     model_periodo: 202511
-  #   outputs:
-  #     output_model_continuidad_version: ${{parent.outputs.output_model_continuidad_version}}
+  register_continuidad_job:
+    type: command
+    component: file:./src/register/continuidad_regular.yml
+    inputs:
+      model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output_continuidad}}
+      model_periodo: 202506
+    outputs:
+      output_model_continuidad_version: ${{parent.outputs.output_model_continuidad_version}}
 
-  # register_continuidad_horario_job:
-  #   type: command
-  #   component: file:./src/register/continuidad_regular_horario.yml
-  #   inputs:
-  #     model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output_continuidad_horario}}
-  #     model_periodo: 202511
-  #   outputs:
-  #     output_model_continuidad_horario_version: ${{parent.outputs.output_model_continuidad_horario_version}}
+  register_continuidad_horario_job:
+    type: command
+    component: file:./src/register/continuidad_regular_horario.yml
+    inputs:
+      model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output_continuidad_horario}}
+      model_periodo: 202506
+    outputs:
+      output_model_continuidad_horario_version: ${{parent.outputs.output_model_continuidad_horario_version}}
 
 
   # # # Model predict

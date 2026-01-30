@@ -415,9 +415,9 @@ def main(args):
     continuidad = Continuidad(tablas)
     tipo_continuidad = continuidad.tipo
 
-    feats_train_path = Path(output_feats_continuidad_datastore) / tipo_continuidad / "train" / feats_version
-    feats_test_path = Path(output_feats_continuidad_datastore) / tipo_continuidad / "test" / feats_version
-    target_test_path = Path(output_target_continuidad_datastore) / tipo_continuidad / "test" / target_version
+    feats_train_path = Path(output_feats_continuidad_datastore)  / "train" / feats_version
+    feats_test_path = Path(output_feats_continuidad_datastore)  / "test" / feats_version
+    target_test_path = Path(output_target_continuidad_datastore)  / "test" / target_version
     
     feats_train_path.mkdir(parents=True, exist_ok=True)
     feats_test_path.mkdir(parents=True, exist_ok=True)

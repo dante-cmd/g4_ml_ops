@@ -593,9 +593,9 @@ def main(args):
     continuidad_horario = ContinuidadToHorario(tablas)
     tipo_continuidad_horario = continuidad_horario.tipo
 
-    feats_train_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "train" / feats_version
-    feats_test_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / feats_version
-    target_test_path = Path(output_target_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / target_version
+    feats_train_path = Path(output_feats_continuidad_horario_datastore) / "train" / feats_version
+    feats_test_path = Path(output_feats_continuidad_horario_datastore) / "test" / feats_version
+    target_test_path = Path(output_target_continuidad_horario_datastore) / "test" / target_version
     
     feats_train_path.mkdir(parents=True, exist_ok=True)
     feats_test_path.mkdir(parents=True, exist_ok=True)
