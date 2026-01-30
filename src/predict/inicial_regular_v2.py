@@ -111,14 +111,12 @@ class TrainInicial:
         print(periodo)
         print(df_model_predict)
 
-        path_model_version = (
-            self.output_predict_datastore / model_version / "test"
-        )
-        path_champion = self.output_predict_datastore / model_version / "champion"
-        path_dev = self.output_predict_datastore / model_version / "dev"
+        path_model_version = self.output_predict_datastore / "test" / model_version
+        # path_champion = self.output_predict_datastore / "test" / model_version / "champion"
+        # path_dev = self.output_predict_datastore / "test" / model_version / "dev"
 
-        path_champion.mkdir(parents=True, exist_ok=True)
-        path_dev.mkdir(parents=True, exist_ok=True)
+        # path_champion.mkdir(parents=True, exist_ok=True)
+        # path_dev.mkdir(parents=True, exist_ok=True)
         path_model_version.mkdir(parents=True, exist_ok=True)
 
         df_model_predict.to_parquet(
@@ -126,12 +124,12 @@ class TrainInicial:
         )
 
         df_model_predict.to_parquet(
-            path_dev / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model_version / f"data_predict_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
-        if not (path_champion / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        if not (path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
             df_model_predict.to_parquet(
-                path_champion / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
+                path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
 
         # if not (path_model_version/f"data_predict_{self.tipo}_{periodo}.parquet").exists():

@@ -95,7 +95,12 @@ class TrainInicial:
         return model
 
     def save_model(self, model, periodo:int):
-        model.save_model(self.output_model_datastore/self.model_version/f"{self.tipo}_{periodo}.cbm")
+        
+        path_model = self.output_model_datastore/'test'/self.model_version
+        path_model.mkdir(parents=True, exist_ok=True)        
+        model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
+        
+        print(f"Guardando modelo en: {path_model/f'{self.tipo}_{periodo}.cbm'}")
 
 
 def main(args):
@@ -123,7 +128,7 @@ def main(args):
         print("Training for:", model_periodo)
         
         # Save model explicitly to the output path
-        print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
+        # print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
         train_inicial.save_model(model, model_periodo)
         
         # train_inicial.register_model(model, model_periodo)

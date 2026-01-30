@@ -40,7 +40,9 @@ environment:
       - pip:
           - pandas
           - numpy
-          - catboost
+          - pyarrow
+          - PyYAML
+          # - catboost
           # - mlflow
           # - mlflow-azureml
           # - scikit-learn
