@@ -4,6 +4,40 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.ml.constants import AssetTypes
 from azure.ai.ml.entities import Model
 import os
+import time
+from datetime import datetime
+from azure.core.credentials import AccessToken
+
+class AzureMLV1Credential:
+    """Wrapper to use Azure ML V1 Authentication object as a V2 TokenCredential"""
+    def __init__(self, v1_auth):
+        self.v1_auth = v1_auth
+
+    def get_token(self, *scopes, **kwargs):
+        # Map scope to resource (simple heuristic)
+        resource = "https://management.azure.com/"
+        for scope in scopes:
+            if "management.azure.com" in scope:
+                resource = "https://management.azure.com/"
+            elif "ml.azure.com" in scope:
+                resource = "https://ml.azure.com/"
+        
+        # Get token from V1 auth object
+        token_obj = self.v1_auth.get_token(resource)
+        
+        # Calculate expiry
+        # 'expiresOn' is typically ISO8601 string
+        expires_on = int(time.time() + 3600) # Default fallback
+        if 'expiresOn' in token_obj:
+            try:
+                # Remove 'Z' if present for fromisoformat compatibility in older python
+                ts_str = token_obj['expiresOn'].replace('Z', '+00:00')
+                dt = datetime.fromisoformat(ts_str)
+                expires_on = int(dt.timestamp())
+            except:
+                pass
+                
+        return AccessToken(token_obj['accessToken'], expires_on)
 
 
 def parse_args():
@@ -28,6 +62,12 @@ def get_ml_client():
             if hasattr(run, 'experiment'):
                 print("Running in Azure ML. Using workspace from Run context...")
                 workspace = run.experiment.workspace
+                
+                # Use the V1 workspace authentication to create a V2-compatible credential
+                # This fixes 'DefaultAzureCredential failed' errors in AML Jobs
+                v1_auth = workspace.service_context.authentication
+                credential = AzureMLV1Credential(v1_auth)
+                
                 ml_client = MLClient(
                     credential=credential,
                     subscription_id=workspace.subscription_id,

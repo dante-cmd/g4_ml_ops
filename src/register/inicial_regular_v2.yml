@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: register_inicial_regular
+name: register_inicial_regular_v2
 version: 1
-display_name: Register Inicial Regular
+display_name: Register Inicial Regular V2
 type: command
 
 inputs:
@@ -11,7 +11,7 @@ inputs:
         type: integer
 
 outputs:
-    output_model_inicial_version:
+    output_model_version:
         type: uri_file
 
 code: .
@@ -33,5 +33,4 @@ command: >-
       python inicial_regular_v2.py 
       --input_model_inicial_path ${{inputs.input_model_inicial_path}} 
       --model_periodo ${{inputs.model_periodo}}
-      --output_model_version ${{outputs.output_model_inicial_version}}
-          
+      --output_model_version ${{outputs.output_model_version}}
