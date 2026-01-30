@@ -21,6 +21,10 @@ def parse_args():
                         type=int)
     parser.add_argument("--periodo", dest='periodo',
                         type=int)
+    parser.add_argument("--model_version", dest='model_version',
+                        type=str)
+    
+
 
     # # add arguments
     # parser.add_argument("--output_predict_test_datastore", dest='output_predict_test_datastore',
