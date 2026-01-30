@@ -11,7 +11,7 @@ class TrainInicial:
         self,
         input_model_datastore: str,
         input_feats_datastore: str,
-        input_target_datastore: str,
+        # input_target_datastore: str,
         output_predict_datastore: str,
         feats_version: str,
         target_version: str,
@@ -21,7 +21,7 @@ class TrainInicial:
 
         self.input_model_datastore = Path(input_model_datastore)
         self.input_feats_datastore = Path(input_feats_datastore)
-        self.input_target_datastore = Path(input_target_datastore)
+        # self.input_target_datastore = Path(input_target_datastore)
         self.output_predict_datastore = Path(output_predict_datastore)
         self.tipo = "inicial_regular"
         self.feats_version = feats_version
@@ -37,15 +37,6 @@ class TrainInicial:
             / f"data_feats_{self.tipo}_{periodo}.parquet"
         )
         return data_model_test
-
-    def get_data_target(self, periodo: int):
-        data_model_target = pd.read_parquet(
-            self.input_target_datastore
-            / "test"
-            / self.target_version
-            / f"data_target_{self.tipo}_{periodo}.parquet"
-        )
-        return data_model_target
 
     def load_model(self, model_periodo:int):
         print(f"Cargando modelo desde: {self.input_model_datastore}")
@@ -157,7 +148,7 @@ def parse_args():
 
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
-    parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
+    # parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
     parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
     parser.add_argument("--feats_version", dest="feats_version", type=str)
     parser.add_argument("--target_version", dest="target_version", type=str)
@@ -176,7 +167,7 @@ def main(args):
 
     input_model_datastore = args.input_model_datastore
     input_feats_datastore = args.input_feats_datastore
-    input_target_datastore = args.input_target_datastore
+    # input_target_datastore = args.input_target_datastore
     output_predict_datastore = args.output_predict_datastore
     # experiment_name = args.experiment_name
     feats_version = args.feats_version
@@ -216,7 +207,7 @@ def main(args):
     train_inicial = TrainInicial(
         input_model_datastore,
         input_feats_datastore,
-        input_target_datastore,
+        # input_target_datastore,
         output_predict_datastore,
         feats_version,
         target_version,

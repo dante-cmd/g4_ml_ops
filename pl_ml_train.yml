@@ -148,16 +148,15 @@ jobs:
     type: command
     component: file:./src/predict/inicial_regular_v2.yml
     inputs:
-      input_feats_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
-      input_target_datastore: ${{parent.jobs.features_inicial_job.outputs.output_target_inicial_datastore}}
-      input_model_datastore: ${{parent.jobs.model_train_inicial_job.outputs.output_model_inicial_datastore}}
+      input_model_inicial_datastore: ${{parent.jobs.model_train_inicial_job.outputs.output_model_inicial_datastore}}
+      input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
       feats_version: "v1"
       target_version: "v1"
       periodo: 202511
       model_periodo: 202506
       model_version: "1"
     outputs:
-      output_predict_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
+      output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
 
   # model_train_continuidad_job:
   #   type: command

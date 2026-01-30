@@ -10,8 +10,8 @@ inputs:
     type: uri_folder
   input_feats_inicial_datastore:
     type: uri_folder
-  input_target_inicial_datastore:
-    type: uri_folder
+  # input_target_inicial_datastore:
+  #   type: uri_folder
   feats_version:
     type: string
   target_version:
@@ -51,7 +51,6 @@ command: >-
   python inicial_regular_v2.py 
   --input_model_datastore ${{inputs.input_model_inicial_datastore}}
   --input_feats_datastore ${{inputs.input_feats_inicial_datastore}}
-  --input_target_datastore ${{inputs.input_target_inicial_datastore}}
   --output_predict_datastore ${{outputs.output_predict_inicial_datastore}}
   --feats_version ${{inputs.feats_version}}
   --target_version ${{inputs.target_version}}
