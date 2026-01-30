@@ -10,8 +10,8 @@ import argparse
 # from catboost import CatBoostRegressor
 # from utils_model import get_dev_version
 from utils_metrics import calculate_classes, calculate_metrics
-import mlflow
-import mlflow.sklearn
+# import mlflow
+# import mlflow.sklearn
 
 # import azureml.mlflow
 # from mlflow.tracking import MlflowClient
@@ -20,21 +20,25 @@ import mlflow.sklearn
 class TrainInicial:
     def __init__(
         self,
-        input_model_inicial_path: str,
-        input_feats_inicial_datastore: str,
-        input_target_inicial_datastore: str,
-        output_predict_inicial_datastore: str,
+        input_model_datastore: str,
+        input_feats_datastore: str,
+        input_target_datastore: str,
+        output_predict_datastore: str,
         feats_version: str,
         target_version: str,
+        model_periodo: int,
+        model_version: str,
     ):
 
-        self.input_model_inicial_path = input_model_inicial_path
+        self.input_model_datastore = input_model_datastore
         self.input_feats_inicial_datastore = Path(input_feats_inicial_datastore)
         self.input_target_inicial_datastore = Path(input_target_inicial_datastore)
         self.output_predict_inicial_datastore = Path(output_predict_inicial_datastore)
         self.tipo = "inicial_regular"
         self.feats_version = feats_version
         self.target_version = target_version
+        self.model_periodo = model_periodo
+        self.model_version = model_version
 
     def get_data_test(self, periodo: int):
         data_model_test = pd.read_parquet(
@@ -55,9 +59,9 @@ class TrainInicial:
         return data_model_target
 
     def load_model(self, periodo: int):
-        print(f"Cargando modelo desde: {self.input_model_inicial_path}")
+        print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = mlflow.sklearn.load_model(
-            self.input_model_inicial_path
+            self.input_model_datastore
             # f"models:/{self.tipo}_{periodo}@dev"
         )
         return model
@@ -213,11 +217,11 @@ def parse_args():
 
 def main(args):
 
-    input_model_inicial_path = args.input_model_inicial_path
-    input_feats_inicial_datastore = args.input_feats_inicial_datastore
-    input_target_inicial_datastore = args.input_target_inicial_datastore
-    output_predict_inicial_datastore = args.output_predict_inicial_datastore
-    experiment_name = args.experiment_name
+    input_model_datastore = args.input_model_datastore
+    input_feats_datastore = args.input_feats_datastore
+    input_target_datastore = args.input_target_datastore
+    output_predict_datastore = args.output_predict_datastore
+    # experiment_name = args.experiment_name
     feats_version = args.feats_version
     target_version = args.target_version
     model_periodo = args.model_periodo
@@ -241,7 +245,7 @@ def main(args):
     # Registrar en Azure ML
     # registered_model = ml_client.models.create_or_update(model)
     # print(f"Modelo registrado versión: {registered_model.version}")
-    print(f"Cargando modelo desde: {args.input_model_inicial_path}")
+    print(f"Cargando modelo desde: {args.input_model_datastore}")
 
     # python src/predict/inicial_regular.py --input_feats_datastore $input_feats_datastore --input_target_datastore $input_target_datastore --output_predict_datastore $output_predict_datastore --experiment_name $experiment_name --model_periodo $model_periodo --periodo $periodo
 
@@ -253,12 +257,14 @@ def main(args):
     # mlflow.set_experiment(experiment_name)
 
     train_inicial = TrainInicial(
-        input_model_inicial_path,
-        input_feats_inicial_datastore,
-        input_target_inicial_datastore,
-        output_predict_inicial_datastore,
+        input_model_datastore,
+        input_feats_datastore,
+        input_target_datastore,
+        output_predict_datastore,
         feats_version,
         target_version,
+        model_periodo,
+        model_version,
     )
 
     model = train_inicial.load_model(model_periodo)

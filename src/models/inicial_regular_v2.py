@@ -78,14 +78,14 @@ class TrainInicial:
         # return model
         
         # with mlflow.start_run():
-        #     model = CatBoostRegressor(
-        #     iterations=500,
-        #     learning_rate=0.1,
-        #     depth=6,
-        #     loss_function='RMSE',
-        #     verbose=False, # Set to True to see training progress,
-        #     min_data_in_leaf=5,
-        #     )
+        model = CatBoostRegressor(
+            iterations=500,
+            learning_rate=0.1,
+            depth=6,
+            loss_function='RMSE',
+            verbose=False, # Set to True to see training progress,
+            min_data_in_leaf=5,
+        )
 
         model.fit(X_train, y_train, cat_features=cat_features)
         # # LinearRegression
