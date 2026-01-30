@@ -71,39 +71,61 @@ jobs:
           SET_FLAGS=""
           
           if [ -n "${{ github.event.inputs.ult_periodo }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.etl_job.inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_inicial_job.inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_job.inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_horario_job.inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
           fi
           
           if [ -n "${{ github.event.inputs.n_periodos }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.n_periodos=\"${{ github.event.inputs.n_periodos }}\""
+            SET_FLAGS="$SET_FLAGS --set jobs.etl_job.inputs.n_periodos=\"${{ github.event.inputs.n_periodos }}\""
           fi
           
           if [ -n "${{ github.event.inputs.all_periodos }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.all_periodos=\"${{ github.event.inputs.all_periodos }}\""
+            SET_FLAGS="$SET_FLAGS --set jobs.etl_job.inputs.all_periodos=\"${{ github.event.inputs.all_periodos }}\""
           fi
           
           if [ -n "${{ github.event.inputs.platinum_version }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.etl_job.inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_inicial_job.inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_job.inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_horario_job.inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
           fi
           
           if [ -n "${{ github.event.inputs.feats_version }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_inicial_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_horario_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_inicial_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_horario_job.inputs.feats_version=${{ github.event.inputs.feats_version }}"
           fi
           
           if [ -n "${{ github.event.inputs.target_version }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.target_version=${{ github.event.inputs.target_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_inicial_job.inputs.target_version=${{ github.event.inputs.target_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_job.inputs.target_version=${{ github.event.inputs.target_version }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_horario_job.inputs.target_version=${{ github.event.inputs.target_version }}"
           fi
           
           if [ -n "${{ github.event.inputs.periodo }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.periodo=${{ github.event.inputs.periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_inicial_job.inputs.periodo=${{ github.event.inputs.periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_job.inputs.periodo=${{ github.event.inputs.periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.features_continuidad_horario_job.inputs.periodo=${{ github.event.inputs.periodo }}"
           fi
           
           if [ -n "${{ github.event.inputs.experiment_name }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.experiment_name=${{ github.event.inputs.experiment_name }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_inicial_job.inputs.experiment_name=${{ github.event.inputs.experiment_name }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_job.inputs.experiment_name=${{ github.event.inputs.experiment_name }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_horario_job.inputs.experiment_name=${{ github.event.inputs.experiment_name }}"
           fi
           
           if [ -n "${{ github.event.inputs.model_periodo }}" ]; then
-            SET_FLAGS="$SET_FLAGS --set inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_inicial_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.model_train_continuidad_horario_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.register_inicial_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.register_continuidad_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+            SET_FLAGS="$SET_FLAGS --set jobs.register_continuidad_horario_job.inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
           fi
           
           # Submit job with only the provided parameters
