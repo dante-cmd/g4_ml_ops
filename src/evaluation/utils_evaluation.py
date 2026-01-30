@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
-from mlflow.tracking import MlflowClient
 
 
 def parse_args():
@@ -238,28 +237,3 @@ def fac_to_cant(df_forecast_fac: pd.DataFrame, df_forecast_cant:pd.DataFrame) ->
 
     return df_forecast_03
 
-
-def get_last_version(model_name) -> str:
-    
-    client = MlflowClient("http://127.0.0.1:5000")
-    
-    versions = client.search_model_versions(f"name='{model_name}'")
-
-    # Sort by version number (descending) and pick the latest
-    latest_version = max(versions, key=lambda v: int(v.version))
-
-    return latest_version.version
-
-    
-def get_dev_version(model_name) -> str:
-    
-    client = MlflowClient("http://127.0.0.1:5000")
-    
-    versions = client.get_registered_model(model_name)
-    # versions = client.search_model_versions(f"name='{model_name}'")
-
-    # # Sort by version number (descending) and pick the latest
-    # latest_version = max(versions, key=lambda v: int(v.version))
-    # latest_version.version
-
-    return versions.aliases['dev']
