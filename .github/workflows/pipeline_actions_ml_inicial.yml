@@ -2,6 +2,34 @@ name: Run Pipeline ML Inicial Regular
 
 on:
   workflow_dispatch:
+    inputs:
+      model_periodo:
+        description: 'Model periodo (YYYYMM)'
+        required: false
+      ult_periodo:
+        description: 'Last periodo (YYYYMM)'
+        required: false
+      periodo:
+        description: 'Current periodo (YYYYMM)'
+        required: false
+      feats_version:
+        description: 'Features version (e.g., v1, v2)'
+        required: false
+      target_version:
+        description: 'Target version (e.g., v1, v2)'
+        required: false
+      platinum_version:
+        description: 'Platinum version (e.g., v1, v2)'
+        required: false
+      experiment_name:
+        description: 'Experiment name'
+        required: false
+      n_periodos:
+        description: 'Number of periods (or "None")'
+        required: false
+      all_periodos:
+        description: 'Process all periods (True/False)'
+        required: false
   push:
     branches:
       - dev
@@ -39,8 +67,49 @@ jobs:
         AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
         AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
       run: |
+          # Build --set flags only for provided parameters
+          SET_FLAGS=""
+          
+          if [ -n "${{ github.event.inputs.ult_periodo }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.ult_periodo=${{ github.event.inputs.ult_periodo }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.n_periodos }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.n_periodos=\"${{ github.event.inputs.n_periodos }}\""
+          fi
+          
+          if [ -n "${{ github.event.inputs.all_periodos }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.all_periodos=\"${{ github.event.inputs.all_periodos }}\""
+          fi
+          
+          if [ -n "${{ github.event.inputs.platinum_version }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.platinum_version=${{ github.event.inputs.platinum_version }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.feats_version }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.feats_version=${{ github.event.inputs.feats_version }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.target_version }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.target_version=${{ github.event.inputs.target_version }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.periodo }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.periodo=${{ github.event.inputs.periodo }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.experiment_name }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.experiment_name=${{ github.event.inputs.experiment_name }}"
+          fi
+          
+          if [ -n "${{ github.event.inputs.model_periodo }}" ]; then
+            SET_FLAGS="$SET_FLAGS --set inputs.model_periodo=${{ github.event.inputs.model_periodo }}"
+          fi
+          
+          # Submit job with only the provided parameters
           JOB_ID=$(az ml job create \
             --file pl_ml_predict.yml \
+            $SET_FLAGS \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
@@ -53,9 +122,6 @@ jobs:
           echo "--- Resultados del Pipeline ---"
           
           # 1. Output del Modelo Inicial - Get the version number
-          version_file_path=$(az ml job show --name $JOB_ID --query outputs.output_model_inicial_version.path -o tsv)
-          echo "Version file path: $version_file_path"
-          
           # Download the file and read its content
           az ml job download --name $JOB_ID --output-name output_model_inicial_version --download-path ./outputs
           
@@ -64,9 +130,18 @@ jobs:
           model_version=$(cat "$version_file")
           echo "Modelo Inicial Version: $model_version"
           
-          # 2. Output del Target Continuidad
-          target_path=$(az ml job show --name $JOB_ID --query outputs.output_target_continuidad_datastore.path -o tsv)
-          echo "Target Continuidad en: $target_path"
+          # 2. Output del Modelo Continuidad
+          az ml job download --name $JOB_ID --output-name output_model_continuidad_version --download-path ./outputs
+          version_file=$(find ./outputs/named-outputs/output_model_continuidad_version -type f | head -n 1)
+          model_version=$(cat "$version_file")
+          echo "Modelo Continuidad Version: $model_version"
+          
+          # 3. Output del Modelo Continuidad Horario
+          az ml job download --name $JOB_ID --output-name output_model_continuidad_horario_version --download-path ./outputs
+          version_file=$(find ./outputs/named-outputs/output_model_continuidad_horario_version -type f | head -n 1)
+          model_version=$(cat "$version_file")
+          echo "Modelo Continuidad Horario Version: $model_version"
+ 
         
 
     # - name: Run Pipeline Script
