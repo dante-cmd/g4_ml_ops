@@ -48,8 +48,8 @@ jobs:
           echo "Submitted job: $JOB_ID"
 
           # Wait for the job to complete
-          echo "Waiting for job to complete..."
-          az ml job stream --name $JOB_ID
+          # echo "Waiting for job to complete..."
+          # az ml job stream --name $JOB_ID
 
           # read version.json
           
@@ -64,7 +64,7 @@ jobs:
           echo "Model Periodo: $model_periodo"
           
 
-          az ml model create --name "inicial_regular_$model_periodo" --version "$inicial_regular_version" --path "azureml://datastores/ml_data/paths/models/inicial_regular/inicial_regular_$model_periodo.cbl"
+          # az ml model create --name "inicial_regular_$model_periodo" --version "$inicial_regular_version" --path "azureml://datastores/ml_data/paths/models/inicial_regular/inicial_regular_$model_periodo.cbl"
           # az ml model create --name "continuidad_regular_$model_periodo" --version "$continuidad_regular_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular/continuidad_regular_$model_periodo.cbl"
           # az ml model create --name "continuidad_regular_horario_$model_periodo" --version "$continuidad_regular_horario_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular_horario/continuidad_regular_horario_$model_periodo.cbl"
 

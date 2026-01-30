@@ -53,6 +53,11 @@ outputs:
     path: azureml://datastores/ml_data/paths/models/inicial_regular
     mode: rw_mount
 
+  output_predict_inicial_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict/inicial_regular
+    mode: rw_mount
+
   # output_model_inicial_version:
   #   type: uri_file
   # output_model_continuidad_version:
@@ -125,7 +130,7 @@ jobs:
       output_target_continuidad_horario_datastore: ${{parent.outputs.output_target_continuidad_horario_datastore}}
 
 
-  # Model train
+  # Model Train
   model_train_inicial_job:
     type: command
     component: file:./src/models/inicial_regular_v2.yml
@@ -136,6 +141,23 @@ jobs:
       model_version: "1"
     outputs:
       output_model_inicial_datastore: ${{parent.outputs.output_model_inicial_datastore}}
+
+
+  # Model Predict
+  model_predict_inicial_job:
+    type: command
+    component: file:./src/predict/inicial_regular_v2.yml
+    inputs:
+      input_feats_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
+      input_target_datastore: ${{parent.jobs.features_inicial_job.outputs.output_target_inicial_datastore}}
+      input_model_datastore: ${{parent.jobs.model_train_inicial_job.outputs.output_model_inicial_datastore}}
+      feats_version: "v1"
+      target_version: "v1"
+      periodo: 202511
+      model_periodo: 202506
+      model_version: "1"
+    outputs:
+      output_predict_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
 
   # model_train_continuidad_job:
   #   type: command

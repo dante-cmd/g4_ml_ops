@@ -1,20 +1,9 @@
 import pandas as pd
-
-# from sklearn.ensemble import RandomForestRegressor # type: ignore
-# from sklearn.ensemble import HistGradientBoostingRegressor, GradientBoostingRegressor # type: ignore
-# from utils import calculate_classes, join_target, calculate_metrics, calculate_alumnos
 import numpy as np
 from pathlib import Path
 import argparse
-
 from catboost import CatBoostRegressor
-# from utils_model import get_dev_version
 from utils_metrics import calculate_classes, calculate_metrics
-# import mlflow
-# import mlflow.sklearn
-
-# import azureml.mlflow
-# from mlflow.tracking import MlflowClient
 
 
 class TrainInicial:
@@ -30,10 +19,10 @@ class TrainInicial:
         model_version: str,
     ):
 
-        self.input_model_datastore = input_model_datastore
-        self.input_feats_inicial_datastore = Path(input_feats_inicial_datastore)
-        self.input_target_inicial_datastore = Path(input_target_inicial_datastore)
-        self.output_predict_inicial_datastore = Path(output_predict_inicial_datastore)
+        self.input_model_datastore = Path(input_model_datastore)
+        self.input_feats_datastore = Path(input_feats_datastore)
+        self.input_target_datastore = Path(input_target_datastore)
+        self.output_predict_datastore = Path(output_predict_datastore)
         self.tipo = "inicial_regular"
         self.feats_version = feats_version
         self.target_version = target_version
@@ -42,7 +31,7 @@ class TrainInicial:
 
     def get_data_test(self, periodo: int):
         data_model_test = pd.read_parquet(
-            self.input_feats_inicial_datastore
+            self.input_feats_datastore
             / "test"
             / self.feats_version
             / f"data_feats_{self.tipo}_{periodo}.parquet"
@@ -51,7 +40,7 @@ class TrainInicial:
 
     def get_data_target(self, periodo: int):
         data_model_target = pd.read_parquet(
-            self.input_target_inicial_datastore
+            self.input_target_datastore
             / "test"
             / self.target_version
             / f"data_target_{self.tipo}_{periodo}.parquet"
@@ -123,37 +112,35 @@ class TrainInicial:
         return data_model_eval
 
     def upload_data_predict(
-        self, model_version: str, periodo: int, df_model_predict: pd.DataFrame
-    ):
-        # name = f"{self.tipo}_{model_periodo}"
-        # model_version = get_dev_version(name, self.client)
-        # print(f"Model Version for {name}: {model_version}")
-        print(self.output_predict_inicial_datastore)
+        self, model_version: str, model_periodo: int, periodo: int, df_model_predict: pd.DataFrame):
+      
+        print(self.output_predict_datastore)
         print(model_version)
+        print(model_periodo)
         print(periodo)
         print(df_model_predict)
 
         path_model_version = (
-            self.output_predict_inicial_datastore / model_version / "test"
+            self.output_predict_datastore / model_version / "test"
         )
-        path_champion = self.output_predict_inicial_datastore / model_version / "champion"
-        path_dev = self.output_predict_inicial_datastore / model_version / "dev"
+        path_champion = self.output_predict_datastore / model_version / "champion"
+        path_dev = self.output_predict_datastore / model_version / "dev"
 
         path_champion.mkdir(parents=True, exist_ok=True)
         path_dev.mkdir(parents=True, exist_ok=True)
         path_model_version.mkdir(parents=True, exist_ok=True)
 
         df_model_predict.to_parquet(
-            path_model_version / f"data_predict_{self.tipo}_{periodo}.parquet"
+            path_model_version / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
         df_model_predict.to_parquet(
-            path_dev / f"data_predict_{self.tipo}_{periodo}.parquet"
+            path_dev / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
-        if not (path_champion / f"data_predict_{self.tipo}_{periodo}.parquet").exists():
+        if not (path_champion / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
             df_model_predict.to_parquet(
-                path_champion / f"data_predict_{self.tipo}_{periodo}.parquet"
+                path_champion / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
 
         # if not (path_model_version/f"data_predict_{self.tipo}_{periodo}.parquet").exists():
@@ -163,46 +150,15 @@ class TrainInicial:
         # else:
         #     print(f"Already exists the predict for {self.tipo}_{periodo}")
 
-    # def logging_metrics(self, periodo:int, model, df_model_predict:pd.DataFrame):
-
-    #     data_target_eval = self.get_data_target(periodo)
-
-    #     on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL']
-
-    #     metrics = calculate_metrics(df_model_predict, data_target_eval, on_cols)
-    #     # print(metrics)
-
-    #     with mlflow.start_run():
-    #         mlflow.sklearn.log_model(model, name=self.tipo)
-    #         mlflow.log_metrics(metrics, step=periodo)
-    # mlflow.log_params(model.get_params())
-
 
 def parse_args():
     # setup arg parser
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--input_model_datastore",
-        dest="input_model_datastore",
-        type=str,
-        help="Ruta del modelo (artifact)",
-    )
-    parser.add_argument(
-        "--input_feats_datastore",
-        dest="input_feats_datastore",
-        type=str,
-    )
-    parser.add_argument(
-        "--input_target_datastore",
-        dest="input_target_datastore",
-        type=str,
-    )
-    parser.add_argument(
-        "--output_predict_datastore",
-        dest="output_predict_datastore",
-        type=str,
-    )
+    parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
+    parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
+    parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
+    parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
     parser.add_argument("--feats_version", dest="feats_version", type=str)
     parser.add_argument("--target_version", dest="target_version", type=str)
     parser.add_argument("--periodo", dest="periodo", type=int)
@@ -269,7 +225,7 @@ def main(args):
 
     model = train_inicial.load_model(model_periodo)
     df_model_predict = train_inicial.get_data_predict(periodo, model)
-    train_inicial.upload_data_predict(model_version, periodo, df_model_predict)
+    train_inicial.upload_data_predict(model_version, model_periodo, periodo, df_model_predict)
     # train_inicial.logging_metrics(periodo, model, df_model_predict)
 
 

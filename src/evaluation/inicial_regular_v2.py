@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_dev_version
+from catboost import CatBoostRegressor
 # import mlflow
 
 
@@ -11,6 +12,7 @@ class TrainInicial:
                  output_evaluation_datastore:str,
                  target_version:str,
                  model_periodo:str,
+                 model_version:str
                  ):
 
         self.input_predict_datastore = Path(input_predict_datastore)
@@ -18,16 +20,18 @@ class TrainInicial:
         self.output_evaluation_datastore = Path(output_evaluation_datastore)
         self.target_version = target_version
         self.model_periodo = model_periodo
+        self.model_version= model_version
         self.tipo = 'inicial_regular'
 
     def get_data_predict(self, periodo:int):
         
-        name = self.tipo + '_' + str(self.model_periodo)
-        version = get_dev_version(name)
-        model_version = f"v{version}"
+        # name_model = self.tipo + '_' + str(self.model_periodo)
+        # version = get_dev_version(name)
+        # 
+        # model_version = f"v{version}"
         
         data_model_predict = pd.read_parquet(
-            self.input_predict_datastore/self.tipo/'test'/model_version/f"data_predict_{self.tipo}_{periodo}.parquet")
+            self.input_predict_datastore/'test'/self.model_version/f"data_predict_{self.tipo}_{periodo}.parquet")
         
         return data_model_predict
 
@@ -81,6 +85,7 @@ def main(args):
     output_evaluation_datastore = args.output_evaluation_datastore
     target_version = args.target_version
     model_periodo = args.model_periodo
+    model_version = args.model_version
     periodo = args.periodo
 
     # python src/predict/inicial_regular.py --input_feats_test_datastore $input_feats_test_datastore --input_target_test_datastore $input_target_test_datastore --output_predict_test_datastore $output_predict_test_datastore --experiment_name $experiment_name --model_periodo $model_periodo --periodo $periodo
