@@ -30,7 +30,7 @@ class TrainInicial:
 
     def get_data_target(self, periodo:int):
         data_model_target = pd.read_parquet(
-            self.input_target_datastore/self.tipo/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
+            self.input_target_datastore/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
         return data_model_target
     
     def get_data_evaluation(self, model_periodo:int, periodo:int):
@@ -50,24 +50,24 @@ class TrainInicial:
         # model_version = f"v{version}"
 
         path_model = (self.output_evaluation_datastore/'test'/model_version)
-        path_champion = self.output_evaluation_datastore/"test"/"champion"
-        path_dev = self.output_evaluation_datastore/"test"/"dev"
+        # path_champion = self.output_evaluation_datastore/"test"/"champion"
+        # path_dev = self.output_evaluation_datastore/"test"/"dev"
         
         path_model.mkdir(parents=True, exist_ok=True)
-        path_champion.mkdir(parents=True, exist_ok=True)
-        path_dev.mkdir(parents=True, exist_ok=True)
+        # path_champion.mkdir(parents=True, exist_ok=True)
+        # path_dev.mkdir(parents=True, exist_ok=True)
         
         df_model_evaluation.to_parquet(
             path_model/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
         df_model_evaluation.to_parquet(
-            path_dev/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model/f"data_evaluation_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
-        if not (path_champion/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        if not (path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
             df_model_evaluation.to_parquet(
-                path_champion/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
+                path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
 
 

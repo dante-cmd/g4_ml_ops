@@ -158,6 +158,20 @@ jobs:
     outputs:
       output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
 
+  # Model evaluation
+  model_evaluation_inicial_job:
+    type: command
+    component: file:./src/evaluation/inicial_regular_v2.yml
+    inputs:
+      input_predict_inicial_datastore: ${{parent.jobs.model_predict_inicial_job.outputs.output_predict_inicial_datastore}}
+      input_target_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_target_inicial_datastore}}
+      target_version: "v1"
+      model_periodo: 202506
+      model_version: "1"
+      periodo: 202511
+    outputs:
+      output_evaluation_inicial_datastore: ${{parent.outputs.output_evaluation_inicial_datastore}}
+
   # model_train_continuidad_job:
   #   type: command
   #   component: file:./src/models/continuidad_regular.yml

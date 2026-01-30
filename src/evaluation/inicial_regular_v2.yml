@@ -6,25 +6,21 @@ display_name: Prediction - Inicial Regular
 type: command
 
 inputs:
-  input_model_inicial_datastore:
-    type: uri_folder
-  input_feats_inicial_datastore:
+  input_predict_inicial_datastore:
     type: uri_folder
   input_target_inicial_datastore:
     type: uri_folder
-  feats_version:
-    type: string
   target_version:
     type: string
-  periodo:
-    type: integer
   model_periodo:
     type: integer
   model_version:
     type: string
+  periodo:
+    type: integer
 
 outputs:
-  output_predict_inicial_datastore:
+  output_evaluation_inicial_datastore:
     type: uri_folder
 
 code: .
@@ -51,12 +47,11 @@ environment:
 
 command: >-
   python inicial_regular_v2.py 
-  --input_model_datastore ${{inputs.input_model_inicial_datastore}}
-  --input_feats_datastore ${{inputs.input_feats_inicial_datastore}}
+  --input_predict_datastore ${{inputs.input_predict_inicial_datastore}}
   --input_target_datastore ${{inputs.input_target_inicial_datastore}}
-  --output_predict_datastore ${{outputs.output_predict_inicial_datastore}}
-  --feats_version ${{inputs.feats_version}}
+  --output_evaluation_datastore ${{outputs.output_evaluation_inicial_datastore}}
   --target_version ${{inputs.target_version}}
-  --periodo ${{inputs.periodo}}
   --model_periodo ${{inputs.model_periodo}}
   --model_version ${{inputs.model_version}}
+  --periodo ${{inputs.periodo}}
+  
