@@ -58,6 +58,11 @@ outputs:
     path: azureml://datastores/ml_data/paths/predict/inicial_regular
     mode: rw_mount
 
+  output_evaluation_inicial_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/evaluation/inicial_regular
+    mode: rw_mount
+
   # output_model_inicial_version:
   #   type: uri_file
   # output_model_continuidad_version:
