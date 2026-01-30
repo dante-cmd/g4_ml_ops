@@ -49,12 +49,12 @@ outputs:
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
 
-  output_model_inicial_version:
-    type: uri_file
-  output_model_continuidad_version:
-    type: uri_file
-  output_model_continuidad_horario_version:
-    type: uri_file
+  # output_model_inicial_version:
+  #   type: uri_file
+  # output_model_continuidad_version:
+  #   type: uri_file
+  # output_model_continuidad_horario_version:
+  #   type: uri_file
 
 
 jobs:
@@ -149,15 +149,15 @@ jobs:
       feats_version: "v1"
       model_periodo: 202506
 
-  # Model Register Jobs
-  register_inicial_job:
-    type: command
-    component: file:./src/register/inicial_regular_v2.yml
-    inputs:
-      input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
-      model_periodo: 202506
-    outputs:
-      output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
+  # # Model Register Jobs
+  # register_inicial_job:
+  #   type: command
+  #   component: file:./src/register/inicial_regular_v2.yml
+  #   inputs:
+  #     input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
+  #     model_periodo: 202506
+  #   outputs:
+  #     output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
 
   # register_continuidad_job:
   #   type: command

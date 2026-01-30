@@ -1,24 +1,26 @@
-import json
+import pickle
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
+# 1. Generate synthetic data
+X = np.array([[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]])
+y = 2 * X.flatten() + 1 + np.random.normal(0, 0.5, size=10)
 
-class Version:
-    def __init__(self):
-        with open("version.json", "r") as f:
-            self.version = json.load(f)
+# 2. Train the model
+model = LinearRegression()
+model.fit(X, y)
 
-    def get_version(self,folder:str ,model_name:str, alias:str):
-        return self.version[folder][model_name][alias]
+print(f"Model coefficient: {model.coef_[0]:.2f}")
+print(f"Model intercept: {model.intercept_:.2f}")
 
-    def update_version(self,folder:str, model_name:str, alias:str, version:str):
-        self.version[folder][model_name][alias] = version
-        with open("version.json", "w") as f:
-            json.dump(self.version, f, indent=4)
+# 3. Save the model to pickle
+output_path = "linear_model.pkl"
+with open(output_path, "wb") as f:
+    pickle.dump(model, f)
+    
+print(f"Model saved to {output_path}")
 
-
-if __name__ == "__main__":
-    version = Version()
-    # print(version.version)
-    print(version.get_version("feats_version","inicial_regular", "champion"))
-
-    print(version.get_version("target_version", "inicial_regular", "champion"))
-
+# Optional: Load and verify
+with open(output_path, "rb") as f:
+    loaded_model = pickle.load(f)
+    print(f"Loaded model prediction for X=11: {loaded_model.predict([[11]])[0]:.2f}")
