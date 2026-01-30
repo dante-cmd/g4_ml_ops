@@ -12,13 +12,12 @@ inputs:
     type: string
   model_periodo:
     type: integer
-  experiment_name:
+  model_version:
     type: string
 
 outputs:
-  model_output_inicial:
-    type: mlflow_model
-    mode: upload
+  output_model_inicial_datastore:
+    type: uri_folder
 
 code: .
 
@@ -36,14 +35,12 @@ environment:
           - PyYAML
           - Unidecode
           - numpy
-          - mlflow
-          - azureml-mlflow
           - catboost
 
 command: >-
   python inicial_regular.py 
   --input_feats_datastore ${{inputs.input_feats_inicial_datastore}}
+  --output_model_datastore ${{outputs.output_model_inicial_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
-  --experiment_name ${{inputs.experiment_name}}
-  --model_output ${{outputs.model_output_inicial}}
+  --model_version ${{inputs.model_version}}

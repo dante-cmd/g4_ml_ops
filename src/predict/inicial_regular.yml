@@ -6,23 +6,21 @@ display_name: Prediction - Inicial Regular
 type: command
 
 inputs:
-  input_feats_datastore:
+  input_model_inicial_datastore:
     type: uri_folder
-  input_target_datastore:
+  input_feats_inicial_datastore:
     type: uri_folder
   feats_version:
     type: string
-  target_version:
-    type: string
-  periodo:
+  n_eval_periodos:
     type: integer
   model_periodo:
     type: integer
-  experiment_name:
+  model_version:
     type: string
 
 outputs:
-  output_predict_datastore:
+  output_predict_inicial_datastore:
     type: uri_folder
 
 code: .
@@ -39,17 +37,21 @@ environment:
           - pandas
           - numpy
           - catboost
-          - scikit-learn
-          - mlflow
-          - azureml-mlflow
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          # - mlflow
+          # - mlflow-azureml
+          # - scikit-learn
+          # - azure-ai-ml
+          # - azure-identity
 
 command: >-
   python inicial_regular.py 
-  --input_feats_datastore ${{inputs.input_feats_datastore}}
-  --input_target_datastore ${{inputs.input_target_datastore}}
-  --output_predict_datastore ${{outputs.output_predict_datastore}}
+  --input_model_datastore ${{inputs.input_model_inicial_datastore}}
+  --input_feats_datastore ${{inputs.input_feats_inicial_datastore}}
+  --output_predict_datastore ${{outputs.output_predict_inicial_datastore}}
   --feats_version ${{inputs.feats_version}}
-  --target_version ${{inputs.target_version}}
-  --periodo ${{inputs.periodo}}
+  --n_eval_periodos ${{inputs.n_eval_periodos}}
   --model_periodo ${{inputs.model_periodo}}
-  --experiment_name ${{inputs.experiment_name}}
+  --model_version ${{inputs.model_version}}

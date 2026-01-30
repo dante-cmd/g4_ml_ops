@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import mlflow
-import mlflow.catboost
+# import mlflow
+# import mlflow.catboost
 from catboost import CatBoostRegressor
 from utils_model import parse_args, get_mapping_tipos
 # import argparse
@@ -19,11 +19,15 @@ from utils_model import parse_args, get_mapping_tipos
 class TrainInicial:
     def __init__(self, 
                  input_feats_datastore:str,
-                 feats_version:str
+                 output_model_datastore:str,
+                 feats_version:str,
+                 model_version:str
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
+        self.output_model_datastore = Path(output_model_datastore)
         self.feats_version = feats_version
+        self.model_version = model_version
         # self.client = client
         self.tipo = 'inicial_regular'
     
@@ -73,81 +77,48 @@ class TrainInicial:
         # print(X_train.head())
         # return model
         
-        with mlflow.start_run():
-            model = CatBoostRegressor(
+        # with mlflow.start_run():
+        model = CatBoostRegressor(
             iterations=500,
             learning_rate=0.1,
             depth=6,
             loss_function='RMSE',
             verbose=False, # Set to True to see training progress,
             min_data_in_leaf=5,
-            )
+        )
 
-            model.fit(X_train, y_train, cat_features=cat_features)
-            # # LinearRegression
-            # model = LinearRegression()
-            # model.fit(X_train, y_train)
+        model.fit(X_train, y_train, cat_features=cat_features)
+        # # LinearRegression
+        # model = LinearRegression()
+        # model.fit(X_train, y_train)
 
         return model
 
-    # def register_model(self, model, periodo:int):
+    def save_model(self, model, periodo:int):
         
-    #     with mlflow.start_run():
-    #         model_name = self.tipo + "_" + str(periodo)
-    #         model_info = mlflow.catboost.log_model(
-    #                 cb_model=model,
-    #                 name=self.tipo,
-    #                 registered_model_name=model_name
-    #             )
-            # versions = self.client.get_registered_model(model_name)
-                
-            # if 'champion' not in versions.aliases.keys():
-            #     self.client.set_registered_model_alias(
-            #         model_name, "champion", version=model_info.registered_model_version)
-                
-            # # Assign '@champion' to Version 1
-            # # client.set_registered_model_alias(self.tipo, "champion", version="1")
-            # # Assign '@dev' to Version 1
-            # self.client.set_registered_model_alias(
-            #         model_name, "dev", version=model_info.registered_model_version)
+        path_model = self.output_model_datastore/'test'/self.model_version
+        path_model.mkdir(parents=True, exist_ok=True)        
+        model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
+        
+        print(f"Guardando modelo en: {path_model/f'{self.tipo}_{periodo}.cbm'}")
 
 
 def main(args):
 
     # 1. Habilitar Autologging (Clave para Azure ML v2)
-    mlflow.sklearn.autolog()
+    # mlflow.sklearn.autolog()
 
     input_feats_datastore = args.input_feats_datastore
-    experiment_name = args.experiment_name
+    output_model_datastore = args.output_model_datastore
     feats_version = args.feats_version
+    model_version = args.model_version
     model_periodo = args.model_periodo
-    model_output = args.model_output
-    
-    # # listening to port 5000
-    # # mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    # # 1. Initialize client
-    # # tracking_uri="http://127.0.0.1:5000"
-    # # client = MlflowClient()
-    # print("Autenticando con Azure...")
-    # credential = DefaultAzureCredential()
-
-    # print("Conectando al workspace de Azure ML...")
-    # ml_client = MLClient(
-    #         credential=credential,
-    #         subscription_id=subscription_id,
-    #         resource_group_name=resource_group,
-    #         workspace_name=workspace_name,
-    #     )
-
-    # print("Configurando MLflow tracking URI...")
-    # mlflow.set_tracking_uri(ml_client.tracking_uri)
-    
-    # mlflow.set_experiment(experiment_name)
-    
     
     train_inicial = TrainInicial(
         input_feats_datastore, 
-        feats_version
+        output_model_datastore,
+        feats_version,
+        model_version
         )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
@@ -157,8 +128,8 @@ def main(args):
         print("Training for:", model_periodo)
         
         # Save model explicitly to the output path
-        print(f"Saving model to {model_output}...")
-        mlflow.catboost.save_model(model, model_output)
+        # print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
+        train_inicial.save_model(model, model_periodo)
         
         # train_inicial.register_model(model, model_periodo)
     

@@ -1,8 +1,8 @@
-# src/models/inicial_regular_v3.yml
+# src/models/continuidad_regular_horario.yml
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-name: model_inicial_regular
+name: model_continuidad_regular_horario
 version: 1
-display_name: Model Training - Inicial Regular
+display_name: Model Training - Continuidad Regular Horario
 type: command
 
 inputs:
@@ -12,13 +12,12 @@ inputs:
     type: string
   model_periodo:
     type: integer
-  experiment_name:
+  model_version:
     type: string
 
 outputs:
-  model_output_continuidad_horario:
-    type: mlflow_model
-    mode: upload
+  output_model_continuidad_horario_datastore:
+    type: uri_folder
 
 code: .
 
@@ -36,14 +35,12 @@ environment:
           - PyYAML
           - Unidecode
           - numpy
-          - mlflow
-          - azureml-mlflow
           - catboost
 
 command: >-
   python continuidad_regular_horario.py 
   --input_feats_datastore ${{inputs.input_feats_continuidad_horario_datastore}}
+  --output_model_datastore ${{outputs.output_model_continuidad_horario_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
-  --experiment_name ${{inputs.experiment_name}}
-  --model_output ${{outputs.model_output_continuidad_horario}}
+  --model_version ${{inputs.model_version}}

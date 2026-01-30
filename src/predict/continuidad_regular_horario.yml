@@ -1,4 +1,4 @@
-# src/predict/inicial_regular.yml
+# src/predict/continuidad_regular.yml
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: predict_continuidad_regular
 version: 1
@@ -6,21 +6,23 @@ display_name: Prediction - Continuidad Regular
 type: command
 
 inputs:
-  input_model_continuidad_datastore:
+  input_model_continuidad_horario_datastore:
     type: uri_folder
-  input_feats_continuidad_datastore:
+  input_feats_continuidad_horario_datastore:
+    type: uri_folder
+  input_predict_continuidad_horario_datastore:
     type: uri_folder
   feats_version:
     type: string
-  n_eval_periodos:
-    type: integer
   model_periodo:
     type: integer
   model_version:
     type: string
-
+  n_eval_periodos:
+    type: integer
+  
 outputs:
-  output_predict_continuidad_datastore:
+  output_predict_continuidad_horario_datastore:
     type: uri_folder
 
 code: .
@@ -37,21 +39,17 @@ environment:
           - pandas
           - numpy
           - catboost
-          - pyarrow
-          - PyYAML
-          - Unidecode
-          # - mlflow
-          # - mlflow-azureml
-          # - scikit-learn
-          # - azure-ai-ml
-          # - azure-identity
+          - scikit-learn
+          - mlflow
 
 command: >-
-  python continuidad_regular.py 
-  --input_model_datastore ${{inputs.input_model_continuidad_datastore}}
-  --input_feats_datastore ${{inputs.input_feats_continuidad_datastore}}
-  --output_predict_datastore ${{outputs.output_predict_continuidad_datastore}}
+  python continuidad_regular_horario.py 
+  --input_model_datastore ${{inputs.input_model_continuidad_horario_datastore}}
+  --input_feats_datastore ${{inputs.input_feats_continuidad_horario_datastore}}
+  --input_predict_datastore ${{inputs.input_predict_continuidad_horario_datastore}}
+  --output_predict_datastore ${{outputs.output_predict_continuidad_horario_datastore}}
   --feats_version ${{inputs.feats_version}}
-  --n_eval_periodos ${{inputs.n_eval_periodos}}
   --model_periodo ${{inputs.model_periodo}}
   --model_version ${{inputs.model_version}}
+  --n_eval_periodos ${{inputs.n_eval_periodos}}
+  

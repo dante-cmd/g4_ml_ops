@@ -11,26 +11,16 @@ def parse_args():
     # setup arg parser
     parser = argparse.ArgumentParser()
 
-    # add arguments
-    parser.add_argument("--input_feats_datastore", dest='input_feats_datastore',
-                        type=str)
-    parser.add_argument("--input_target_datastore", dest='input_target_datastore',
-                        type=str)
-    parser.add_argument("--output_predict_datastore", dest='output_predict_datastore',
-                        type=str)
-    parser.add_argument("--feats_version", dest='feats_version',
-                        type=str)
-    parser.add_argument("--target_version", dest='target_version',
-                        type=str)
-    parser.add_argument("--periodo", dest='periodo',
-                        type=int)
-    parser.add_argument("--experiment_name", dest='experiment_name',
-                        type=str)
-    parser.add_argument("--model_periodo", dest='model_periodo',
-                        type=int)
-    parser.add_argument("--dummy_input", dest='dummy_input',
-                        type=str, required=False)
-    
+    parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
+    parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
+    # parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
+    parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
+    parser.add_argument("--feats_version", dest="feats_version", type=str)
+    parser.add_argument("--target_version", dest="target_version", type=str)
+    parser.add_argument("--periodo", dest="periodo", type=int)
+    parser.add_argument("--model_periodo", dest="model_periodo", type=int)
+    parser.add_argument("--model_version", dest="model_version", type=str)
+
     # parse args
     args = parser.parse_args()
 
@@ -75,16 +65,16 @@ def get_mapping_tipos(periodo: int) -> dict:
 # model_name = "YourModelName"
 # tag_key = "stage"
 # tag_value = "Production"  # or any value like "staging", "latest", etc.
+def get_n_lags(periodo: int, n: int):
+    periodo_date = datetime.strptime(str(periodo), '%Y%m')
+    return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 
-# Get all versions of the model
 
-def get_dev_version(model_name, client) -> str:
-    
-    versions = client.get_registered_model(model_name)
-    # versions = client.search_model_versions(f"name='{model_name}'")
+def get_ahead_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos posteriores al periodo dado.
+    Ejemplo:
+        get_ahead_n_periodos(202306, 3) -> [202306, 202307, 202308]
+    """
+    return [get_n_lags(periodo, -lag) for lag in range(n)]
 
-    # # Sort by version number (descending) and pick the latest
-    # latest_version = max(versions, key=lambda v: int(v.version))
-    # latest_version.version
-
-    return versions.aliases['dev']
