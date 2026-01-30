@@ -11,7 +11,7 @@ import re
 import argparse
 from pathlib import Path
 from unidecode import unidecode
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, get_mapping_tipos, parse_args
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, get_mapping_tipos, parse_args, get_ahead_n_periodos
 from parser_regular import Utils
 from loader import Loader
 

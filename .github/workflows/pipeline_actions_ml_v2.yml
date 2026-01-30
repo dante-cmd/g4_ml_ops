@@ -1,10 +1,10 @@
-name: Run Pipeline ML Inicial Regular
+name: Run Pipeline ML Inicial Regular V2
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - prod
+      - dev
 
 jobs:
   run-pipeline:

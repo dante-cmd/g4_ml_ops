@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from unidecode import unidecode
 import argparse
-from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args, get_mapping_tipos
+from utils_feats import get_n_lags, get_training_periodos, filter_by_hora_atencion, parse_args, get_mapping_tipos, get_ahead_n_periodos
 from parser_regular import Utils
 from loader import Loader
 
@@ -592,7 +592,7 @@ def main(args):
 
     continuidad_horario = ContinuidadToHorario(tablas)
     tipo_continuidad_horario = continuidad_horario.tipo
-    
+
     feats_train_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "train" / feats_version
     feats_test_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / feats_version
     target_test_path = Path(output_target_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / target_version
