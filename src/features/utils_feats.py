@@ -63,9 +63,11 @@ def parse_args():
                         type=str)
     parser.add_argument("--target_version", dest='target_version',
                         type=str)
-    parser.add_argument("--periodo", dest='periodo',
+    parser.add_argument("--n_eval_periodos", dest='n_eval_periodos',
                         type=int)
     parser.add_argument("--ult_periodo", dest='ult_periodo',
+                        type=int)
+    parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
     
 
@@ -82,7 +84,21 @@ def get_n_lags(periodo: int, n: int):
 
 
 def get_last_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos anteriores al periodo dado.
+    Ejemplo:
+        get_last_n_periodos(202306, 3) -> [202306, 202305, 202304]
+    """
     return [get_n_lags(periodo, lag) for lag in range(n)]
+
+
+def get_ahead_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos posteriores al periodo dado.
+    Ejemplo:
+        get_ahead_n_periodos(202306, 3) -> [202306, 202307, 202308]
+    """
+    return [get_n_lags(periodo, -lag) for lag in range(n)]
 
 
 def get_all_periodos(periodo: int):

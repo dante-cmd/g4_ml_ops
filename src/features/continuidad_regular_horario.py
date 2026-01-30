@@ -574,7 +574,8 @@ def main(args):
     platinum_version = args.platinum_version
     feats_version=args.feats_version
     target_version=args.target_version
-    periodo=args.periodo
+    model_periodo=args.model_periodo
+    n_eval_periodos=args.n_eval_periodos
     
     
     loader = Loader(
@@ -587,32 +588,36 @@ def main(args):
     # Continuidad a nivel de horario
     
     # Create directories for ContinuidadToHorario
-    mapping_tipos = get_mapping_tipos(periodo)
+    # mapping_tipos = get_mapping_tipos(periodo)
 
     continuidad_horario = ContinuidadToHorario(tablas)
-    
     tipo_continuidad_horario = continuidad_horario.tipo
     
-    if mapping_tipos[tipo_continuidad_horario]:
-        feats_train_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "train" / feats_version
-        feats_test_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / feats_version
-        target_test_path = Path(output_target_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / target_version
-        
-        feats_train_path.mkdir(parents=True, exist_ok=True)
-        feats_test_path.mkdir(parents=True, exist_ok=True)
-        target_test_path.mkdir(parents=True, exist_ok=True)
-
-        continuidad_horario.load_features(
-            periodo, 
-            feats_version,
-            output_feats_continuidad_horario_datastore)
+    feats_train_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "train" / feats_version
+    feats_test_path = Path(output_feats_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / feats_version
+    target_test_path = Path(output_target_continuidad_horario_datastore) / tipo_continuidad_horario / "test" / target_version
     
-        continuidad_horario.load_target(
-            periodo, 
-            target_version,
-            output_target_continuidad_horario_datastore)
-    else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+    feats_train_path.mkdir(parents=True, exist_ok=True)
+    feats_test_path.mkdir(parents=True, exist_ok=True)
+    target_test_path.mkdir(parents=True, exist_ok=True)
+
+    
+    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+        mapping_tipos = get_mapping_tipos(periodo)
+        
+        if mapping_tipos[tipo_continuidad_horario]:
+
+            continuidad_horario.load_features(
+                periodo, 
+                feats_version,
+                output_feats_continuidad_horario_datastore)
+        
+            continuidad_horario.load_target(
+                periodo, 
+                target_version,
+                output_target_continuidad_horario_datastore)
+        else:
+            print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
     
 
 

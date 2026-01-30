@@ -297,7 +297,8 @@ def main(args):
     platinum_version = args.platinum_version
     feats_version=args.feats_version
     target_version = args.target_version
-    periodo=args.periodo
+    model_periodo=args.model_periodo
+    n_eval_periodos=args.n_eval_periodos
 
     loader = Loader(
         input_datastore, 
@@ -310,23 +311,25 @@ def main(args):
     inicial = Inicial(tablas)
     tipo = inicial.tipo
 
-    mapping_tipos = get_mapping_tipos(periodo)
+    # Create directories if they don't exist
+    feats_train_path = Path(output_feats_inicial_datastore) / "train" / feats_version
+    feats_test_path = Path(output_feats_inicial_datastore) / "test" / feats_version
+    target_test_path = Path(output_target_inicial_datastore) / "test" / target_version
     
-    if mapping_tipos[tipo]:
-        # Create directories if they don't exist
-        feats_train_path = Path(output_feats_inicial_datastore) / "train" / feats_version
-        feats_test_path = Path(output_feats_inicial_datastore) / "test" / feats_version
-        target_test_path = Path(output_target_inicial_datastore) / "test" / target_version
-        
-        feats_train_path.mkdir(parents=True, exist_ok=True)
-        feats_test_path.mkdir(parents=True, exist_ok=True)
-        target_test_path.mkdir(parents=True, exist_ok=True)
+    feats_train_path.mkdir(parents=True, exist_ok=True)
+    feats_test_path.mkdir(parents=True, exist_ok=True)
+    target_test_path.mkdir(parents=True, exist_ok=True)
 
-        inicial.load_features(periodo, feats_version, output_feats_inicial_datastore)
+    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+        mapping_tipos = get_mapping_tipos(periodo)
+    
+        if mapping_tipos[tipo]:
+
+            inicial.load_features(periodo, feats_version, output_feats_inicial_datastore)
         
-        inicial.load_target(periodo, target_version, output_target_inicial_datastore)
-    else:
-        print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+            inicial.load_target(periodo, target_version, output_target_inicial_datastore)
+        else:
+            print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
 
 
 if __name__ == '__main__':
