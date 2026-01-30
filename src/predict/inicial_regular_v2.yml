@@ -41,6 +41,9 @@ environment:
           - pandas
           - numpy
           - catboost
+          - pyarrow
+          - PyYAML
+          - Unidecode
           # - mlflow
           # - mlflow-azureml
           # - scikit-learn
