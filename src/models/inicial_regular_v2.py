@@ -123,7 +123,7 @@ def main(args):
         print("Training for:", model_periodo)
         
         # Save model explicitly to the output path
-        print(f"Saving model to {model_output}...")
+        print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
         train_inicial.save_model(model, model_periodo)
         
         # train_inicial.register_model(model, model_periodo)

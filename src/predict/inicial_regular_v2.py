@@ -7,7 +7,7 @@ import numpy as np
 from pathlib import Path
 import argparse
 
-# from catboost import CatBoostRegressor
+from catboost import CatBoostRegressor
 # from utils_model import get_dev_version
 from utils_metrics import calculate_classes, calculate_metrics
 # import mlflow
@@ -26,7 +26,7 @@ class TrainInicial:
         output_predict_datastore: str,
         feats_version: str,
         target_version: str,
-        model_periodo: int,
+        # model_periodo: int,
         model_version: str,
     ):
 
@@ -37,7 +37,7 @@ class TrainInicial:
         self.tipo = "inicial_regular"
         self.feats_version = feats_version
         self.target_version = target_version
-        self.model_periodo = model_periodo
+        # self.model_periodo = model_periodo
         self.model_version = model_version
 
     def get_data_test(self, periodo: int):
@@ -58,12 +58,14 @@ class TrainInicial:
         )
         return data_model_target
 
-    def load_model(self, periodo: int):
+    def load_model(self, model_periodo:int):
         print(f"Cargando modelo desde: {self.input_model_datastore}")
-        model = mlflow.sklearn.load_model(
-            self.input_model_datastore
-            # f"models:/{self.tipo}_{periodo}@dev"
-        )
+        model = CatBoostRegressor()
+        model.load_model(self.input_model_datastore/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        # model = mlflow.sklearn.load_model(
+        #     self.input_model_datastore
+        #     # f"models:/{self.tipo}_{periodo}@dev"
+        # )
         return model
 
     def get_data_predict(self, periodo: int, model):
@@ -77,46 +79,46 @@ class TrainInicial:
             pd.DataFrame: DataFrame with forecast data after computing metrics.
         """
 
-        # # Loading evaluation data
-        # data_model_eval = self.get_data_test(periodo)
+        # Loading evaluation data
+        data_model_eval = self.get_data_test(periodo)
 
-        # meses = [1, 2, 3]
+        meses = [1, 2, 3]
 
-        # base = ['PERIODO_TARGET', 'CURSO_ACTUAL', 'HORARIO_ACTUAL', 'IDX',
-        #             'PE', 'VAC_ACAD_ESTANDAR']
+        base = ['PERIODO_TARGET', 'CURSO_ACTUAL', 'HORARIO_ACTUAL', 'IDX',
+                    'PE', 'VAC_ACAD_ESTANDAR']
 
-        # # cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE']
-        # cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE', 'FRECUENCIA', 'DURACION']
+        # cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE']
+        cat_features = ['NIVEL', 'LEVEL', 'IDX_CURSO', 'SEDE', 'FRECUENCIA', 'DURACION']
 
-        # if periodo % 100 in meses:
-        #     num_features = ['CANT_ALUMNOS_LAG_12', 'CANT_ALUMNOS_LAG_01',
-        #                     'CANT_ALUMNOS_LAG_02', 'CANT_ALUMNOS_LAG_03']
+        if periodo % 100 in meses:
+            num_features = ['CANT_ALUMNOS_LAG_12', 'CANT_ALUMNOS_LAG_01',
+                            'CANT_ALUMNOS_LAG_02', 'CANT_ALUMNOS_LAG_03']
 
-        # else:
-        #     num_features  = ['CANT_ALUMNOS_LAG_01', 'CANT_ALUMNOS_LAG_02',
-        #                      'CANT_ALUMNOS_LAG_03']
+        else:
+            num_features  = ['CANT_ALUMNOS_LAG_01', 'CANT_ALUMNOS_LAG_02',
+                             'CANT_ALUMNOS_LAG_03']
 
-        # target = 'CANT_ALUMNOS'
-        # predict = f"{target}_PREDICT"
+        target = 'CANT_ALUMNOS'
+        predict = f"{target}_PREDICT"
 
-        # x = num_features + cat_features
+        x = num_features + cat_features
 
-        # data_model_eval = data_model_eval[base + num_features + cat_features].copy()
+        data_model_eval = data_model_eval[base + num_features + cat_features].copy()
 
-        # X_eval = data_model_eval[x].copy()
+        X_eval = data_model_eval[x].copy()
 
-        # preds = model.predict(X_eval)
+        preds = model.predict(X_eval)
 
-        # preds = np.where(preds < 0, 0, preds)
-        # preds = preds // 1 + np.where(preds %1 >= 0.4,1, 0)
+        preds = np.where(preds < 0, 0, preds)
+        preds = preds // 1 + np.where(preds %1 >= 0.4,1, 0)
 
-        # data_model_eval[predict] = preds
+        data_model_eval[predict] = preds
 
-        # data_model_eval = calculate_classes(data_model_eval)
-        data_model_eval = pd.DataFrame(
-            data=np.random.randint(0, 2, size=(100, 3)),
-            columns=["PERIODO_TARGET", "CURSO_ACTUAL", "HORARIO_ACTUAL"],
-        )
+        data_model_eval = calculate_classes(data_model_eval)
+        # data_model_eval = pd.DataFrame(
+        #     data=np.random.randint(0, 2, size=(100, 3)),
+        #     columns=["PERIODO_TARGET", "CURSO_ACTUAL", "HORARIO_ACTUAL"],
+        # )
 
         return data_model_eval
 
@@ -132,10 +134,10 @@ class TrainInicial:
         print(df_model_predict)
 
         path_model_version = (
-            self.output_predict_inicial_datastore / "test" / model_version
+            self.output_predict_inicial_datastore / model_version / "test"
         )
-        path_champion = self.output_predict_inicial_datastore / "test" / "champion"
-        path_dev = self.output_predict_inicial_datastore / "test" / "dev"
+        path_champion = self.output_predict_inicial_datastore / model_version / "champion"
+        path_dev = self.output_predict_inicial_datastore / model_version / "dev"
 
         path_champion.mkdir(parents=True, exist_ok=True)
         path_dev.mkdir(parents=True, exist_ok=True)
@@ -181,30 +183,29 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--input_model_inicial_path",
-        dest="input_model_inicial_path",
+        "--input_model_datastore",
+        dest="input_model_datastore",
         type=str,
         help="Ruta del modelo (artifact)",
     )
     parser.add_argument(
-        "--input_feats_inicial_datastore",
-        dest="input_feats_inicial_datastore",
+        "--input_feats_datastore",
+        dest="input_feats_datastore",
         type=str,
     )
     parser.add_argument(
-        "--input_target_inicial_datastore",
-        dest="input_target_inicial_datastore",
+        "--input_target_datastore",
+        dest="input_target_datastore",
         type=str,
     )
     parser.add_argument(
-        "--output_predict_inicial_datastore",
-        dest="output_predict_inicial_datastore",
+        "--output_predict_datastore",
+        dest="output_predict_datastore",
         type=str,
     )
     parser.add_argument("--feats_version", dest="feats_version", type=str)
     parser.add_argument("--target_version", dest="target_version", type=str)
     parser.add_argument("--periodo", dest="periodo", type=int)
-    parser.add_argument("--experiment_name", dest="experiment_name", type=str)
     parser.add_argument("--model_periodo", dest="model_periodo", type=int)
     parser.add_argument("--model_version", dest="model_version", type=str)
 
@@ -263,7 +264,6 @@ def main(args):
         output_predict_datastore,
         feats_version,
         target_version,
-        model_periodo,
         model_version,
     )
 
