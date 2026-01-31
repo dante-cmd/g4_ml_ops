@@ -98,7 +98,7 @@ jobs:
       platinum_version: "v1"
       feats_version: "v1"
       target_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
       model_periodo: 202506
     outputs:
       output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
@@ -115,7 +115,7 @@ jobs:
       platinum_version: "v1"
       feats_version: "v1"
       target_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
       model_periodo: 202506
     outputs:
       output_feats_continuidad_datastore: ${{parent.outputs.output_feats_continuidad_datastore}}
@@ -131,7 +131,7 @@ jobs:
       platinum_version: "v1"
       feats_version: "v1"
       target_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
       model_periodo: 202506
     outputs:
       output_feats_continuidad_horario_datastore: ${{parent.outputs.output_feats_continuidad_horario_datastore}}
@@ -145,7 +145,7 @@ jobs:
       input_model_inicial_datastore: ${{parent.inputs.input_model_inicial_datastore}}
       input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
       feats_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
       model_periodo: 202506
       model_version: "v1"
     outputs:
@@ -158,7 +158,7 @@ jobs:
       input_model_continuidad_datastore: ${{parent.inputs.input_model_continuidad_datastore}}
       input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
       feats_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
       model_periodo: 202506
       model_version: "v1"
     outputs:
@@ -174,6 +174,6 @@ jobs:
       feats_version: "v1"
       model_periodo: 202506
       model_version: "v1"
-      n_eval_periodos: 3
+      n_eval_periodos: 4
     outputs:
       output_predict_continuidad_horario_datastore: ${{parent.outputs.output_predict_continuidad_horario_datastore}}
