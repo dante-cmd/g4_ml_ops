@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check_date.outputs.should_run }}
+      platinum_version: ${{ steps.read_params.outputs.platinum_version }}
+      feats_version: ${{ steps.read_params.outputs.feats_version }}
+      target_version: ${{ steps.read_params.outputs.target_version }}
+      model_version: ${{ steps.read_params.outputs.model_version }}
+      model_periodo: ${{ steps.read_params.outputs.model_periodo }}
+      ult_periodo_data: ${{ steps.read_params.outputs.ult_periodo_data }}
+      n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -26,21 +33,28 @@ jobs:
         id: check_date
         run: python src/utils/date_validator.py
 
+      - name: Read Parameters
+        id: read_params
+        if: steps.check_date.outputs.should_run == 'true'
+        run: |
+          echo "platinum_version=$(jq -r '.platinum_version.champion' version.json)" >> $GITHUB_OUTPUT
+          echo "feats_version=$(jq -r '.feats_version.champion' version.json)" >> $GITHUB_OUTPUT
+          echo "target_version=$(jq -r '.target_version.champion' version.json)" >> $GITHUB_OUTPUT
+          echo "model_version=$(jq -r '.model_version.champion' version.json)" >> $GITHUB_OUTPUT
+          echo "model_periodo=$(jq -r '.model_periodo' params.json)" >> $GITHUB_OUTPUT
+          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params.json)" >> $GITHUB_OUTPUT
+          echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params.json)" >> $GITHUB_OUTPUT
+
   trigger-pipeline:
     needs: validate-date
     if: needs.validate-date.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Trigger Production Pipeline
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Triggering pipeline_deploy_prod.yml..."
-          gh workflow run pipeline_deploy_prod.yml 
-          # --ref ${{ github.ref }}
+    uses: ./.github/workflows/pipeline_deploy_prod.yml
+    with:
+      platinum_version: ${{ needs.validate-date.outputs.platinum_version }}
+      feats_version: ${{ needs.validate-date.outputs.feats_version }}
+      target_version: ${{ needs.validate-date.outputs.target_version }}
+      model_version: ${{ needs.validate-date.outputs.model_version }}
+      model_periodo: ${{ fromJson(needs.validate-date.outputs.model_periodo) }}
+      ult_periodo_data: ${{ fromJson(needs.validate-date.outputs.ult_periodo_data) }}
+      n_eval_periodos: ${{ fromJson(needs.validate-date.outputs.n_eval_periodos) }}
+    secrets: inherit
