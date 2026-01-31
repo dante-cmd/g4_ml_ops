@@ -1,8 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from utils_evaluation import parse_args, calculate_metrics, join_target
-# from catboost import CatBoostRegressor
-# import mlflow
+from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
 
 
 class TrainInicial:
@@ -45,17 +43,8 @@ class TrainInicial:
     
     def upload_data_evaluation(self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame):
 
-        # name = self.tipo + '_' + str(model_periodo)
-        # version = get_dev_version(name)
-        # model_version = f"v{version}"
-
         path_model = (self.output_evaluation_datastore/'test'/model_version)
-        # path_champion = self.output_evaluation_datastore/"test"/"champion"
-        # path_dev = self.output_evaluation_datastore/"test"/"dev"
-        
         path_model.mkdir(parents=True, exist_ok=True)
-        # path_champion.mkdir(parents=True, exist_ok=True)
-        # path_dev.mkdir(parents=True, exist_ok=True)
         
         df_model_evaluation.to_parquet(
             path_model/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
@@ -79,7 +68,7 @@ def main(args):
     target_version = args.target_version
     model_periodo = args.model_periodo
     model_version = args.model_version
-    periodo = args.periodo
+    n_eval_periodos = args.n_eval_periodos
     
     train_inicial = TrainInicial(
         input_predict_datastore,
@@ -88,8 +77,13 @@ def main(args):
         target_version,
         model_version)
 
-    df_model_evaluation = train_inicial.get_data_evaluation(model_periodo,periodo)
-    train_inicial.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation)
+    tipo = train_inicial.tipo
+
+    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+        map_tipos = get_mapping_tipos(periodo)
+        if map_tipos[tipo]:
+            df_model_evaluation = train_inicial.get_data_evaluation(model_periodo,periodo)
+            train_inicial.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation)
 
 
 if __name__ == '__main__':

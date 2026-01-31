@@ -6,9 +6,9 @@ display_name: Prediction - Inicial Regular
 type: command
 
 inputs:
-  input_predict_inicial_datastore:
+  input_predict_continuidad_horario_datastore:
     type: uri_folder
-  input_target_inicial_datastore:
+  input_target_continuidad_horario_datastore:
     type: uri_folder
   target_version:
     type: string
@@ -20,7 +20,7 @@ inputs:
     type: integer
 
 outputs:
-  output_evaluation_inicial_datastore:
+  output_evaluation_continuidad_horario_datastore:
     type: uri_folder
 
 code: .
@@ -46,10 +46,10 @@ environment:
           # - azure-identity
 
 command: >-
-  python inicial_regular.py 
-  --input_predict_datastore ${{inputs.input_predict_inicial_datastore}}
-  --input_target_datastore ${{inputs.input_target_inicial_datastore}}
-  --output_evaluation_datastore ${{outputs.output_evaluation_inicial_datastore}}
+  python continuidad_regular_horario.py 
+  --input_predict_datastore ${{inputs.input_predict_continuidad_horario_datastore}}
+  --input_target_datastore ${{inputs.input_target_continuidad_horario_datastore}}
+  --output_evaluation_datastore ${{outputs.output_evaluation_continuidad_horario_datastore}}
   --target_version ${{inputs.target_version}}
   --model_periodo ${{inputs.model_periodo}}
   --model_version ${{inputs.model_version}}

@@ -1,7 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from utils_evaluation import parse_args, calculate_metrics, join_target, get_dev_version
-# import mlflow
+from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
 
 
 class TrainContinuidad:
@@ -10,65 +9,54 @@ class TrainContinuidad:
                  input_target_datastore:str,
                  output_evaluation_datastore:str,
                  target_version:str,
-                 model_periodo:str,
+                 model_version:str
                  ):
 
         self.input_predict_datastore = Path(input_predict_datastore)
         self.input_target_datastore = Path(input_target_datastore)
         self.output_evaluation_datastore = Path(output_evaluation_datastore)
         self.target_version = target_version
-        self.model_periodo = model_periodo
+        self.model_version= model_version
         self.tipo = 'continuidad_regular'
 
-    def get_data_predict(self, periodo:int):
-        name = self.tipo + '_' + str(self.model_periodo)
-        version = get_dev_version(name)
-        model_version = f"v{version}"
+    def get_data_predict(self, model_periodo:int, periodo:int):
         
         data_model_predict = pd.read_parquet(
-            self.input_predict_datastore/self.tipo/'test'/model_version/f"data_predict_{self.tipo}_{periodo}.parquet")
+            self.input_predict_datastore/'test'/self.model_version/f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet")
         
         return data_model_predict
 
     def get_data_target(self, periodo:int):
         data_model_target = pd.read_parquet(
-            self.input_target_datastore/self.tipo/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
+            self.input_target_datastore/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
         return data_model_target
     
-    def get_data_evaluation(self, periodo:int):
+    def get_data_evaluation(self, model_periodo:int, periodo:int):
         on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL']
         
-        data_model_predict = self.get_data_predict(periodo)
+        data_model_predict = self.get_data_predict(model_periodo, periodo)
         data_model_target = self.get_data_target(periodo)
 
         data_model_evaluation = join_target(data_model_predict, data_model_target, on_cols)
 
         return data_model_evaluation
     
-    def upload_data_evaluation(self, periodo:int, df_model_evaluation:pd.DataFrame):
-        name = self.tipo + '_' + str(self.model_periodo)
-        version = get_dev_version(name)
-        model_version = f"v{version}"
+    def upload_data_evaluation(self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame):
 
-        path_model = (self.output_evaluation_datastore/self.tipo/'test'/model_version)
-        path_champion = self.output_evaluation_datastore/self.tipo/"test"/"champion"
-        path_dev = self.output_evaluation_datastore/self.tipo/"test"/"dev"
-        
+        path_model = (self.output_evaluation_datastore/'test'/model_version)
         path_model.mkdir(parents=True, exist_ok=True)
-        path_champion.mkdir(parents=True, exist_ok=True)
-        path_dev.mkdir(parents=True, exist_ok=True)
         
         df_model_evaluation.to_parquet(
-            path_model/f"data_evaluation_{self.tipo}_{periodo}.parquet"
+            path_model/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
         df_model_evaluation.to_parquet(
-            path_dev/f"data_evaluation_{self.tipo}_{periodo}.parquet"
+            path_model/f"data_evaluation_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
-        if not (path_champion/f"data_evaluation_{self.tipo}_{periodo}.parquet").exists():
+        if not (path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
             df_model_evaluation.to_parquet(
-                path_champion/f"data_evaluation_{self.tipo}_{periodo}.parquet"
+                path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
 
 
@@ -79,17 +67,23 @@ def main(args):
     output_evaluation_datastore = args.output_evaluation_datastore
     target_version = args.target_version
     model_periodo = args.model_periodo
-    periodo = args.periodo
+    model_version = args.model_version
+    n_eval_periodos = args.n_eval_periodos
     
     train_continuidad = TrainContinuidad(
         input_predict_datastore,
         input_target_datastore,
         output_evaluation_datastore,
         target_version,
-        model_periodo)
+        model_version)
 
-    df_model_evaluation = train_continuidad.get_data_evaluation(periodo)
-    train_continuidad.upload_data_evaluation(periodo, df_model_evaluation)
+    tipo = train_continuidad.tipo
+
+    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+        map_tipos = get_mapping_tipos(periodo)
+        if map_tipos[tipo]:
+            df_model_evaluation = train_continuidad.get_data_evaluation(model_periodo,periodo)
+            train_continuidad.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation)
 
 
 if __name__ == '__main__':

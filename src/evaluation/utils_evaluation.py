@@ -241,3 +241,53 @@ def fac_to_cant(df_forecast_fac: pd.DataFrame, df_forecast_cant:pd.DataFrame) ->
 
     return df_forecast_03
 
+
+def get_n_lags(periodo: int, n: int):
+    periodo_date = datetime.strptime(str(periodo), '%Y%m')
+    return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
+
+
+def get_ahead_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos posteriores al periodo dado.
+    Ejemplo:
+        get_ahead_n_periodos(202306, 3) -> [202306, 202307, 202308]
+    """
+    return [get_n_lags(periodo, -lag) for lag in range(n)]
+
+
+def get_mapping_tipos(periodo: int) -> dict:
+    """
+    Returns a dict that map tipo -> bool type of train to be executed.
+    
+    Args:
+        periodo (int): The period to be trained.
+    Returns:
+    """
+    if periodo%100 == 1:
+        tipos = {
+            'inicial_estacional':True, 
+            'continuidad_estacional':False, 
+            'inicial_regular':True, 
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True}
+        
+        return tipos
+    elif periodo%100 == 2:
+        tipos = {
+            'inicial_estacional':True, 
+            'continuidad_estacional':True,
+            'inicial_regular':True, 
+            'continuidad_regular':True, 
+            'continuidad_regular_horario':True}
+        return tipos
+    else:
+        tipos = {
+            'inicial_estacional':False, 
+            'continuidad_estacional':False, 
+            'inicial_regular':True, 
+            'continuidad_regular':True,
+            'continuidad_regular_horario':True}
+        return tipos
+
+
