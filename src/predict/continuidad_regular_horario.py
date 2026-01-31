@@ -33,7 +33,7 @@ class TrainContinuidadToHorario:
     
     def get_data_input_predict(self, model_periodo:int, periodo:int):
         data_model_test = pd.read_parquet(
-            self.input_predict_datastore/"test"/self.model_version/f"data_predict_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet")
+            self.input_predict_datastore/"test"/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet")
         return data_model_test    
 
     def get_data_predict(self, model_periodo:int ,periodo:int, model):
@@ -132,12 +132,12 @@ class TrainContinuidadToHorario:
         print(periodo)
         print(df_model_predict)
 
-        path_model_version = self.output_predict_datastore / "test" / model_version
+        path_model_version = self.output_predict_datastore / "test"
         
         path_model_version.mkdir(parents=True, exist_ok=True)
 
         df_model_predict.to_parquet(
-            path_model_version / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
         df_model_predict.to_parquet(

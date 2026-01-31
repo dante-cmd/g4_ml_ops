@@ -22,7 +22,7 @@ class TrainContinuidad:
     def get_data_predict(self, model_periodo:int, periodo:int):
         
         data_model_predict = pd.read_parquet(
-            self.input_predict_datastore/'test'/self.model_version/f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet")
+            self.input_predict_datastore/'test'/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet")
         
         return data_model_predict
 
@@ -43,11 +43,11 @@ class TrainContinuidad:
     
     def upload_data_evaluation(self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame):
 
-        path_model = (self.output_evaluation_datastore/'test'/model_version)
+        path_model = (self.output_evaluation_datastore/'test')
         path_model.mkdir(parents=True, exist_ok=True)
         
         df_model_evaluation.to_parquet(
-            path_model/f"data_evaluation_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
         df_model_evaluation.to_parquet(

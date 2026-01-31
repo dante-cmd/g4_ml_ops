@@ -148,12 +148,12 @@ class TrainContinuidad:
         print(periodo)
         print(df_model_predict)
 
-        path_model_version = self.output_predict_datastore / "test" / model_version
+        path_model_version = self.output_predict_datastore / "test" 
         
         path_model_version.mkdir(parents=True, exist_ok=True)
 
         df_model_predict.to_parquet(
-            path_model_version / f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
         df_model_predict.to_parquet(
