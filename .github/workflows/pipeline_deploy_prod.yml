@@ -18,13 +18,13 @@ on:
         type: string
       model_periodo:
         required: true
-        type: int
+        type: number
       ult_periodo_data:
         required: true
-        type: int
+        type: number
       n_eval_periodos:
         required: true
-        type: int
+        type: number
   # push:
   #   branches:
   #     - prod
