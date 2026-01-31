@@ -115,7 +115,7 @@ class TrainContinuidadToHorario:
     def load_model(self, model_periodo:int):
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
-        model.load_model(self.input_model_datastore/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
         # model = mlflow.sklearn.load_model(
         #     self.input_model_datastore
         #     # f"models:/{self.tipo}_{periodo}@dev"
