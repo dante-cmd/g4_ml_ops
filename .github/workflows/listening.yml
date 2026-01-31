@@ -42,4 +42,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Triggering pipeline_deploy_prod.yml..."
-          gh workflow run pipeline_deploy_prod.yml --ref ${{ github.ref }}
+          gh workflow run pipeline_deploy_prod.yml 
+          # --ref ${{ github.ref }}
