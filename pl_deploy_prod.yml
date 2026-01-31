@@ -61,9 +61,6 @@ outputs:
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
 
-  
-
-
   output_predict_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/predict/inicial_regular
@@ -78,21 +75,6 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/predict/continuidad_regular_horario
     mode: rw_mount
-
-  # output_evaluation_inicial_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/evaluation/inicial_regular
-  #   mode: rw_mount
-
-  # output_evaluation_continuidad_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular
-  #   mode: rw_mount
-
-  # output_evaluation_continuidad_horario_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular_horario
-  #   mode: rw_mount
 
 
 jobs:
@@ -163,7 +145,7 @@ jobs:
     type: command
     component: file:./src/predict/inicial_regular.yml
     inputs:
-      input_model_inicial_datastore: ${{parent.outputs.output_model_inicial_datastore}}
+      input_model_inicial_datastore: ${{parent.inputs.input_model_inicial_datastore}}
       input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
       feats_version: "v1"
       n_eval_periodos: 3
@@ -176,7 +158,7 @@ jobs:
     type: command
     component: file:./src/predict/continuidad_regular.yml
     inputs:
-      input_model_continuidad_datastore: ${{parent.outputs.output_model_continuidad_datastore}}
+      input_model_continuidad_datastore: ${{parent.inputs.input_model_continuidad_datastore}}
       input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
       feats_version: "v1"
       n_eval_periodos: 3
@@ -189,7 +171,7 @@ jobs:
     type: command
     component: file:./src/predict/continuidad_regular_horario.yml
     inputs:
-      input_model_continuidad_horario_datastore: ${{parent.outputs.output_model_continuidad_horario_datastore}}
+      input_model_continuidad_horario_datastore: ${{parent.inputs.input_model_continuidad_horario_datastore}}
       input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
       input_predict_continuidad_datastore: ${{parent.jobs.model_predict_continuidad_job.outputs.output_predict_continuidad_datastore}}
       feats_version: "v1"

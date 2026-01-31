@@ -1,0 +1,81 @@
+name: Run Pipeline ML Train
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install azure-ai-ml azure-identity
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install Azure ML CLI extension
+      run: |
+          az extension add -n ml -y || az extension update -n ml
+          az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
+
+    - name: Submit pipeline job and print outputs
+      env:
+        AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+        AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
+        AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+      run: |
+          # Submit job with only the provided parameters
+          JOB_ID=$(az ml job create \
+            --file pl_deploy_prod.yml \
+            --query name -o tsv)
+
+          echo "Submitted job: $JOB_ID"
+
+          # Wait for the job to complete
+          # echo "Waiting for job to complete..."
+          # az ml job stream --name $JOB_ID
+
+          # read version.json
+          
+          inicial_regular_version=$(jq -r '.model_version.inicial_regular.champion' version.json)
+          continuidad_regular_version=$(jq -r '.model_version.continuidad_regular.champion' version.json)
+          continuidad_regular_horario_version=$(jq -r '.model_version.continuidad_regular_horario.champion' version.json)
+          model_periodo=$(jq -r '.model_periodo' params.json)
+
+          echo "Inicial Regular Version: $inicial_regular_version"
+          echo "Continuidad Regular Version: $continuidad_regular_version"
+          echo "Continuidad Regular Horario Version: $continuidad_regular_horario_version"
+          echo "Model Periodo: $model_periodo"
+          
+
+          # az ml model create --name "inicial_regular_$model_periodo" --version "$inicial_regular_version" --path "azureml://datastores/ml_data/paths/models/inicial_regular/inicial_regular_$model_periodo.cbl"
+          # az ml model create --name "continuidad_regular_$model_periodo" --version "$continuidad_regular_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular/continuidad_regular_$model_periodo.cbl"
+          # az ml model create --name "continuidad_regular_horario_$model_periodo" --version "$continuidad_regular_horario_version" --path "azureml://datastores/ml_data/paths/models/continuidad_regular_horario/continuidad_regular_horario_$model_periodo.cbl"
+
+      
+        
+
+    # - name: Run Pipeline Script
+    #   env:
+    #     AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+    #     AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
+    #     AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+    #   run: |
+    #     python pipeline_cloud_base_v2_actions.py
+    #  opcional: exponerlo como output del step
+         # echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
