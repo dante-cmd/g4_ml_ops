@@ -19,7 +19,7 @@ def parse_args():
                         type=str)
     parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
-    parser.add_argument("--periodo", dest='periodo',
+    parser.add_argument("--n_eval_periodos", dest='n_eval_periodos',
                         type=int)
     parser.add_argument("--model_version", dest='model_version',
                         type=str)
