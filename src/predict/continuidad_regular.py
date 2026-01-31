@@ -40,11 +40,17 @@ class TrainContinuidad:
     def load_model(self, model_periodo:int):
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
-        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        # model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
         # model = mlflow.sklearn.load_model(
         #     self.input_model_datastore
         #     # f"models:/{self.tipo}_{periodo}@dev"
         # )
+        if self.input_model_datastore.name == self.tipo:
+            print("Ruta modelo tipo directo")
+            model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        else:
+            model.load_model(self.input_model_datastore/self.tipo/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        
         return model
     
 
