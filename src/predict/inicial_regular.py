@@ -129,7 +129,7 @@ def parse_args():
     # parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
     parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
     parser.add_argument("--feats_version", dest="feats_version", type=str)
-    parser.add_argument("--periodo", dest="periodo", type=int)
+    parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int)
     parser.add_argument("--model_periodo", dest="model_periodo", type=int)
     parser.add_argument("--model_version", dest="model_version", type=str)
 
