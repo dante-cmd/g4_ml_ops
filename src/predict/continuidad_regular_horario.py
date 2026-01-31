@@ -22,6 +22,7 @@ class TrainContinuidadToHorario:
         self.output_predict_datastore = Path(output_predict_datastore)
         self.input_model_datastore = Path(input_model_datastore)
         self.tipo = 'continuidad_regular_horario'
+        self.tipo_continuidad = 'continuidad_regular'
         self.feats_version = feats_version
         self.model_version = model_version
     
@@ -32,7 +33,7 @@ class TrainContinuidadToHorario:
     
     def get_data_input_predict(self, model_periodo:int, periodo:int):
         data_model_test = pd.read_parquet(
-            self.input_predict_datastore/"test"/self.model_version/f"data_predict_{model_periodo}_{self.tipo}_{periodo}.parquet")
+            self.input_predict_datastore/"test"/self.model_version/f"data_predict_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet")
         return data_model_test    
 
     def get_data_predict(self, model_periodo:int ,periodo:int, model):

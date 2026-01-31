@@ -1,10 +1,9 @@
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_dev_version
-# import mlflow
 
 
-class TrainInicial:
+class TrainContinuidadToHorario:
     def __init__(self, 
                  input_predict_datastore:str,
                  input_target_datastore:str,
@@ -18,10 +17,9 @@ class TrainInicial:
         self.output_evaluation_datastore = Path(output_evaluation_datastore)
         self.target_version = target_version
         self.model_periodo = model_periodo
-        self.tipo = 'inicial_estacional'
+        self.tipo = 'continuidad_regular_horario'
 
     def get_data_predict(self, periodo:int):
-
         name = self.tipo + '_' + str(self.model_periodo)
         version = get_dev_version(name)
         model_version = f"v{version}"
@@ -47,7 +45,6 @@ class TrainInicial:
         return data_model_evaluation
     
     def upload_data_evaluation(self, periodo:int, df_model_evaluation:pd.DataFrame):
-        
         name = self.tipo + '_' + str(self.model_periodo)
         version = get_dev_version(name)
         model_version = f"v{version}"
@@ -83,21 +80,17 @@ def main(args):
     model_periodo = args.model_periodo
     periodo = args.periodo
 
-    # python src/predict/inicial_regular.py --input_feats_test_datastore $input_feats_test_datastore --input_target_test_datastore $input_target_test_datastore --output_predict_test_datastore $output_predict_test_datastore --experiment_name $experiment_name --model_periodo $model_periodo --periodo $periodo
-    
-    # listening to port 5000
-    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    # mlflow.set_experiment(experiment_name)
-    
-    train_inicial = TrainInicial(
+    train_continuidad_horario = TrainContinuidadToHorario(
         input_predict_datastore,
         input_target_datastore,
         output_evaluation_datastore,
         target_version,
         model_periodo)
 
-    df_model_evaluation = train_inicial.get_data_evaluation(periodo)
-    train_inicial.upload_data_evaluation(periodo, df_model_evaluation)
+    df_model_evaluation_horario = train_continuidad_horario.get_data_evaluation(periodo)
+    train_continuidad_horario.upload_data_evaluation(
+        periodo, df_model_evaluation_horario)
+
 
 if __name__ == '__main__':
         # add space in logs

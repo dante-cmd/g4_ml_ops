@@ -10,7 +10,7 @@ inputs:
     type: uri_folder
   input_feats_continuidad_horario_datastore:
     type: uri_folder
-  input_predict_continuidad_horario_datastore:
+  input_predict_continuidad_datastore:
     type: uri_folder
   feats_version:
     type: string
@@ -47,7 +47,7 @@ command: >-
   python continuidad_regular_horario.py 
   --input_model_datastore ${{inputs.input_model_continuidad_horario_datastore}}
   --input_feats_datastore ${{inputs.input_feats_continuidad_horario_datastore}}
-  --input_predict_datastore ${{inputs.input_predict_continuidad_horario_datastore}}
+  --input_predict_datastore ${{inputs.input_predict_continuidad_datastore}}
   --output_predict_datastore ${{outputs.output_predict_continuidad_horario_datastore}}
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}

@@ -46,7 +46,7 @@ environment:
           # - azure-identity
 
 command: >-
-  python inicial_regular_v2.py 
+  python inicial_regular.py 
   --input_predict_datastore ${{inputs.input_predict_inicial_datastore}}
   --input_target_datastore ${{inputs.input_target_inicial_datastore}}
   --output_evaluation_datastore ${{outputs.output_evaluation_inicial_datastore}}
