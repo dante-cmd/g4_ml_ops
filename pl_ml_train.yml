@@ -91,13 +91,6 @@ outputs:
     path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular_horario
     mode: rw_mount
 
-  # output_model_inicial_version:
-  #   type: uri_file
-  # output_model_continuidad_version:
-  #   type: uri_file
-  # output_model_continuidad_horario_version:
-  #   type: uri_file
-
 
 jobs:
   # ETL Job
@@ -171,7 +164,7 @@ jobs:
       input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
       feats_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
     outputs:
       output_model_inicial_datastore: ${{parent.outputs.output_model_inicial_datastore}}
 
@@ -183,7 +176,7 @@ jobs:
       input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
       feats_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
     outputs:
       output_model_continuidad_datastore: ${{parent.outputs.output_model_continuidad_datastore}}
 
@@ -194,7 +187,7 @@ jobs:
       input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
       feats_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
     outputs:
       output_model_continuidad_horario_datastore: ${{parent.outputs.output_model_continuidad_horario_datastore}}
 
@@ -209,7 +202,7 @@ jobs:
       feats_version: "v1"
       n_eval_periodos: 3
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
     outputs:
       output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
 
@@ -222,7 +215,7 @@ jobs:
       feats_version: "v1"
       n_eval_periodos: 3
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
     outputs:
       output_predict_continuidad_datastore: ${{parent.outputs.output_predict_continuidad_datastore}}
 
@@ -235,7 +228,7 @@ jobs:
       input_predict_continuidad_datastore: ${{parent.jobs.model_predict_continuidad_job.outputs.output_predict_continuidad_datastore}}
       feats_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
       n_eval_periodos: 3
     outputs:
       output_predict_continuidad_horario_datastore: ${{parent.outputs.output_predict_continuidad_horario_datastore}}
@@ -251,7 +244,7 @@ jobs:
       input_target_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_target_inicial_datastore}}
       target_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
       n_eval_periodos: 3
     outputs:
       output_evaluation_inicial_datastore: ${{parent.outputs.output_evaluation_inicial_datastore}}
@@ -264,7 +257,7 @@ jobs:
       input_target_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_target_continuidad_datastore}}
       target_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
       n_eval_periodos: 3
     outputs:
       output_evaluation_continuidad_datastore: ${{parent.outputs.output_evaluation_continuidad_datastore}}
@@ -277,7 +270,7 @@ jobs:
       input_target_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_target_continuidad_horario_datastore}}
       target_version: "v1"
       model_periodo: 202506
-      model_version: "1"
+      model_version: "v1"
       n_eval_periodos: 3
     outputs:
       output_evaluation_continuidad_horario_datastore: ${{parent.outputs.output_evaluation_continuidad_horario_datastore}}

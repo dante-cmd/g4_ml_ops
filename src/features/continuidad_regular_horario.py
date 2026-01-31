@@ -617,7 +617,7 @@ def main(args):
                 target_version,
                 output_target_continuidad_horario_datastore)
         else:
-            print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
+            print(f"No se generaron features para el periodo {periodo} y tipo {tipo_continuidad_horario}")
     
 
 
