@@ -1,0 +1,44 @@
+name: Daily Validator
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  validate-date:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check_date.outputs.should_run }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Check Date
+        id: check_date
+        run: python src/utils/date_validator.py
+
+  trigger-pipeline:
+    needs: validate-date
+    if: needs.validate-date.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Trigger Production Pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Triggering pipeline_deploy_prod.yml..."
+          gh workflow run pipeline_deploy_prod.yml --ref ${{ github.ref }}
