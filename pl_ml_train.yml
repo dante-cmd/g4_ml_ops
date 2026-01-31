@@ -27,10 +27,7 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/target/inicial_regular
     mode: rw_mount
-  # output_predict_inicial_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/predict/inicial_regular
-  #   mode: rw_mount
+  
   output_feats_continuidad_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/features/continuidad_regular
@@ -67,6 +64,16 @@ outputs:
   output_predict_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/predict/inicial_regular
+    mode: rw_mount
+
+  output_predict_continuidad_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict/continuidad_regular
+    mode: rw_mount
+
+  output_predict_continuidad_horario_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict/continuidad_regular_horario
     mode: rw_mount
 
   output_evaluation_inicial_datastore:
@@ -183,20 +190,46 @@ jobs:
 
 
   # Model Predict
-  # model_predict_inicial_job:
-  #   type: command
-  #   component: file:./src/predict/inicial_regular.yml
-  #   inputs:
-  #     input_model_inicial_datastore: ${{parent.jobs.model_train_inicial_job.outputs.output_model_inicial_datastore}}
-  #     input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
-  #     feats_version: "v1"
-  #     target_version: "v1"
-  #     # periodo: 202511
-  #     n_eval_periodos: 3
-  #     model_periodo: 202506
-  #     model_version: "1"
-  #   outputs:
-  #     output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
+  model_predict_inicial_job:
+    type: command
+    component: file:./src/predict/inicial_regular.yml
+    inputs:
+      input_model_inicial_datastore: ${{parent.jobs.model_train_inicial_job.outputs.output_model_inicial_datastore}}
+      input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
+      feats_version: "v1"
+      n_eval_periodos: 3
+      model_periodo: 202506
+      model_version: "1"
+    outputs:
+      output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
+
+  model_predict_continuidad_job:
+    type: command
+    component: file:./src/predict/continuidad_regular.yml
+    inputs:
+      input_model_continuidad_datastore: ${{parent.jobs.model_train_continuidad_job.outputs.output_model_continuidad_datastore}}
+      input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
+      feats_version: "v1"
+      n_eval_periodos: 3
+      model_periodo: 202506
+      model_version: "1"
+    outputs:
+      output_predict_continuidad_datastore: ${{parent.outputs.output_predict_continuidad_datastore}}
+
+  model_predict_continuidad_horario_job:
+    type: command
+    component: file:./src/predict/continuidad_regular_horario.yml
+    inputs:
+      input_model_continuidad_horario_datastore: ${{parent.jobs.model_train_continuidad_horario_job.outputs.output_model_continuidad_horario_datastore}}
+      input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
+      input_predict_continuidad_horario_datastore: ${{parent.jobs.model_predict_continuidad_job.outputs.output_predict_continuidad_datastore}}
+      feats_version: "v1"
+      model_periodo: 202506
+      model_version: "1"
+      n_eval_periodos: 3
+    outputs:
+      output_predict_continuidad_horario_datastore: ${{parent.outputs.output_predict_continuidad_horario_datastore}}
+
 
   # Model evaluation
   # model_evaluation_inicial_job:
@@ -212,49 +245,3 @@ jobs:
   #     n_eval_periodos: 3
   #   outputs:
   #     output_evaluation_inicial_datastore: ${{parent.outputs.output_evaluation_inicial_datastore}}
-
-  # # Model Register Jobs
-  # register_inicial_job:
-  #   type: command
-  #   component: file:./src/register/inicial_regular_v2.yml
-  #   inputs:
-  #     input_model_inicial_path: ${{parent.jobs.model_train_inicial_job.outputs.model_output_inicial}}
-  #     model_periodo: 202506
-  #   outputs:
-  #     output_model_inicial_version: ${{parent.outputs.output_model_inicial_version}}
-
-  # register_continuidad_job:
-  #   type: command
-  #   component: file:./src/register/continuidad_regular.yml
-  #   inputs:
-  #     model_input_path: ${{parent.jobs.model_train_continuidad_job.outputs.model_output_continuidad}}
-  #     model_periodo: 202506
-  #   outputs:
-  #     output_model_continuidad_version: ${{parent.outputs.output_model_continuidad_version}}
-
-  # register_continuidad_horario_job:
-  #   type: command
-  #   component: file:./src/register/continuidad_regular_horario.yml
-  #   inputs:
-  #     model_input_path: ${{parent.jobs.model_train_continuidad_horario_job.outputs.model_output_continuidad_horario}}
-  #     model_periodo: 202506
-  #   outputs:
-  #     output_model_continuidad_horario_version: ${{parent.outputs.output_model_continuidad_horario_version}}
-
-
-  # # # Model predict
-  # # model_predict_job:
-  # #   type: command
-  # #   component: file:./src/predict/inicial_regular_v2.yml
-  # #   inputs:
-  # #     input_model_inicial_path: ${{parent.jobs.model_train_job.outputs.model_output}}
-  # #     input_feats_inicial_datastore: ${{parent.jobs.features_job.outputs.output_feats_inicial_datastore}}
-  # #     input_target_inicial_datastore: ${{parent.jobs.features_job.outputs.output_target_inicial_datastore}}
-  # #     experiment_name: ml_pipeline_experiment
-  # #     feats_version: "v1"
-  # #     target_version: "v1"
-  # #     periodo: 202511
-  # #     model_periodo: 202511
-  # #     model_version: "v1"
-  # #   outputs:
-  # #     output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}

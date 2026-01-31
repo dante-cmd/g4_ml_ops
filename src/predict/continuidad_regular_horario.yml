@@ -39,8 +39,9 @@ environment:
           - pandas
           - numpy
           - catboost
-          - scikit-learn
-          - mlflow
+          - pyarrow
+          - PyYAML
+          - Unidecode
 
 command: >-
   python continuidad_regular_horario.py 

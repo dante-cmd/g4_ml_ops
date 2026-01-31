@@ -1,4 +1,4 @@
-# src/predict/inicial_regular.yml
+  # src/predict/inicial_regular.yml
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: predict_inicial_regular
 version: 1
