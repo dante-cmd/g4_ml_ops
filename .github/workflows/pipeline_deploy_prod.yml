@@ -1,4 +1,4 @@
-name: Run Pipeline ML Train
+name: Run Pipeline deploy
 
 on:
   workflow_dispatch:
