@@ -1,0 +1,56 @@
+# src/predict/continuidad_regular.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: predict_continuidad_regular
+version: 1
+display_name: Prediction - Continuidad Regular
+type: command
+
+inputs:
+  input_model_continuidad_horario_datastore:
+    type: uri_folder
+  input_feats_continuidad_horario_datastore:
+    type: uri_folder
+  input_predict_continuidad_datastore:
+    type: uri_folder
+  feats_version:
+    type: string
+  model_periodo:
+    type: integer
+  model_version:
+    type: string
+  n_eval_periodos:
+    type: integer
+  
+outputs:
+  output_predict_continuidad_horario_datastore:
+    type: uri_folder
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - numpy
+          - catboost
+          - pyarrow
+          - PyYAML
+          - Unidecode
+
+command: >-
+  python continuidad_regular_horario.py 
+  --input_model_datastore ${{inputs.input_model_continuidad_horario_datastore}}
+  --input_feats_datastore ${{inputs.input_feats_continuidad_horario_datastore}}
+  --input_predict_datastore ${{inputs.input_predict_continuidad_datastore}}
+  --output_predict_datastore ${{outputs.output_predict_continuidad_horario_datastore}}
+  --feats_version ${{inputs.feats_version}}
+  --model_periodo ${{inputs.model_periodo}}
+  --model_version ${{inputs.model_version}}
+  --n_eval_periodos ${{inputs.n_eval_periodos}}
+  

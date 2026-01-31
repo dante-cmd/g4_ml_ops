@@ -122,8 +122,7 @@ class TrainContinuidadToHorario:
         #     # f"models:/{self.tipo}_{periodo}@dev"
         # )
         
-        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
-        
+        model.load_model(self.input_model_datastore/self.tipo/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
         return model
     
     def upload_data_predict(

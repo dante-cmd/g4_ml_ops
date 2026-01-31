@@ -144,7 +144,7 @@ jobs:
   # Model Predict
   model_predict_inicial_job:
     type: command
-    component: file:./src/predict/inicial_regular.yml
+    component: file:./src/deploy_predict/inicial_regular.yml
     inputs:
       input_model_inicial_datastore: ${{parent.inputs.input_model_datastore}}
       input_feats_inicial_datastore: ${{parent.jobs.features_inicial_job.outputs.output_feats_inicial_datastore}}
@@ -157,7 +157,7 @@ jobs:
 
   model_predict_continuidad_job:
     type: command
-    component: file:./src/predict/continuidad_regular.yml
+    component: file:./src/deploy_predict/continuidad_regular.yml
     inputs:
       input_model_continuidad_datastore: ${{parent.inputs.input_model_datastore}}
       input_feats_continuidad_datastore: ${{parent.jobs.features_continuidad_job.outputs.output_feats_continuidad_datastore}}
@@ -170,7 +170,7 @@ jobs:
 
   model_predict_continuidad_horario_job:
     type: command
-    component: file:./src/predict/continuidad_regular_horario.yml
+    component: file:./src/deploy_predict/continuidad_regular_horario.yml
     inputs:
       input_model_continuidad_horario_datastore: ${{parent.inputs.input_model_datastore}}
       input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}

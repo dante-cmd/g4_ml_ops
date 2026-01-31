@@ -1,0 +1,57 @@
+# src/predict/inicial_regular.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: predict_continuidad_regular
+version: 1
+display_name: Prediction - Continuidad Regular
+type: command
+
+inputs:
+  input_model_continuidad_datastore:
+    type: uri_folder
+  input_feats_continuidad_datastore:
+    type: uri_folder
+  feats_version:
+    type: string
+  n_eval_periodos:
+    type: integer
+  model_periodo:
+    type: integer
+  model_version:
+    type: string
+
+outputs:
+  output_predict_continuidad_datastore:
+    type: uri_folder
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - numpy
+          - catboost
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          # - mlflow
+          # - mlflow-azureml
+          # - scikit-learn
+          # - azure-ai-ml
+          # - azure-identity
+
+command: >-
+  python continuidad_regular.py 
+  --input_model_datastore ${{inputs.input_model_continuidad_datastore}}
+  --input_feats_datastore ${{inputs.input_feats_continuidad_datastore}}
+  --output_predict_datastore ${{outputs.output_predict_continuidad_datastore}}
+  --feats_version ${{inputs.feats_version}}
+  --n_eval_periodos ${{inputs.n_eval_periodos}}
+  --model_periodo ${{inputs.model_periodo}}
+  --model_version ${{inputs.model_version}}
