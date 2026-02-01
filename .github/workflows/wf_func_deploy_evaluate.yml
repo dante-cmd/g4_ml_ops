@@ -1,0 +1,67 @@
+name: Run Pipeline Base
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install azure-ai-ml azure-identity
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install Azure ML CLI extension
+      run: |
+          az extension add -n ml -y || az extension update -n ml
+          az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
+
+    - name: Submit pipeline job and print outputs
+      env:
+        AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+        AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
+        AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+      run: |
+          # Submit job with only the provided parameters
+          JOB_ID=$(az ml job create \
+            --file pl_ml_deploy_evaluate.yml \
+            --query name -o tsv)
+
+          echo "Submitted job: $JOB_ID"
+
+          # Wait for the job to complete
+          # echo "Waiting for job to complete..."
+          az ml job stream --name $JOB_ID
+
+          CHILD_JOB_NAME=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_inicial_job'].name | [0]" -o tsv)
+
+          R2_FINAL=$(az ml job show --name $CHILD_JOB_NAME --query "metrics.R2_Score" -o tsv)
+
+          echo "El R2 obtenido con azureml-core es: $R2_FINAL"
+        
+
+    # - name: Run Pipeline Script
+    #   env:
+    #     AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+    #     AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
+    #     AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+    #   run: |
+    #     python pipeline_cloud_base_v2_actions.py
+    #  opcional: exponerlo como output del step
+         # echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT

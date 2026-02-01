@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
+from azureml.core import Run
 
 
 class TrainInicial:
@@ -64,6 +65,13 @@ class TrainInicial:
             df_model_evaluation.to_parquet(
                 path_model/f"data_evaluation_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
+    
+    def upload_metrics(self):
+    # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
+        run = Run.get_context()
+        run.log_metrics("R2_Score", 0.5)
+        run.complete()
+        # run.log_table("metrics", metrics)
 
 
 def main(args):
@@ -110,6 +118,8 @@ def main(args):
         if map_tipos[tipo]:
             df_model_evaluation = train_inicial.get_data_evaluation(model_periodo,periodo)
             train_inicial.upload_data_evaluation(model_periodo, model_version, periodo, df_model_evaluation, mode)
+    
+    train_inicial.upload_metrics()
 
 
 if __name__ == '__main__':

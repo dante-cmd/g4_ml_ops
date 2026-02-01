@@ -44,6 +44,7 @@ environment:
           - numpy
           - pyarrow
           - PyYAML
+          - azureml-core
           # - catboost
           # - mlflow
           # - mlflow-azureml
