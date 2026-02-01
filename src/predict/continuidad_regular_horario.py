@@ -228,7 +228,7 @@ def main(args):
         
         if mapping_tipos[train_continuidad_horario.tipo]:
             df_model_predict = train_continuidad_horario.get_data_predict(model_periodo,periodo, model)
-            train_continuidad_horario.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode, with_tipo)
+            train_continuidad_horario.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode)
     
     
 

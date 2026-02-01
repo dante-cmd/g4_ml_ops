@@ -9,7 +9,8 @@ class TrainContinuidad:
                  input_target_datastore:str,
                  output_evaluation_datastore:str,
                  target_version:str,
-                 model_version:str
+                 model_version:str,
+                 tipo:str
                  ):
 
         self.input_predict_datastore = Path(input_predict_datastore)
@@ -17,7 +18,7 @@ class TrainContinuidad:
         self.output_evaluation_datastore = Path(output_evaluation_datastore)
         self.target_version = target_version
         self.model_version= model_version
-        self.tipo = 'continuidad_regular'
+        self.tipo = tipo
 
     def get_data_predict(self, model_periodo:int, periodo:int):
         
@@ -43,13 +44,9 @@ class TrainContinuidad:
     
     def upload_data_evaluation(
         self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame, 
-        mode:str, with_tipo:str):
+        mode:str):
 
-        eval_tipo = eval(with_tipo)
-        if not eval_tipo:
-            path_model = (self.output_evaluation_datastore/self.tipo/'test')
-        else:
-            path_model = (self.output_evaluation_datastore/'test')
+        path_model = (self.output_evaluation_datastore/'test')
 
         path_model.mkdir(parents=True, exist_ok=True)
         
@@ -81,13 +78,22 @@ def main(args):
     periodo = args.periodo
     mode = args.mode
     with_tipo = args.with_tipo
+
+    tipo = 'continuidad_regular'
+    eval_tipo = eval(with_tipo)
+
+    if not eval_tipo:
+        input_predict_datastore = f"{input_predict_datastore}/{tipo}"
+        input_target_datastore = f"{input_target_datastore}/{tipo}"
+        output_evaluation_datastore = f"{output_evaluation_datastore}/{tipo}"
     
     train_continuidad = TrainContinuidad(
         input_predict_datastore,
         input_target_datastore,
         output_evaluation_datastore,
         target_version,
-        model_version)
+        model_version,
+        tipo)
 
     tipo = train_continuidad.tipo
 
@@ -102,7 +108,7 @@ def main(args):
         map_tipos = get_mapping_tipos(periodo)
         if map_tipos[tipo]:
             df_model_evaluation = train_continuidad.get_data_evaluation(model_periodo,periodo)
-            train_continuidad.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation)
+            train_continuidad.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation, mode)
 
 
 if __name__ == '__main__':

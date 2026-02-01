@@ -203,7 +203,8 @@ def main(args):
     with_tipo = args.with_tipo
 
     tipo = 'continuidad_regular'
-
+    eval_tipo =eval(with_tipo)
+    
     if not eval_tipo:
         input_model_datastore = f"{input_model_datastore}/{tipo}"
         input_feats_datastore = f"{input_feats_datastore}/{tipo}"
@@ -231,7 +232,7 @@ def main(args):
         if mapping_tipos[train_continuidad.tipo]:
             df_model_predict = train_continuidad.get_data_predict(periodo, model)
             train_continuidad.upload_data_predict(
-                model_version, model_periodo, periodo, df_model_predict, mode, with_tipo)
+                model_version, model_periodo, periodo, df_model_predict, mode)
     
 
 if __name__ == '__main__':
