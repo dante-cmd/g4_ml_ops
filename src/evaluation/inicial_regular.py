@@ -68,11 +68,14 @@ class TrainInicial:
             )
     
     def upload_metrics(self):
-    # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
-    # Azure ML configura MLflow automáticamente
-        mlflow.start_run()
-        mlflow.log_metric("R2_Score", float(0.5))
-        mlflow.end_run()
+        print("Uploading metrics...")
+        with mlflow.start_run(nested=True):
+            mlflow.log_metric("R2_Score", 0.5)
+        # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
+        # Azure ML configura MLflow automáticamente
+        # mlflow.start_run()
+        # mlflow.log_metric("R2_Score", float(0.5))
+        # mlflow.end_run()
 
         # run = Run.get_context()
         # run.log("R2_Score", 0.5)

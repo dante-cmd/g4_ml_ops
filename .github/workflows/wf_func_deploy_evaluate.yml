@@ -47,14 +47,15 @@ jobs:
 
           # Wait for the job to complete
           # echo "Waiting for job to complete..."
-          az ml job stream --name $JOB_ID
+          # az ml job stream --name $JOB_ID
+          az ml job wait --name $JOB_ID
 
           CHILD_JOB_NAME=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_inicial_job'].name | [0]" -o tsv)
 
           echo "Submitted children job: $CHILD_JOB_NAME"
 
           az ml job show --name $CHILD_JOB_NAME
-          
+
           R2_FINAL=$(az ml job show --name $CHILD_JOB_NAME --query "metrics.R2_Score" -o tsv)
 
           echo "El R2 obtenido con azureml-core es: $R2_FINAL"
