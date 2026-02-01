@@ -1,7 +1,8 @@
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
-from azureml.core import Run
+# from azureml.core import Run
+import mlflow
 
 
 class TrainInicial:
@@ -68,9 +69,14 @@ class TrainInicial:
     
     def upload_metrics(self):
     # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
-        run = Run.get_context()
-        run.log("R2_Score", 0.5)
-        run.complete()
+    # Azure ML configura MLflow automáticamente
+        mlflow.start_run()
+        mlflow.log_metric("R2_Score", float(0.5))
+        mlflow.end_run()
+
+        # run = Run.get_context()
+        # run.log("R2_Score", 0.5)
+        # run.complete()
         # run.log_table("metrics", metrics)
 
 
