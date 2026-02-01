@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-# import mlflow
-# import mlflow.catboost
 from catboost import CatBoostRegressor
 from utils_model import parse_args, get_mapping_tipos
 
