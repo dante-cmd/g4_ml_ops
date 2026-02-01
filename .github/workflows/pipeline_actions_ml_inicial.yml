@@ -146,7 +146,6 @@ jobs:
           # 1. Output del Modelo Inicial - Get the version number
           # Download the file and read its content
           az ml job download --name $JOB_ID --output-name output_model_inicial_version --download-path ./outputs
-          
           # The downloaded output is a directory, find the actual file inside
           version_file=$(find ./outputs/named-outputs/output_model_inicial_version -type f | head -n 1)
           model_version=$(cat "$version_file")

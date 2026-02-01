@@ -56,9 +56,17 @@ jobs:
 
           az ml job show --name $CHILD_JOB_NAME
 
-          R2_FINAL=$(az ml job show --name $CHILD_JOB_NAME --query "metrics.R2_Score" -o tsv)
-
-          echo "El R2 obtenido con azureml-core es: $R2_FINAL"
+          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics
+          
+          R2_FILE=$(find ./outputs_metrics -name "r2_score.txt" | head -n 1)
+          
+          if [ -f "$R2_FILE" ]; then
+              R2_FINAL=$(cat "$R2_FILE")
+              echo "El R2 obtenido desde archivo es: $R2_FINAL"
+          else
+              echo "Error: No se encontró el archivo r2_score.txt"
+              exit 1
+          fi
         
 
     # - name: Run Pipeline Script

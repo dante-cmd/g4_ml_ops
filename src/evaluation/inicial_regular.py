@@ -68,9 +68,19 @@ class TrainInicial:
             )
     
     def upload_metrics(self):
-        print("Uploading metrics...")
-        with mlflow.start_run(nested=True):
-            mlflow.log_metric("R2_Score", 0.5)
+        r2 = 0.5
+        print(f"Uploading metrics R2={r2} to file...")
+        
+        # Guardar en archivo para recuperar desde GitHub Actions
+        metric_file = self.output_evaluation_datastore / "r2_score.txt"
+        
+        # Asegurar que el directorio existe
+        self.output_evaluation_datastore.mkdir(parents=True, exist_ok=True)
+        
+        with open(metric_file, "w") as f:
+            f.write(str(r2))
+            
+        print(f"Metric saved to {metric_file}")
         # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
         # Azure ML configura MLflow automáticamente
         # mlflow.start_run()
