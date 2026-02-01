@@ -13,13 +13,17 @@ inputs:
     type: uri_folder
     path: azureml://datastores/base_data/paths/rawdata
 
-  input_model_inicial_datastore:
+  input_model_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/models
 
   input_feats_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/features
+
+  input_predict_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/predict
 
 outputs:
 
