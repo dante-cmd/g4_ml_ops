@@ -64,11 +64,17 @@ def parse_args():
     parser.add_argument("--target_version", dest='target_version',
                         type=str)
     parser.add_argument("--n_eval_periodos", dest='n_eval_periodos',
-                        type=int)
+                        type=int, default=-1)
     parser.add_argument("--ult_periodo", dest='ult_periodo',
                         type=int)
     parser.add_argument("--model_periodo", dest='model_periodo',
                         type=int)
+    parser.add_argument("--mode", dest='mode',
+                        type=str)
+    parser.add_argument("--periodo", dest='periodo',
+                        type=int, default=-1)
+    parser.add_argument("--with_tipo", dest='with_tipo',
+                        type=str)
     
 
     # parse args

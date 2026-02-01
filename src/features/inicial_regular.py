@@ -258,11 +258,16 @@ class Inicial(Utils):
                       periodo:int, 
                       version:str,
                       output_feats_datastore:str,
+                      with_tipo:str
                       ):
         # output_feats_train_datastore:str,
         # output_feats_test_datastore:str
         
         data_model_train, data_model_test = self.get_features(periodo)
+
+        eval_tipo = eval(with_tipo)
+        if not eval_tipo:
+            output_feats_datastore = f"{output_feats_datastore}/{self.tipo}"
         
         # ./data/ml_data/features/{self.tipo}/{version}/train/{periodo}/data_feats_{self.tipo}_{periodo}.parquet
         data_model_train.to_parquet(
@@ -272,8 +277,11 @@ class Inicial(Utils):
             f"{output_feats_datastore}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", 
             index=False)
     
-    def load_target(self, periodo:int, version:str, output_target_datastore:str):
-
+    def load_target(self, periodo:int, version:str, output_target_datastore:str,with_tipo:str):
+        eval_tipo = eval(with_tipo)
+        
+        if not eval_tipo:
+            output_target_datastore = f"{output_target_datastore}/{self.tipo}"
         try:
             df_real_09 = self.get_target(periodo)
             df_real_09.to_parquet(
@@ -288,8 +296,12 @@ def main(args):
     
     # python src/features/inicial_regular.py --input_datastore "./data/ml_data/platinumdata/v1/" --output_feats_datastore "./data/ml_data/features/" --output_target_datastore "./data/ml_data/target/" --feats_version "v1" --target_version "v1" --periodo 202506 --ult_periodo 202506
     # for Loader
+    mode = args.mode
+    periodo = args.periodo
+
     input_datastore=args.input_datastore
     ult_periodo=args.ult_periodo
+    with_tipo = args.with_tipo
     
     # for Inicial
     output_feats_inicial_datastore = args.output_feats_datastore
@@ -320,14 +332,20 @@ def main(args):
     feats_test_path.mkdir(parents=True, exist_ok=True)
     target_test_path.mkdir(parents=True, exist_ok=True)
 
-    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+    if (periodo != -1) and (n_eval_periodos == -1):
+        periodos = [periodo]
+    else:
+        assert n_eval_periodos >= 1, "n_eval_periodos debe ser mayor o igual a 1"
+        periodos = get_ahead_n_periodos(model_periodo, n_eval_periodos)
+
+    for periodo in periodos:
         mapping_tipos = get_mapping_tipos(periodo)
     
         if mapping_tipos[tipo]:
 
-            inicial.load_features(periodo, feats_version, output_feats_inicial_datastore)
+            inicial.load_features(periodo, feats_version, output_feats_inicial_datastore, with_tipo)
         
-            inicial.load_target(periodo, target_version, output_target_inicial_datastore)
+            inicial.load_target(periodo, target_version, output_target_inicial_datastore, with_tipo)
         else:
             print(f"No se generaron features para el periodo {periodo} y tipo {tipo}")
 

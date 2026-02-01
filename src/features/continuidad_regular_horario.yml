@@ -2,7 +2,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: features
 version: 1
-display_name: Features
+display_name: Features Continuidad Regular Horario
 type: command
 
 inputs:
@@ -20,6 +20,12 @@ inputs:
     type: integer
   model_periodo:
     type: integer
+  periodo:
+    type: integer
+  mode:
+    type: string
+  with_tipo:
+    type: string
 
 outputs:
   output_feats_continuidad_horario_datastore:
@@ -56,3 +62,6 @@ command: >-
   --target_version ${{inputs.target_version}}
   --n_eval_periodos ${{inputs.n_eval_periodos}}
   --model_periodo ${{inputs.model_periodo}}
+  --periodo ${{inputs.periodo}}
+  --mode ${{inputs.mode}}
+  --with_tipo ${{inputs.with_tipo}}

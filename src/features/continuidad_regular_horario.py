@@ -546,7 +546,11 @@ class ContinuidadToHorario(Utils):
 
         return (data_model_train, data_model_test)
     
-    def load_features(self, periodo:int, version:str, output_feats_continuidad_horario_datastore:str):
+    def load_features(self, periodo:int, version:str, output_feats_continuidad_horario_datastore:str, with_tipo:str):
+        eval_tipo = eval(with_tipo)
+        
+        if not eval_tipo:
+            output_feats_continuidad_horario_datastore = f"{output_feats_continuidad_horario_datastore}/{self.tipo}"
         
         data_model_train, data_model_test = self.get_features(periodo)
         data_model_train.to_parquet(
@@ -554,7 +558,13 @@ class ContinuidadToHorario(Utils):
         data_model_test.to_parquet(
             f"{output_feats_continuidad_horario_datastore}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", index=False)
     
-    def load_target(self, periodo:int, version:str, output_target_continuidad_horario_datastore:str):
+    def load_target(self, periodo:int, version:str, 
+                    output_target_continuidad_horario_datastore:str, 
+                    with_tipo:str):
+        eval_tipo = eval(with_tipo)
+        
+        if not eval_tipo:
+            output_target_continuidad_horario_datastore = f"{output_target_continuidad_horario_datastore}/{self.tipo}"
         try:
             df_real_09 = self.get_target(periodo)
             df_real_09.to_parquet(
@@ -567,6 +577,10 @@ class ContinuidadToHorario(Utils):
 def main(args):
     input_datastore=args.input_datastore
     ult_periodo=args.ult_periodo
+    
+    mode = args.mode
+    periodo = args.periodo
+    with_tipo = args.with_tipo
     
     # for Continuidad
     output_feats_continuidad_horario_datastore = args.output_feats_datastore
@@ -601,8 +615,15 @@ def main(args):
     feats_test_path.mkdir(parents=True, exist_ok=True)
     target_test_path.mkdir(parents=True, exist_ok=True)
 
+
+    if (periodo != -1) and (n_eval_periodos == -1):
+        periodos = [periodo]
+    else:
+        assert n_eval_periodos >= 1, "n_eval_periodos debe ser mayor o igual a 1"
+        periodos = get_ahead_n_periodos(model_periodo, n_eval_periodos)
+
     
-    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+    for periodo in periodos:
         mapping_tipos = get_mapping_tipos(periodo)
         
         if mapping_tipos[tipo_continuidad_horario]:
@@ -610,12 +631,12 @@ def main(args):
             continuidad_horario.load_features(
                 periodo, 
                 feats_version,
-                output_feats_continuidad_horario_datastore)
+                output_feats_continuidad_horario_datastore, with_tipo)
         
             continuidad_horario.load_target(
                 periodo, 
                 target_version,
-                output_target_continuidad_horario_datastore)
+                output_target_continuidad_horario_datastore, with_tipo)
         else:
             print(f"No se generaron features para el periodo {periodo} y tipo {tipo_continuidad_horario}")
     

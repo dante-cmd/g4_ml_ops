@@ -1,4 +1,4 @@
-name: Run Pipeline deploy
+name: Deploy Pipeline ML prod
 
 on:
   # workflow_dispatch:
@@ -30,7 +30,7 @@ on:
   #     - prod
 
 jobs:
-  run-pipeline:
+  deploy-pl-ml-prod:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -63,12 +63,9 @@ jobs:
         AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
       run: |
 
-
-
-
           # Submit job with parameters from workflow inputs
           JOB_ID=$(az ml job create \
-            --file pl_deploy_prod.yml \
+            --file pl_ml_predict_prod.yml \
             --set jobs.etl_job.inputs.platinum_version="${{ inputs.platinum_version }}" \
             --set jobs.etl_job.inputs.ult_periodo="${{ inputs.ult_periodo_data }}" \
             --set jobs.features_inicial_job.inputs.platinum_version="${{ inputs.platinum_version }}" \
@@ -108,28 +105,4 @@ jobs:
           # Wait for the job to complete
           # echo "Waiting for job to complete..."
           # az ml job stream --name $JOB_ID
-
-          # read version.json
           
-          inicial_regular_version=$(jq -r '.model_version.inicial_regular.champion' version.json)
-          continuidad_regular_version=$(jq -r '.model_version.continuidad_regular.champion' version.json)
-          continuidad_regular_horario_version=$(jq -r '.model_version.continuidad_regular_horario.champion' version.json)
-          model_periodo=$(jq -r '.model_periodo' params.json)
-
-          echo "Inicial Regular Version: $inicial_regular_version"
-          echo "Continuidad Regular Version: $continuidad_regular_version"
-          echo "Continuidad Regular Horario Version: $continuidad_regular_horario_version"
-          echo "Model Periodo: $model_periodo"
-
-      
-        
-
-    # - name: Run Pipeline Script
-    #   env:
-    #     AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-    #     AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
-    #     AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
-    #   run: |
-    #     python pipeline_cloud_base_v2_actions.py
-    #  opcional: exponerlo como output del step
-         # echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT

@@ -21,7 +21,6 @@ outputs:
   output_datastore:
     type: uri_folder
   
-
 code: .
 
 environment:
@@ -38,9 +37,6 @@ environment:
           - openpyxl
           - pyarrow
           - Unidecode
-          - scikit-learn
-          - PyYAML
-          - joblib
 
 command: >-
   python etl.py 
