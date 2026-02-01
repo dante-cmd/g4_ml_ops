@@ -69,7 +69,7 @@ class TrainInicial:
     def upload_metrics(self):
     # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
         run = Run.get_context()
-        run.log_metrics("R2_Score", 0.5)
+        run.log("R2_Score", 0.5)
         run.complete()
         # run.log_table("metrics", metrics)
 
