@@ -38,11 +38,12 @@ jobs:
         if: always()
         run: |
           with_tipo="True"
+          periodo=-1
           echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
           echo "model_periodo=$(jq -r '.model_periodo' params_prod.json)" >> $GITHUB_OUTPUT
           echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
           echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_prod.json)" >> $GITHUB_OUTPUT
-          echo "periodo=-1" >> $GITHUB_OUTPUT
+          echo "periodo=$periodo" >> $GITHUB_OUTPUT
           echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
           echo "platinum_version=$(jq -r '.platinum_version.prod' version.json)" >> $GITHUB_OUTPUT
           echo "feats_version=$(jq -r '.feats_version.prod' version.json)" >> $GITHUB_OUTPUT
