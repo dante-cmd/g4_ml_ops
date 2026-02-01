@@ -57,7 +57,7 @@ jobs:
           az ml job show --name $CHILD_JOB_NAME
 
           az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics
-          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_continuidad_regular_horario_datastore --download-path ./outputs_metrics
+          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_continuidad_horario_datastore --download-path ./outputs_metrics
           
           response_inicial_file = $(find ./outputs_metrics -name "response_inicial.txt" | head -n 1)
           response_continuidad_horario_file = $(find ./outputs_metrics -name "response_continuidad_regular_horario.txt" | head -n 1)
