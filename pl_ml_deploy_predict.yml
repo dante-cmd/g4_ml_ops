@@ -106,7 +106,7 @@ jobs:
       n_eval_periodos: -1
       model_periodo: 202506
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "True"
     outputs:
       output_feats_inicial_datastore: ${{parent.outputs.output_feats_inicial_datastore}}
@@ -125,7 +125,7 @@ jobs:
       n_eval_periodos: -1
       model_periodo: 202506
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "True"
     outputs:
       output_feats_continuidad_datastore: ${{parent.outputs.output_feats_continuidad_datastore}}
@@ -144,7 +144,7 @@ jobs:
       n_eval_periodos: -1
       model_periodo: 202506
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "True"
     outputs:
       output_feats_continuidad_horario_datastore: ${{parent.outputs.output_feats_continuidad_horario_datastore}}
@@ -162,7 +162,7 @@ jobs:
       model_periodo: 202506
       model_version: "v1"
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "False"
     outputs:
       output_predict_inicial_datastore: ${{parent.outputs.output_predict_inicial_datastore}}
@@ -178,7 +178,7 @@ jobs:
       model_periodo: 202506
       model_version: "v1"
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "False"
     outputs:
       output_predict_continuidad_datastore: ${{parent.outputs.output_predict_continuidad_datastore}}
@@ -195,7 +195,7 @@ jobs:
       model_version: "v1"
       n_eval_periodos: -1
       periodo: 202512
-      mode: "dev"
+      mode: "prod"
       with_tipo: "False"
     outputs:
       output_predict_continuidad_horario_datastore: ${{parent.outputs.output_predict_continuidad_horario_datastore}}
