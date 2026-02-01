@@ -197,3 +197,4 @@ def fac_to_cant(df_forecast_fac: pd.DataFrame, df_forecast_cant:pd.DataFrame) ->
     df_forecast_03 = df_forecast_03.rename(columns={'CANT_ALUMNOS': 'CANT_ALUMNOS_PREDICT'})
 
     return df_forecast_03
+

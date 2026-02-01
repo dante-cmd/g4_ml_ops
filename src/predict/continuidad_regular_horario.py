@@ -3,7 +3,7 @@ import numpy as np
 from catboost import CatBoostRegressor, Pool
 from pathlib import Path
 from utils_metrics import calculate_classes , calculate_metrics, fac_to_cant
-from utils_model import get_mapping_tipos, get_ahead_n_periodos
+from utils_predict import get_mapping_tipos, get_ahead_n_periodos
 import argparse 
 
 
@@ -127,58 +127,55 @@ class TrainContinuidadToHorario:
         return model
     
     def upload_data_predict(
-        self, model_version: str, model_periodo: int, periodo: int, df_model_predict: pd.DataFrame):
+        self, model_version: str, model_periodo: int, periodo: int, 
+        df_model_predict: pd.DataFrame, mode:str, with_tipo:str):
       
-        print(self.output_predict_datastore)
-        print(model_version)
-        print(model_periodo)
-        print(periodo)
-        print(df_model_predict)
-
-        path_model_version = self.output_predict_datastore / "test"
+        eval_tipo = eval(with_tipo)
         
+        if not eval_tipo:
+            path_model_version = self.output_predict_datastore/self.tipo/"test" 
+        else:
+            path_model_version = self.output_predict_datastore/"test"
+            
         path_model_version.mkdir(parents=True, exist_ok=True)
-
+        
         df_model_predict.to_parquet(
             path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
-
-        df_model_predict.to_parquet(
+        
+        # path_model_version = self.output_predict_datastore / "test" 
+        assert mode in ["dev", "prod"]
+        
+        if mode == "dev":
+            df_model_predict.to_parquet(
             path_model_version / f"data_predict_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
-
-        if not (path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        else:
             df_model_predict.to_parquet(
-                path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
-            )
+            path_model_version / f"data_predict_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
+        )
 
 
 def parse_args():
-    # setup arg parser
     parser = argparse.ArgumentParser()
-
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
     parser.add_argument("--input_predict_datastore", dest="input_predict_datastore", type=str)
-    # parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
     parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
-    
     parser.add_argument("--feats_version", dest="feats_version", type=str)
+    parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int, default=-1)
     parser.add_argument("--model_periodo", dest="model_periodo", type=int)
     parser.add_argument("--model_version", dest="model_version", type=str)
-    # parser.add_argument("--target_version", dest="target_version", type=str)
-    # parser.add_argument("--periodo", dest="periodo", type=int)    
-    parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int)
+    parser.add_argument("--periodo", dest="periodo", type=int, default=-1)
+    parser.add_argument("--mode", dest="mode", type=str)
+    parser.add_argument("--with_tipo", dest="with_tipo", type=str)
 
-    # parse args
     args = parser.parse_args()
 
-    # return args
     return args
 
 
 def main(args):
-    # input_feats_train_datastore = args.input_feats_train_datastore
     input_feats_datastore = args.input_feats_datastore
     input_predict_datastore = args.input_predict_datastore
     input_model_datastore = args.input_model_datastore
@@ -189,6 +186,10 @@ def main(args):
     model_periodo = args.model_periodo
     model_version = args.model_version
     n_eval_periodos = args.n_eval_periodos
+
+    periodo = args.periodo
+    mode = args.mode
+    with_tipo = args.with_tipo
     
     train_continuidad_horario = TrainContinuidadToHorario(
         input_feats_datastore,
@@ -200,12 +201,18 @@ def main(args):
     
     model = train_continuidad_horario.load_model(model_periodo)
 
-    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+    if periodo == -1:
+        assert n_eval_periodos >= 1
+        periodos = get_ahead_n_periodos(model_periodo, n_eval_periodos)
+    else:
+        periodos = [periodo]
+
+    for periodo in periodos:
         mapping_tipos = get_mapping_tipos(periodo)
         
         if mapping_tipos[train_continuidad_horario.tipo]:
             df_model_predict = train_continuidad_horario.get_data_predict(model_periodo,periodo, model)
-            train_continuidad_horario.upload_data_predict(model_version, model_periodo, periodo, df_model_predict)
+            train_continuidad_horario.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode, with_tipo)
     
     
 

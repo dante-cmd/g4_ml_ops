@@ -4,7 +4,7 @@ from pathlib import Path
 import argparse
 from catboost import CatBoostRegressor
 from utils_metrics import calculate_classes, calculate_metrics
-from utils_model import get_mapping_tipos, get_ahead_n_periodos 
+from utils_predict import get_mapping_tipos, get_ahead_n_periodos 
 
 
 class TrainInicial:
@@ -95,49 +95,54 @@ class TrainInicial:
         return data_model_eval
 
     def upload_data_predict(
-        self, model_version: str, model_periodo: int, periodo: int, df_model_predict: pd.DataFrame):
+        self, 
+        model_version: str, model_periodo: int, periodo: int, 
+        df_model_predict: pd.DataFrame, mode:str, with_tipo:str):
       
-        print(self.output_predict_datastore)
-        print(model_version)
-        print(model_periodo)
-        print(periodo)
-        print(df_model_predict)
+        eval_tipo = eval(with_tipo)
 
-        path_model_version = self.output_predict_datastore / "test" 
-        
+        if not eval_tipo:
+            path_model_version = self.output_predict_datastore/self.tipo/"test" 
+        else:
+            path_model_version = self.output_predict_datastore/"test"
+            
         path_model_version.mkdir(parents=True, exist_ok=True)
-
+        
         df_model_predict.to_parquet(
             path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
-
-        df_model_predict.to_parquet(
+        
+        # path_model_version = self.output_predict_datastore / "test" 
+        assert mode in ["dev", "prod"]
+        
+        if mode == "dev":
+            df_model_predict.to_parquet(
             path_model_version / f"data_predict_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
-
-        if not (path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        else:
             df_model_predict.to_parquet(
-                path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
-            )
+            path_model_version / f"data_predict_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
+        )
+
+        # if not (path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        #     df_model_predict.to_parquet(
+        #         path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
+        #     )
 
 
 def parse_args():
-    # setup arg parser
     parser = argparse.ArgumentParser()
-
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
-    # parser.add_argument("--input_target_datastore", dest="input_target_datastore", type=str)
     parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
     parser.add_argument("--feats_version", dest="feats_version", type=str)
-    parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int)
+    parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int, default=-1)
     parser.add_argument("--model_periodo", dest="model_periodo", type=int)
     parser.add_argument("--model_version", dest="model_version", type=str)
-
-    # parse args
+    parser.add_argument("--periodo", dest="periodo", type=int, default=-1)
+    parser.add_argument("--mode", dest="mode", type=str)
+    parser.add_argument("--with_tipo", dest="with_tipo", type=str)
     args = parser.parse_args()
-
-    # return args
     return args
 
 
@@ -152,6 +157,10 @@ def main(args):
     model_periodo = args.model_periodo
     model_version = args.model_version
     n_eval_periodos = args.n_eval_periodos
+
+    periodo = args.periodo
+    mode = args.mode
+    with_tipo = args.with_tipo
 
     # registered_model = ml_client.models.create_or_update(model)
     # print(f"Modelo registrado versión: {registered_model.version}")
@@ -168,13 +177,19 @@ def main(args):
     )
     
     model = train_inicial.load_model(model_periodo)
+
+    if periodo == -1:
+        assert n_eval_periodos >= 1
+        periodos = get_ahead_n_periodos(model_periodo, n_eval_periodos)
+    else:
+        periodos = [periodo]
     
-    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+    for periodo in periodos:
         mapping_tipos = get_mapping_tipos(periodo)
         
         if mapping_tipos[train_inicial.tipo]:
             df_model_predict = train_inicial.get_data_predict(periodo, model)
-            train_inicial.upload_data_predict(model_version, model_periodo, periodo, df_model_predict)
+            train_inicial.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode, with_tipo)
     # train_inicial.logging_metrics(periodo, model, df_model_predict)
 
 
