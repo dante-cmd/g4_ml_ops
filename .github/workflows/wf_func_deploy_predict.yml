@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - prod
+      - dev
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
       run: |
           # Submit job with only the provided parameters
           JOB_ID=$(az ml job create \
-            --file pl_ml_base.yml \
+            --file pl_ml_deploy_predict.yml \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
