@@ -14,24 +14,43 @@ class TrainContinuidadToHorario:
                  input_model_datastore:str,
                  output_predict_datastore:str,
                  feats_version:str,
-                 model_version:str
+                 model_version:str,
+                 tipo:str,
+                 tipo_continuidad:str
                  ):
         
         self.input_feats_datastore = Path(input_feats_datastore)
         self.input_predict_datastore = Path(input_predict_datastore)
         self.output_predict_datastore = Path(output_predict_datastore)
         self.input_model_datastore = Path(input_model_datastore)
-        self.tipo = 'continuidad_regular_horario'
-        self.tipo_continuidad = 'continuidad_regular'
+        self.tipo = tipo
+        self.tipo_continuidad = tipo_continuidad
         self.feats_version = feats_version
         self.model_version = model_version
     
-    def get_data_test(self, periodo:int):
+    def get_data_test(self, periodo: int):
+        
         data_model_test = pd.read_parquet(
-            self.input_feats_datastore/"test"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
+            self.input_feats_datastore
+            / "test"
+            / self.feats_version
+            / f"data_feats_{self.tipo}_{periodo}.parquet"
+        )
         return data_model_test
+
+    def load_model(self, model_periodo:int):
+        print(f"Cargando modelo desde: {self.input_model_datastore}")
+        model = CatBoostRegressor()
+        
+        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+        # model = mlflow.sklearn.load_model(
+        #     self.input_model_datastore
+        #     # f"models:/{self.tipo}_{periodo}@dev"
+        # )
+        return model
     
     def get_data_input_predict(self, model_periodo:int, periodo:int):
+
         data_model_test = pd.read_parquet(
             self.input_predict_datastore/"test"/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet")
         return data_model_test    
@@ -113,34 +132,19 @@ class TrainContinuidadToHorario:
 
         return data_model_eval
 
-    def load_model(self, model_periodo:int):
-        print(f"Cargando modelo desde: {self.input_model_datastore}")
-        model = CatBoostRegressor()
-        # model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
-        # model = mlflow.sklearn.load_model(
-        #     self.input_model_datastore
-        #     # f"models:/{self.tipo}_{periodo}@dev"
-        # )
-        
-        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
-        
+
         return model
     
     def upload_data_predict(
         self, model_version: str, model_periodo: int, periodo: int, 
-        df_model_predict: pd.DataFrame, mode:str, with_tipo:str):
-      
-        eval_tipo = eval(with_tipo)
+        df_model_predict: pd.DataFrame, mode:str):
         
-        if not eval_tipo:
-            path_model_version = self.output_predict_datastore/self.tipo/"test" 
-        else:
-            path_model_version = self.output_predict_datastore/"test"
+        path_model_version = self.output_predict_datastore/"test"
             
         path_model_version.mkdir(parents=True, exist_ok=True)
         
         df_model_predict.to_parquet(
-            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet"
         )
         
         # path_model_version = self.output_predict_datastore / "test" 
@@ -190,6 +194,16 @@ def main(args):
     periodo = args.periodo
     mode = args.mode
     with_tipo = args.with_tipo
+
+    tipo = 'continuidad_regular_horario'
+    tipo_continuidad = 'continuidad_regular'
+
+    eval_tipo = eval(with_tipo)
+    if not eval_tipo:
+        input_feats_datastore = f"{input_feats_datastore}/{tipo}"
+        input_predict_datastore = f"{input_predict_datastore}/{tipo_continuidad}"
+        input_model_datastore = f"{input_model_datastore}/{tipo}"
+        output_predict_datastore = f"{output_predict_datastore}/{tipo}"
     
     train_continuidad_horario = TrainContinuidadToHorario(
         input_feats_datastore,
@@ -197,7 +211,9 @@ def main(args):
         input_model_datastore,
         output_predict_datastore,
         feats_version,
-        model_version)
+        model_version,
+        tipo,
+        tipo_continuidad)
     
     model = train_continuidad_horario.load_model(model_periodo)
 

@@ -41,22 +41,31 @@ class TrainInicial:
 
         return data_model_evaluation
     
-    def upload_data_evaluation(self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame):
+    def upload_data_evaluation(
+        self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame, 
+        mode:str, with_tipo:str):
 
-        path_model = (self.output_evaluation_datastore/'test')
+        eval_tipo = eval(with_tipo)
+        if not eval_tipo:
+            path_model = (self.output_evaluation_datastore/self.tipo/'test')
+        else:
+            path_model = (self.output_evaluation_datastore/'test')
+
         path_model.mkdir(parents=True, exist_ok=True)
         
         df_model_evaluation.to_parquet(
             path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
+
+        assert mode in ['prod', 'dev']
         
-        df_model_evaluation.to_parquet(
-            path_model/f"data_evaluation_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
-        )
-        
-        if not (path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
+        if mode == 'dev':
             df_model_evaluation.to_parquet(
-                path_model/f"data_evaluation_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
+                path_model/f"data_evaluation_dev_{model_periodo}_{self.tipo}_{periodo}.parquet"
+            )
+        else:
+            df_model_evaluation.to_parquet(
+                path_model/f"data_evaluation_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
 
 
@@ -69,6 +78,10 @@ def main(args):
     model_periodo = args.model_periodo
     model_version = args.model_version
     n_eval_periodos = args.n_eval_periodos
+
+    periodo = args.periodo
+    mode = args.mode
+    with_tipo = args.with_tipo
     
     train_inicial = TrainInicial(
         input_predict_datastore,
@@ -79,7 +92,14 @@ def main(args):
 
     tipo = train_inicial.tipo
 
-    for periodo in get_ahead_n_periodos(model_periodo, n_eval_periodos):
+    if periodo == -1:
+        assert n_eval_periodos >= 1
+        periodo = model_periodo
+        periodos = get_ahead_n_periodos(model_periodo, n_eval_periodos)
+    else:
+        periodos = [periodo]
+
+    for periodo in periodos:
         map_tipos = get_mapping_tipos(periodo)
         if map_tipos[tipo]:
             df_model_evaluation = train_inicial.get_data_evaluation(model_periodo,periodo)

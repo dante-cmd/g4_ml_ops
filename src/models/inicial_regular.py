@@ -10,15 +10,15 @@ class TrainInicial:
                  input_feats_datastore:str,
                  output_model_datastore:str,
                  feats_version:str,
-                 model_version:str
+                 model_version:str,
+                 tipo:str
                  ):
 
         self.input_feats_datastore = Path(input_feats_datastore)
         self.output_model_datastore = Path(output_model_datastore)
         self.feats_version = feats_version
         self.model_version = model_version
-        # self.client = client
-        self.tipo = 'inicial_regular'
+        self.tipo = tipo
     
     def apply_filter(self, df_train:pd.DataFrame):
         return df_train
@@ -83,13 +83,9 @@ class TrainInicial:
 
         return model
 
-    def save_model(self, model, periodo:int, with_tipo:str):
-        eval_tipo = eval(with_tipo)
-
-        if not eval_tipo:
-            path_model = self.output_model_datastore/self.tipo/'test'/self.model_version
-        else:
-            path_model = self.output_model_datastore/'test'/self.model_version
+    def save_model(self, model, periodo:int):
+        
+        path_model = self.output_model_datastore/'test'/self.model_version
         
         path_model.mkdir(parents=True, exist_ok=True)        
         model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
@@ -109,12 +105,21 @@ def main(args):
     mode = args.mode
     with_tipo = args.with_tipo
     model_periodo = args.model_periodo
+
+    tipo = 'inicial_regular'
+    
+    eval_tipo = eval(with_tipo)
+
+    if not eval_tipo:
+        output_model_datastore = f"{output_model_datastore}/{tipo}"
+        input_feats_datastore = f"{input_feats_datastore}/{tipo}"
     
     train_inicial = TrainInicial(
         input_feats_datastore, 
         output_model_datastore,
         feats_version,
-        model_version
+        model_version,
+        tipo
         )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
@@ -125,7 +130,7 @@ def main(args):
         
         # Save model explicitly to the output path
         # print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
-        train_inicial.save_model(model, model_periodo, with_tipo)
+        train_inicial.save_model(model, model_periodo)
         
         # train_inicial.register_model(model, model_periodo)
     

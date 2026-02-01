@@ -10,14 +10,15 @@ class TrainContinuidad:
                  input_feats_datastore:str,
                  output_model_datastore:str,
                  feats_version:str,
-                 model_version:str
+                 model_version:str,
+                 tipo:str
                  ):
         
         self.input_feats_datastore = Path(input_feats_datastore)
         self.output_model_datastore = Path(output_model_datastore)
         self.feats_version = feats_version
         self.model_version = model_version
-        self.tipo  = 'continuidad_regular'
+        self.tipo  = tipo
 
     def apply_filter(self, df_train:pd.DataFrame):
         return df_train
@@ -95,13 +96,9 @@ class TrainContinuidad:
         model.fit(X_train, y_train, cat_features=cat_features)
         return model
 
-    def save_model(self, model, periodo:int, with_tipo:str):
-        eval_tipo = eval(with_tipo)
+    def save_model(self, model, periodo:int):
         
-        if not eval_tipo:
-            path_model = self.output_model_datastore/self.tipo/'test'/self.model_version
-        else:
-            path_model = self.output_model_datastore/'test'/self.model_version
+        path_model = self.output_model_datastore/'test'/self.model_version
         
         path_model.mkdir(parents=True, exist_ok=True)        
         model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
@@ -118,11 +115,20 @@ def main(args):
     with_tipo = args.with_tipo
     model_periodo = args.model_periodo
     
+    tipo = 'continuidad_regular'
+    
+    eval_tipo = eval(with_tipo)
+        
+    if not eval_tipo:
+        output_model_datastore = f"{output_model_datastore}/{tipo}"
+        input_feats_datastore = f"{input_feats_datastore}/{tipo}"
+    
     train_continuidad = TrainContinuidad(
         input_feats_datastore,
         output_model_datastore,
         feats_version,
-        model_version
+        model_version,
+        tipo
         )
     
     mapping_tipos = get_mapping_tipos(model_periodo)
@@ -130,7 +136,7 @@ def main(args):
     if mapping_tipos[train_continuidad.tipo]:
         model = train_continuidad.train_model(model_periodo)
         print("Training for:", model_periodo)
-        train_continuidad.save_model(model, model_periodo, with_tipo)
+        train_continuidad.save_model(model, model_periodo)
 
 
 if __name__ == '__main__':

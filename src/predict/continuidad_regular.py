@@ -18,12 +18,13 @@ class TrainContinuidad:
                  output_predict_datastore: str,
                  feats_version: str,
                  model_version: str,
+                 tipo: str,
                  ):
         
         self.input_feats_datastore = Path(input_feats_datastore)
         self.input_model_datastore = Path(input_model_datastore)
         self.output_predict_datastore = Path(output_predict_datastore)
-        self.tipo  = 'continuidad_regular'
+        self.tipo  = tipo
         self.feats_version = feats_version
         self.model_version = model_version
 
@@ -36,19 +37,17 @@ class TrainContinuidad:
         )
         return data_model_test
 
-
     def load_model(self, model_periodo:int):
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
-        # model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
+
+        input_model_datastore = self.input_model_datastore
+        
+        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
         # model = mlflow.sklearn.load_model(
         #     self.input_model_datastore
         #     # f"models:/{self.tipo}_{periodo}@dev"
         # )
-        
-        model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
-        
-        
         return model
     
 
@@ -145,14 +144,9 @@ class TrainContinuidad:
     
     def upload_data_predict(
         self, model_version: str, model_periodo: int, periodo: int, 
-        df_model_predict: pd.DataFrame, mode:str, with_tipo:str):
+        df_model_predict: pd.DataFrame, mode:str):
       
-        eval_tipo = eval(with_tipo)
-        
-        if not eval_tipo:
-            path_model_version = self.output_predict_datastore/self.tipo/"test" 
-        else:
-            path_model_version = self.output_predict_datastore/"test"
+        path_model_version = self.output_predict_datastore/"test"
             
         path_model_version.mkdir(parents=True, exist_ok=True)
         
@@ -207,13 +201,21 @@ def main(args):
     periodo = args.periodo
     mode = args.mode
     with_tipo = args.with_tipo
+
+    tipo = 'continuidad_regular'
+
+    if not eval_tipo:
+        input_model_datastore = f"{input_model_datastore}/{tipo}"
+        input_feats_datastore = f"{input_feats_datastore}/{tipo}"
+        output_predict_datastore = f"{output_predict_datastore}/{tipo}"
     
     train_continuidad = TrainContinuidad(
         input_model_datastore,
         input_feats_datastore,
         output_predict_datastore,
         feats_version,
-        model_version
+        model_version,
+        tipo
         )
     
     model = train_continuidad.load_model(model_periodo)

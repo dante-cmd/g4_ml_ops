@@ -19,33 +19,15 @@ def parse_args():
                         type=str)
     parser.add_argument("--target_version", dest='target_version',
                         type=str)
-    parser.add_argument("--model_periodo", dest='model_periodo',
-                        type=int)
-    parser.add_argument("--n_eval_periodos", dest='n_eval_periodos',
-                        type=int)
-    parser.add_argument("--model_version", dest='model_version',
-                        type=str)
+    parser.add_argument("--model_periodo", dest='model_periodo', type=int)
+    parser.add_argument("--model_version", dest='model_version', type=str)
+    parser.add_argument("--n_eval_periodos", dest='n_eval_periodos', type=int, default=-1)
+    parser.add_argument("--periodo", dest='periodo', type=int, default=-1)
+    parser.add_argument("--mode", dest='mode', type=str)
+    parser.add_argument("--with_tipo", dest='with_tipo', type=str)
     
-
-
-    # # add arguments
-    # parser.add_argument("--output_predict_test_datastore", dest='output_predict_test_datastore',
-    #                     type=str)
-    # parser.add_argument("--input_feats_test_datastore", dest='input_feats_test_datastore',
-    #                     type=str)
-    # parser.add_argument("--input_target_test_datastore", dest='input_target_test_datastore',
-    #                     type=str)
-    # parser.add_argument("--periodo", dest='periodo',
-    #                     type=int)
-    # parser.add_argument("--experiment_name", dest='experiment_name',
-    #                     type=str)
-    # parser.add_argument("--model_periodo", dest='model_periodo',
-    #                     type=int)
-    
-    # parse args
     args = parser.parse_args()
 
-    # return args
     return args
 
 

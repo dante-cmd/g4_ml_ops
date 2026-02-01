@@ -15,16 +15,18 @@ class TrainInicial:
         output_predict_datastore: str,
         feats_version: str,
         model_version: str,
+        tipo: str,
     ):
 
         self.input_model_datastore = Path(input_model_datastore)
         self.input_feats_datastore = Path(input_feats_datastore)
         self.output_predict_datastore = Path(output_predict_datastore)
-        self.tipo = "inicial_regular"
+        self.tipo = tipo
         self.feats_version = feats_version
         self.model_version = model_version
 
     def get_data_test(self, periodo: int):
+
         data_model_test = pd.read_parquet(
             self.input_feats_datastore
             / "test"
@@ -38,10 +40,6 @@ class TrainInicial:
         model = CatBoostRegressor()
         
         model.load_model(self.input_model_datastore/'test'/self.model_version/f"{self.tipo}_{model_periodo}.cbm")
-        # model = mlflow.sklearn.load_model(
-        #     self.input_model_datastore
-        #     # f"models:/{self.tipo}_{periodo}@dev"
-        # )
         return model
 
     def get_data_predict(self, periodo: int, model):
@@ -97,14 +95,9 @@ class TrainInicial:
     def upload_data_predict(
         self, 
         model_version: str, model_periodo: int, periodo: int, 
-        df_model_predict: pd.DataFrame, mode:str, with_tipo:str):
+        df_model_predict: pd.DataFrame, mode:str):
       
-        eval_tipo = eval(with_tipo)
-
-        if not eval_tipo:
-            path_model_version = self.output_predict_datastore/self.tipo/"test" 
-        else:
-            path_model_version = self.output_predict_datastore/"test"
+        path_model_version = self.output_predict_datastore/"test"
             
         path_model_version.mkdir(parents=True, exist_ok=True)
         
@@ -112,7 +105,6 @@ class TrainInicial:
             path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
-        # path_model_version = self.output_predict_datastore / "test" 
         assert mode in ["dev", "prod"]
         
         if mode == "dev":
@@ -123,11 +115,6 @@ class TrainInicial:
             df_model_predict.to_parquet(
             path_model_version / f"data_predict_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
-
-        # if not (path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet").exists():
-        #     df_model_predict.to_parquet(
-        #         path_model_version / f"data_predict_champion_{model_periodo}_{self.tipo}_{periodo}.parquet"
-        #     )
 
 
 def parse_args():
@@ -166,6 +153,15 @@ def main(args):
     # print(f"Modelo registrado versión: {registered_model.version}")
     print(f"Cargando modelo desde: {args.input_model_datastore}")
 
+    eval_tipo = eval(with_tipo)
+    
+    tipo = 'inicial_regular'
+
+    if not eval_tipo:
+        input_model_datastore = f"{input_model_datastore}/{tipo}"
+        input_feats_datastore = f"{input_feats_datastore}/{tipo}"
+        output_predict_datastore = f"{output_predict_datastore}/{tipo}"
+
     # python src/predict/inicial_regular.py --input_feats_datastore $input_feats_datastore --input_target_datastore $input_target_datastore --output_predict_datastore $output_predict_datastore --experiment_name $experiment_name --model_periodo $model_periodo --periodo $periodo
 
     train_inicial = TrainInicial(
@@ -174,6 +170,7 @@ def main(args):
         output_predict_datastore,
         feats_version,
         model_version,
+        tipo
     )
     
     model = train_inicial.load_model(model_periodo)
@@ -189,7 +186,7 @@ def main(args):
         
         if mapping_tipos[train_inicial.tipo]:
             df_model_predict = train_inicial.get_data_predict(periodo, model)
-            train_inicial.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode, with_tipo)
+            train_inicial.upload_data_predict(model_version, model_periodo, periodo, df_model_predict, mode)
     # train_inicial.logging_metrics(periodo, model, df_model_predict)
 
 

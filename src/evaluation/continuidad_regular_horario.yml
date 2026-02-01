@@ -18,6 +18,12 @@ inputs:
     type: string
   n_eval_periodos:
     type: integer
+  periodo:
+    type: integer
+  mode:
+    type: string
+  with_tipo:
+    type: string
 
 outputs:
   output_evaluation_continuidad_horario_datastore:
@@ -54,4 +60,8 @@ command: >-
   --model_periodo ${{inputs.model_periodo}}
   --model_version ${{inputs.model_version}}
   --n_eval_periodos ${{inputs.n_eval_periodos}}
+  --periodo ${{inputs.periodo}}
+  --mode ${{inputs.mode}}
+  --with_tipo ${{inputs.with_tipo}}
+  
   
