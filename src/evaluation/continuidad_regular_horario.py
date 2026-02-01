@@ -67,6 +67,7 @@ class TrainContinuidadToHorario:
             df_model_evaluation.to_parquet(
                 path_model/f"data_evaluation_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
+            
 def main(args):
     
     input_predict_datastore = args.input_predict_datastore

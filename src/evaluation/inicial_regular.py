@@ -82,6 +82,10 @@ def main(args):
     periodo = args.periodo
     mode = args.mode
     with_tipo = args.with_tipo
+
+    tipo = 'inicial_regular'
+    eval_tipo = eval(with_tipo)
+    
     
     train_inicial = TrainInicial(
         input_predict_datastore,
