@@ -50,17 +50,19 @@ jobs:
           az ml job stream --name $JOB_ID
           # az ml job wait --name $JOB_ID
 
-          CHILD_JOB_NAME=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_inicial_job'].name | [0]" -o tsv)
+          CHILD_JOB_NAME_INICIAL=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_inicial_job'].name | [0]" -o tsv)
+          CHILD_JOB_NAME_HORARIO=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_continuidad_horario_job'].name | [0]" -o tsv)
 
-          echo "Submitted children job: $CHILD_JOB_NAME"
+          echo "Submitted children job inicial: $CHILD_JOB_NAME_INICIAL"
+          echo "Submitted children job horario: $CHILD_JOB_NAME_HORARIO"
 
-          az ml job show --name $CHILD_JOB_NAME
+          # az ml job show --name $CHILD_JOB_NAME_INICIAL
 
-          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics
-          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_continuidad_horario_datastore --download-path ./outputs_metrics
+          az ml job download --name $CHILD_JOB_NAME_INICIAL --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics_inicial
+          az ml job download --name $CHILD_JOB_NAME_HORARIO --output-name output_evaluation_continuidad_horario_datastore --download-path ./outputs_metrics_horario
           
-          response_inicial_file = $(find ./outputs_metrics -name "response_inicial.txt" | head -n 1)
-          response_continuidad_horario_file = $(find ./outputs_metrics -name "response_continuidad_regular_horario.txt" | head -n 1)
+          response_inicial_file=$(find ./outputs_metrics_inicial -name "response_*.txt" | head -n 1)
+          response_continuidad_horario_file=$(find ./outputs_metrics_horario -name "response_*.txt" | head -n 1)
           
           if [ -f "$response_inicial_file" ]; then
               response_inicial=$(cat "$response_inicial_file")
