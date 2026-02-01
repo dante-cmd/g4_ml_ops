@@ -45,7 +45,7 @@ environment:
           - pyarrow
           - PyYAML
           # - azureml-core
-          - azureml-mlflow
+          # - azureml-mlflow
           # - catboost
           # - mlflow
           # - mlflow-azureml

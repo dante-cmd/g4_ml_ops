@@ -6,6 +6,14 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
+treshold_tipos =  {
+            'inicial_estacional':0.7, 
+            'continuidad_estacional':0.7,
+            'inicial_regular':0.7, 
+            'continuidad_regular':0.6, 
+            'continuidad_regular_horario':0.85}
+
+
 def parse_args():
     # setup arg parser
     parser = argparse.ArgumentParser()
@@ -91,9 +99,17 @@ def join_target(df_forecast: pd.DataFrame, df_target:pd.DataFrame, on_cols: list
 
 
 def calculate_metrics(df_forecast:pd.DataFrame, df_target:pd.DataFrame, on_cols: list[str]):
-    
-    # logging.info(f' Mode: {mode} {periodo}'.center(50, '=').upper())
-    # logging.info(f'Tipo: {tipo}'.upper())
+    """
+    Calculate metrics for forecast data.
+        
+    Args:
+        df_forecast (pd.DataFrame): DataFrame with forecast data.
+        df_target (pd.DataFrame): DataFrame with target data.
+        on_cols (list[str]): List of columns to join on.
+        
+    Returns:
+        dict: Dictionary with metrics.
+    """
 
     df_forecast_02 = join_target(df_forecast, df_target, on_cols)
 
@@ -102,10 +118,7 @@ def calculate_metrics(df_forecast:pd.DataFrame, df_target:pd.DataFrame, on_cols:
     pct_comb = df_forecast_formado['IDX'].mean()
     total_comb = df_forecast_formado['IDX'].sum()
     
-    # logging.info("% Comb: {:.1%}".format(pct_comb))
-    # logging.info("# Comb: {:n}".format(total_comb))
     
-    # df_forecast_02 = self.calculate_classes(df_forecast_01)
     es_zero_predict = df_forecast_02['CANT_CLASES_PREDICT'] == 0
     es_zero = df_forecast_02['CANT_CLASES'] == 0
     df_forecast_03 = df_forecast_02[~(es_zero_predict & es_zero)].copy()
@@ -117,18 +130,11 @@ def calculate_metrics(df_forecast:pd.DataFrame, df_target:pd.DataFrame, on_cols:
             df_forecast_03['CANT_CLASES_PREDICT'] > df_forecast_03['CANT_CLASES'],
             df_forecast_03['CANT_CLASES_PREDICT'] - df_forecast_03['CANT_CLASES'],
             0)
-    # logging.info("Total Faltante: {:n}".format(faltante.sum()))
-    # logging.info("Total Sobrante: {:n}".format(sobrante.sum()))
-    # logging.info("Total Gestion: {:n}".format(faltante.sum() + sobrante.sum()))
+
     match_clases = np.where(
             df_forecast_03['CANT_CLASES'] == df_forecast_03['CANT_CLASES_PREDICT'], 1, 0)
     precision = match_clases.mean()
-    
-    # logging.info("% Precision {:.1%}".format(precision))
-    # logging.info("Total Clases (vs Predict): {:,.0f} ({:,.0f})".format(
-    #         df_forecast_03['CANT_CLASES'].sum(), df_forecast_03['CANT_CLASES_PREDICT'].sum()))
-    # logging.info("Total alumnos (vs Predict): {:,.0f} ({:,.0f})".format(
-    #         df_forecast_03['CANT_ALUMNOS'].sum(), df_forecast_03['CANT_ALUMNOS_PREDICT'].sum()))
+
     return {
         "pct_comb": pct_comb,
         "total_comb": total_comb,

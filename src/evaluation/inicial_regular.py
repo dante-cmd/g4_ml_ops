@@ -1,8 +1,8 @@
 import pandas as pd
 from pathlib import Path
-from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
+from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos, treshold_tipos
 # from azureml.core import Run
-import mlflow
+# import mlflow
 
 
 class TrainInicial:
@@ -67,30 +67,40 @@ class TrainInicial:
                 path_model/f"data_evaluation_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
     
-    def upload_metrics(self):
-        r2 = 0.5
-        print(f"Uploading metrics R2={r2} to file...")
+    def get_precision(self, model_periodo:int, periodo:int):
+        
+        df_forecast = self.get_data_predict(model_periodo, periodo)
+        df_target = self.get_data_target(periodo)
+        
+        on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL']
+        
+        metrics = calculate_metrics(df_forecast, df_target, on_cols)
+
+        return metrics['precision']
+
+    
+    def upload_response(self, scores:list):
+        precision = sum(scores)/len(scores)
+        
+        threshold = treshold_tipos[self.tipo]
+
+        if precision>=threshold:
+            print(f"Precision is {precision}, which is above the threshold of {threshold}")
+            response = 'approved'
+        else:
+            print(f"Precision is {precision}, which is below the threshold of {threshold}")
+            response = 'rejected'
         
         # Guardar en archivo para recuperar desde GitHub Actions
-        metric_file = self.output_evaluation_datastore / "r2_score.txt"
+        metric_file = self.output_evaluation_datastore / "response.txt"
         
         # Asegurar que el directorio existe
         self.output_evaluation_datastore.mkdir(parents=True, exist_ok=True)
         
         with open(metric_file, "w") as f:
-            f.write(str(r2))
+            f.write(str(response))
             
         print(f"Metric saved to {metric_file}")
-        # def upload_metrics(self, metrics:dict, model_periodo:int, model_version:str, periodo:int, mode:str):
-        # Azure ML configura MLflow automáticamente
-        # mlflow.start_run()
-        # mlflow.log_metric("R2_Score", float(0.5))
-        # mlflow.end_run()
-
-        # run = Run.get_context()
-        # run.log("R2_Score", 0.5)
-        # run.complete()
-        # run.log_table("metrics", metrics)
 
 
 def main(args):
@@ -132,13 +142,16 @@ def main(args):
     else:
         periodos = [periodo]
 
+    scores = []
     for periodo in periodos:
         map_tipos = get_mapping_tipos(periodo)
         if map_tipos[tipo]:
             df_model_evaluation = train_inicial.get_data_evaluation(model_periodo,periodo)
             train_inicial.upload_data_evaluation(model_periodo, model_version, periodo, df_model_evaluation, mode)
+            precision = train_inicial.get_precision(model_periodo, periodo)
+            scores.append(precision)
     
-    train_inicial.upload_metrics()
+    train_inicial.upload_response(scores)
 
 
 if __name__ == '__main__':
