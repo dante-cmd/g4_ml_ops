@@ -1,5 +1,6 @@
 {
     "model_periodo": 202506,
     "ult_periodo_data": 202512,
-    "n_eval_periodos": 5
+    "n_eval_periodos": 5,
+    "mode": "prod"
 }

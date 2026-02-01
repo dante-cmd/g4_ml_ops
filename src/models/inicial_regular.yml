@@ -14,6 +14,10 @@ inputs:
     type: integer
   model_version:
     type: string
+  mode:
+    type: string
+  with_tipo:
+    type: string
 
 outputs:
   output_model_inicial_datastore:
@@ -44,3 +48,5 @@ command: >-
   --feats_version ${{inputs.feats_version}}
   --model_periodo ${{inputs.model_periodo}}
   --model_version ${{inputs.model_version}}
+  --mode ${{inputs.mode}}
+  --with_tipo ${{inputs.with_tipo}}

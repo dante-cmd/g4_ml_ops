@@ -6,10 +6,8 @@ import argparse
 
 
 def parse_args():
-    # setup arg parser
     parser = argparse.ArgumentParser()
 
-    # add arguments
     parser.add_argument("--input_feats_datastore", dest='input_feats_datastore',
                         type=str)
     parser.add_argument("--output_model_datastore", dest='output_model_datastore',
@@ -20,15 +18,14 @@ def parse_args():
                         type=int)
     parser.add_argument("--model_version", dest='model_version',
                         type=str)
-    # parser.add_argument("--experiment_name", dest='experiment_name',
-    #                     type=str)
-    # parser.add_argument("--model_output", dest='model_output',
-    #                     type=str)
     
-    # parse args
+    parser.add_argument("--mode", dest='mode',
+                        type=str)
+    parser.add_argument("--with_tipo", dest='with_tipo',
+                        type=str)
+    
     args = parser.parse_args()
 
-    # return args
     return args
 
 

@@ -1,19 +1,7 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-# import mlflow
-# import mlflow.catboost
-from catboost import CatBoostRegressor
 from utils_model import parse_args, get_mapping_tipos
-# import argparse
-# from sklearn.linear_model import LinearRegression
-# from utils_metrics import calculate_classes, calculate_metrics
-# import mlflow
-# import mlflow.catboost
-# import azureml.mlflow
-# from azure.identity import DefaultAzureCredential
-# # from mlflow.tracking import MlflowClient
-# from azure.ai.ml import MLClient
 
 
 class TrainInicial:
@@ -94,9 +82,14 @@ class TrainInicial:
 
         return model
 
-    def save_model(self, model, periodo:int):
+    def save_model(self, model, periodo:int, with_tipo:str):
+        eval_tipo = eval(with_tipo)
+
+        if not eval_tipo:
+            path_model = self.output_model_datastore/self.tipo/'test'/self.model_version
+        else:
+            path_model = self.output_model_datastore/'test'/self.model_version
         
-        path_model = self.output_model_datastore/'test'/self.model_version
         path_model.mkdir(parents=True, exist_ok=True)        
         model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
         
@@ -112,6 +105,8 @@ def main(args):
     output_model_datastore = args.output_model_datastore
     feats_version = args.feats_version
     model_version = args.model_version
+    mode = args.mode
+    with_tipo = args.with_tipo
     model_periodo = args.model_periodo
     
     train_inicial = TrainInicial(
@@ -129,7 +124,7 @@ def main(args):
         
         # Save model explicitly to the output path
         # print(f"Saving model to {output_model_datastore}/{model_version}/{train_inicial.tipo}_{model_periodo}.cbm")
-        train_inicial.save_model(model, model_periodo)
+        train_inicial.save_model(model, model_periodo, with_tipo)
         
         # train_inicial.register_model(model, model_periodo)
     

@@ -83,9 +83,14 @@ class TrainContinuidadToHorario:
         
         return model
 
-    def save_model(self, model, periodo:int):
+    def save_model(self, model, periodo:int, with_tipo:str):
+        eval_tipo = eval(with_tipo)
         
-        path_model = self.output_model_datastore/'test'/self.model_version
+        if not eval_tipo:
+            path_model = self.output_model_datastore/self.tipo/'test'/self.model_version
+        else:
+            path_model = self.output_model_datastore/'test'/self.model_version
+        
         path_model.mkdir(parents=True, exist_ok=True)        
         model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
         
@@ -97,6 +102,8 @@ def main(args):
     output_model_datastore = args.output_model_datastore
     feats_version = args.feats_version
     model_version = args.model_version
+    mode = args.mode
+    with_tipo = args.with_tipo
     model_periodo = args.model_periodo
     
     train_continuidad_horario = TrainContinuidadToHorario(
@@ -110,7 +117,7 @@ def main(args):
     if mapping_tipos[train_continuidad_horario.tipo]:
         model = train_continuidad_horario.train_model(model_periodo)
         print("Training for:", model_periodo)
-        train_continuidad_horario.save_model(model, model_periodo)
+        train_continuidad_horario.save_model(model, model_periodo, with_tipo)
     
 
 if __name__ == '__main__':
