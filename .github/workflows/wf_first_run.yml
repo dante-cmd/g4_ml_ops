@@ -38,7 +38,7 @@ jobs:
         if: always()
         run: |
           with_tipo="True"
-          periodo=-1
+          periodo=202510
           echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
           echo "model_periodo=$(jq -r '.model_periodo' params_prod.json)" >> $GITHUB_OUTPUT
           echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
