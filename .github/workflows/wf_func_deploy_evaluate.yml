@@ -57,14 +57,24 @@ jobs:
           az ml job show --name $CHILD_JOB_NAME
 
           az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics
+          az ml job download --name $CHILD_JOB_NAME --output-name output_evaluation_continuidad_regular_horario_datastore --download-path ./outputs_metrics
           
-          R2_FILE=$(find ./outputs_metrics -name "response.txt" | head -n 1)
+          response_inicial_file = $(find ./outputs_metrics -name "response_inicial.txt" | head -n 1)
+          response_continuidad_horario_file = $(find ./outputs_metrics -name "response_continuidad_regular_horario.txt" | head -n 1)
           
-          if [ -f "$R2_FILE" ]; then
-              R2_FINAL=$(cat "$R2_FILE")
-              echo "El R2 obtenido desde archivo es: $R2_FINAL"
+          if [ -f "$response_inicial_file" ]; then
+              response_inicial=$(cat "$response_inicial_file")
+              echo "El response obtenido desde archivo es: $response_inicial"
           else
-              echo "Error: No se encontró el archivo response.txt"
+              echo "Error: No se encontró el archivo response_inicial.txt"
+              exit 1
+          fi
+        
+          if [ -f "$response_continuidad_horario_file" ]; then
+              response_continuidad_horario=$(cat "$response_continuidad_horario_file")
+              echo "El response obtenido desde archivo es: $response_continuidad_horario"
+          else
+              echo "Error: No se encontró el archivo response_continuidad_regular_horario.txt"
               exit 1
           fi
         

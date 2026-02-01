@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
+from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos, treshold_tipos
 
 
 class TrainContinuidadToHorario:
@@ -64,6 +64,41 @@ class TrainContinuidadToHorario:
             df_model_evaluation.to_parquet(
                 path_model/f"data_evaluation_prod_{model_periodo}_{self.tipo}_{periodo}.parquet"
             )
+        
+    def get_precision(self, model_periodo:int, periodo:int):
+        
+        df_forecast = self.get_data_predict(model_periodo, periodo)
+        df_target = self.get_data_target(periodo)
+        
+        on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL']
+        
+        metrics = calculate_metrics(df_forecast, df_target, on_cols)
+
+        return metrics['precision']
+
+    def upload_response(self, scores:list):
+        precision = sum(scores)/len(scores)
+        
+        threshold = treshold_tipos[self.tipo]
+
+        if precision>=threshold:
+            print(f"Precision is {precision}, which is above the threshold of {threshold}")
+            response = 'approved'
+        else:
+            print(f"Precision is {precision}, which is below the threshold of {threshold}")
+            response = 'rejected'
+        
+        # Guardar en archivo para recuperar desde GitHub Actions
+        metric_file = self.output_evaluation_datastore / f"response_{self.tipo}.txt"
+        
+        # Asegurar que el directorio existe
+        self.output_evaluation_datastore.mkdir(parents=True, exist_ok=True)
+        
+        with open(metric_file, "w") as f:
+            f.write(str(response))
+            
+        print(f"Metric saved to {metric_file}")
+
 
 def main(args):
     
@@ -104,11 +139,15 @@ def main(args):
     else:
         periodos = [periodo]
 
+    scores = []
     for periodo in periodos:
         map_tipos = get_mapping_tipos(periodo)
         if map_tipos[tipo]:
             df_model_evaluation = train_continuidad_horario.get_data_evaluation(model_periodo,periodo)
             train_continuidad_horario.upload_data_evaluation(model_periodo, model_version,periodo, df_model_evaluation, mode)
+            score = train_continuidad_horario.get_precision(model_periodo, periodo)
+            scores.append(score)
+    train_continuidad_horario.upload_response(scores)
 
 
 if __name__ == '__main__':

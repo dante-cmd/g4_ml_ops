@@ -92,7 +92,7 @@ class TrainInicial:
             response = 'rejected'
         
         # Guardar en archivo para recuperar desde GitHub Actions
-        metric_file = self.output_evaluation_datastore / "response.txt"
+        metric_file = self.output_evaluation_datastore / f"response_{self.tipo}.txt"
         
         # Asegurar que el directorio existe
         self.output_evaluation_datastore.mkdir(parents=True, exist_ok=True)
