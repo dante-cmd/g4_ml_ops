@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 treshold_tipos =  {
             'inicial_estacional':0.7, 
             'continuidad_estacional':0.7,
-            'inicial_regular':0.60, 
+            'inicial_regular':1, 
             'continuidad_regular':0.6, 
             'continuidad_regular_horario':0.85}
 
