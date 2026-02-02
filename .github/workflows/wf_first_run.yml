@@ -68,11 +68,11 @@ jobs:
       model_version: ${{ needs.load-params.outputs.model_version }}
     secrets: inherit
 
-  trigger-pl-ml-predict:
+  trigger-pl-ml-model:
     needs: [load-params, trigger-pl-ml-evaluate]
     if: always() && needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
     # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_test.yml
+    uses: ./.github/workflows/wf_func_deploy_model.yml
     with:
       mode: ${{ needs.load-params.outputs.mode }}
       model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}

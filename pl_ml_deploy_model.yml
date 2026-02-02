@@ -58,11 +58,6 @@ outputs:
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
 
-  # output_predict_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/predict
-  #   mode: rw_mount
-
   output_model_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/models/inicial_regular
@@ -104,7 +99,7 @@ jobs:
       target_version: "v1"
       n_eval_periodos: -1
       model_periodo: 202506
-      periodo: -1
+      periodo: 202506
       mode: "prod"
       with_tipo: "True"
     outputs:
@@ -123,7 +118,7 @@ jobs:
       target_version: "v1"
       n_eval_periodos: -1
       model_periodo: 202506
-      periodo: -1
+      periodo: 202506
       mode: "prod"
       with_tipo: "True"
     outputs:
@@ -142,7 +137,7 @@ jobs:
       target_version: "v1"
       n_eval_periodos: -1
       model_periodo: 202506
-      periodo: -1
+      periodo: 202506
       mode: "prod"
       with_tipo: "True"
     outputs:
