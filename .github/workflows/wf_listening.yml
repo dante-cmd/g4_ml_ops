@@ -57,8 +57,8 @@ jobs:
   trigger-pl-ml-predict:
     needs: validate-date
     if: needs.validate-date.outputs.should_run == 'true'
-    # uses: ./.github/workflows/wf_func_deploy_predict.yml
-    uses: ./.github/workflows/wf_func_test.yml
+    uses: ./.github/workflows/wf_func_deploy_predict.yml
+    # uses: ./.github/workflows/wf_func_test.yml
     with:
       mode: ${{ needs.validate-date.outputs.mode }}
       model_periodo: ${{ fromJson(needs.validate-date.outputs.model_periodo) }}
