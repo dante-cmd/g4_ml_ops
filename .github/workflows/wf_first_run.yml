@@ -67,3 +67,21 @@ jobs:
       target_version: ${{ needs.load-params.outputs.target_version }}
       model_version: ${{ needs.load-params.outputs.model_version }}
     secrets: inherit
+
+  trigger-pl-ml-predict:
+    needs: [load-params, trigger-pl-ml-evaluate]
+    if: always() && needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
+    # uses: ./.github/workflows/wf_func_test.yml
+    uses: ./.github/workflows/wf_func_deploy_test.yml
+    with:
+      mode: ${{ needs.load-params.outputs.mode }}
+      model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
+      ult_periodo_data: ${{ fromJson(needs.load-params.outputs.ult_periodo_data) }}
+      n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
+      periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
+      with_tipo: ${{ needs.load-params.outputs.with_tipo }}
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+    secrets: inherit

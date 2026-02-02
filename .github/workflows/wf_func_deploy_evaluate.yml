@@ -34,6 +34,13 @@ on:
       model_version:
         required: true
         type: string
+    outputs:
+      response_inicial:
+        description: "Evaluation response for inicial_regular"
+        value: ${{ jobs.run-pipeline.outputs.response_inicial }}
+      response_continuidad_horario:
+        description: "Evaluation response for continuidad_regular_horario"
+        value: ${{ jobs.run-pipeline.outputs.response_continuidad_horario }}
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -62,6 +69,7 @@ jobs:
           az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
 
     - name: Submit pipeline job and print outputs
+      id: submit_job
       env:
         AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
         AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
@@ -173,7 +181,7 @@ jobs:
               echo "El response obtenido desde archivo es: $response_inicial"
           else
               echo "Error: No se encontró el archivo response_inicial.txt"
-              exit 1
+              response_inicial="failed"
           fi
         
           if [ -f "$response_continuidad_horario_file" ]; then
@@ -181,6 +189,17 @@ jobs:
               echo "El response obtenido desde archivo es: $response_continuidad_horario"
           else
               echo "Error: No se encontró el archivo response_continuidad_regular_horario.txt"
+              response_continuidad_horario="failed"
+          fi
+          
+          echo "response_inicial=$response_inicial" >> $GITHUB_OUTPUT
+          echo "response_continuidad_horario=$response_continuidad_horario" >> $GITHUB_OUTPUT
+
+          if [ "$response_inicial" == "failed" ] || [ "$response_continuidad_horario" == "failed" ]; then
               exit 1
           fi
+
+    outputs:
+      response_inicial: ${{ steps.submit_job.outputs.response_inicial }}
+      response_continuidad_horario: ${{ steps.submit_job.outputs.response_continuidad_horario }}
         

@@ -48,19 +48,6 @@ jobs:
           # Wait for the job to complete
           # echo "Waiting for job to complete..."
           # az ml job stream --name $JOB_ID
-
-          # read version.json
-          
-          inicial_regular_version=$(jq -r '.model_version.inicial_regular.champion' version.json)
-          continuidad_regular_version=$(jq -r '.model_version.continuidad_regular.champion' version.json)
-          continuidad_regular_horario_version=$(jq -r '.model_version.continuidad_regular_horario.champion' version.json)
-          model_periodo=$(jq -r '.model_periodo' params.json)
-
-          echo "Inicial Regular Version: $inicial_regular_version"
-          echo "Continuidad Regular Version: $continuidad_regular_version"
-          echo "Continuidad Regular Horario Version: $continuidad_regular_horario_version"
-          echo "Model Periodo: $model_periodo"
-
         
 
     # - name: Run Pipeline Script
