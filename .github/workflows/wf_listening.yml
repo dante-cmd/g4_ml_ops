@@ -1,0 +1,74 @@
+name: Deploy Scheduled Pipeline 
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  validate-date:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check_date.outputs.should_run }}
+      platinum_version: ${{ steps.read_params.outputs.platinum_version }}
+      feats_version: ${{ steps.read_params.outputs.feats_version }}
+      target_version: ${{ steps.read_params.outputs.target_version }}
+      model_version: ${{ steps.read_params.outputs.model_version }}
+      model_periodo: ${{ steps.read_params.outputs.model_periodo }}
+      ult_periodo_data: ${{ steps.read_params.outputs.ult_periodo_data }}
+      n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
+      periodo: ${{ steps.check_date.outputs.periodo }}
+      with_tipo: ${{ steps.read_params.outputs.with_tipo }}
+      with_tipo_predict: ${{ steps.read_params.outputs.with_tipo_predict }}
+      mode: ${{ steps.read_params.outputs.mode }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Check Date
+        id: check_date
+        run: python src/utils/date_validator.py
+
+      - name: Read Parameters
+        id: read_params
+        if: steps.check_date.outputs.should_run == 'true'
+        run: |
+          with_tipo="True"
+          with_tipo_predict="False"
+          echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
+          echo "model_periodo=$(jq -r '.model_periodo' params_prod.json)" >> $GITHUB_OUTPUT
+          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
+          echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_prod.json)" >> $GITHUB_OUTPUT
+          echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
+          echo "platinum_version=$(jq -r '.platinum_version.prod' version.json)" >> $GITHUB_OUTPUT
+          echo "feats_version=$(jq -r '.feats_version.prod' version.json)" >> $GITHUB_OUTPUT
+          echo "target_version=$(jq -r '.target_version.prod' version.json)" >> $GITHUB_OUTPUT
+          echo "model_version=$(jq -r '.model_version.prod' version.json)" >> $GITHUB_OUTPUT
+          echo "with_tipo_predict=$with_tipo_predict" >> $GITHUB_OUTPUT
+
+  trigger-pl-ml-predict:
+    needs: validate-date
+    if: needs.validate-date.outputs.should_run == 'true'
+    # uses: ./.github/workflows/wf_func_deploy_predict.yml
+    uses: ./.github/workflows/wf_func_deploy_test.yml
+    with:
+      mode: ${{ needs.validate-date.outputs.mode }}
+      model_periodo: ${{ fromJson(needs.validate-date.outputs.model_periodo) }}
+      ult_periodo_data: ${{ fromJson(needs.validate-date.outputs.ult_periodo_data) }}
+      n_eval_periodos: ${{ fromJson(needs.validate-date.outputs.n_eval_periodos) }}
+      periodo: ${{ fromJson(needs.validate-date.outputs.periodo) }}
+      with_tipo: ${{ needs.validate-date.outputs.with_tipo }}
+      platinum_version: ${{ needs.validate-date.outputs.platinum_version }}
+      feats_version: ${{ needs.validate-date.outputs.feats_version }}
+      target_version: ${{ needs.validate-date.outputs.target_version }}
+      model_version: ${{ needs.validate-date.outputs.model_version }}
+      with_tipo_predict: ${{ needs.validate-date.outputs.with_tipo_predict }}
+    secrets: inherit

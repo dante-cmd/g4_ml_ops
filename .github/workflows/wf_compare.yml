@@ -1,3 +1,4 @@
+
 name: Daily Validator
 
 on:
@@ -39,22 +40,22 @@ jobs:
         run: |
           with_tipo="True"
           periodo="-1"
-          echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
-          echo "model_periodo=$(jq -r '.model_periodo' params_prod.json)" >> $GITHUB_OUTPUT
-          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
-          echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_prod.json)" >> $GITHUB_OUTPUT
+          echo "mode=$(jq -r '.mode' params_dev.json)" >> $GITHUB_OUTPUT
+          echo "model_periodo=$(jq -r '.model_periodo' params_dev.json)" >> $GITHUB_OUTPUT
+          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_dev.json)" >> $GITHUB_OUTPUT
+          echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_dev.json)" >> $GITHUB_OUTPUT
           echo "periodo=$periodo" >> $GITHUB_OUTPUT
           echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
-          echo "platinum_version=$(jq -r '.platinum_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "feats_version=$(jq -r '.feats_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "target_version=$(jq -r '.target_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "model_version=$(jq -r '.model_version.prod' version.json)" >> $GITHUB_OUTPUT
+          echo "platinum_version=$(jq -r '.platinum_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "feats_version=$(jq -r '.feats_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "target_version=$(jq -r '.target_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "model_version=$(jq -r '.model_version.dev' version.json)" >> $GITHUB_OUTPUT
 
-  trigger-pl-ml-evaluate:
+  trigger-pl-ml-compare:
     needs: load-params
     if: always()
     # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_deploy_evaluate.yml
+    uses: ./.github/workflows/wf_func_deploy_compare.yml
     with:
       mode: ${{ needs.load-params.outputs.mode }}
       model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
@@ -69,8 +70,8 @@ jobs:
     secrets: inherit
 
   trigger-pl-ml-model:
-    needs: [load-params, trigger-pl-ml-evaluate]
-    if: always() && needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
+    needs: [load-params, trigger-pl-ml-compare]
+    if: always() && needs.trigger-pl-ml-compare.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-compare.outputs.response_continuidad_horario == 'approved'
     # uses: ./.github/workflows/wf_func_test.yml
     uses: ./.github/workflows/wf_func_deploy_model.yml
     with:

@@ -34,7 +34,9 @@ on:
       model_version:
         required: true
         type: string
-      
+      with_tipo_predict:
+        required: true
+        type: string
   # push:
   #   branches:
   #     - prod

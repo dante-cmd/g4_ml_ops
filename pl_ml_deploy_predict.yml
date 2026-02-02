@@ -31,10 +31,12 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/platinumdata
     mode: rw_mount
+
   output_feats_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/features/inicial_regular
     mode: rw_mount
+
   output_target_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/target/inicial_regular
@@ -44,6 +46,7 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/features/continuidad_regular
     mode: rw_mount
+    
   output_target_continuidad_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/target/continuidad_regular
@@ -53,15 +56,11 @@ outputs:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/features/continuidad_regular_horario
     mode: rw_mount
+
   output_target_continuidad_horario_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
-
-  # output_predict_datastore:
-  #   type: uri_folder
-  #   path: azureml://datastores/ml_data/paths/predict
-  #   mode: rw_mount
 
   output_predict_inicial_datastore:
     type: uri_folder

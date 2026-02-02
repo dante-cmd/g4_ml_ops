@@ -16,24 +16,27 @@ def check_date_and_set_output(csv_path):
         sys.exit(1)
 
     found = False
+    periodo = -1
     try:
         with open(csv_path, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row['fecha'] == today_str:
                     found = True
+                    periodo = row['periodo']
                     break
     except Exception as e:
         print(f"Error reading CSV: {e}")
         sys.exit(1)
 
     if found:
-        print(f"Match found for {today_str}. Setting should_run=true.")
+        print(f"Match found for {today_str}. Setting should_run=true, periodo={periodo}.")
         # Write to GITHUB_OUTPUT environment variable if it exists
         github_output = os.environ.get('GITHUB_OUTPUT')
         if github_output:
             with open(github_output, 'a') as f:
                 f.write("should_run=true\n")
+                f.write(f"periodo={periodo}\n")
         else:
             print("GITHUB_OUTPUT not found, skipping output set.")
     else:
