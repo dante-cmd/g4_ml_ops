@@ -72,7 +72,7 @@ jobs:
     needs: [load-params, trigger-pl-ml-evaluate]
     if: always() && needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
     # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_deploy_test.yml
+    uses: ./.github/workflows/wf_func_test.yml
     with:
       mode: ${{ needs.load-params.outputs.mode }}
       model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
