@@ -191,13 +191,14 @@ jobs:
           az ml job download --name $CHILD_JOB_NAME --output-name output_compare_datastore --download-path ./outputs_metrics_compare
 
           
-          response_compare_file=$(find ./outputs_metrics_compare -name "response_*.txt" | head -n 1)
+          # The compare job writes "response.txt" inside the output compare datastore
+          response_compare_file=$(find ./outputs_metrics_compare -name "response.txt" | head -n 1)
           
           if [ -f "$response_compare_file" ]; then
               response_compare=$(cat "$response_compare_file")
               echo "El response obtenido desde archivo es: $response_compare"
           else
-              echo "Error: No se encontró el archivo response_compare.txt"
+              echo "Error: No se encontró el archivo response.txt"
               response_compare="failed"
           fi
           
