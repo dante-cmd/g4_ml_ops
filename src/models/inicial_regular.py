@@ -58,7 +58,8 @@ class TrainInicial:
                 ~(data_model_train['PERIODO_TARGET']%100).isin(meses)
                 ].copy()
             
-        x = num_features + cat_features
+        # x = num_features + cat_features
+        x = cat_features
         y = target
 
         X_train = data_model_train[x].copy()
