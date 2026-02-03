@@ -1,21 +1,26 @@
 
 import argparse
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
-    parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
-    parser.add_argument("--output_predict_datastore", dest="output_predict_datastore", type=str)
-    parser.add_argument("--feats_version", dest="feats_version", type=str)
+    
+    parser.add_argument("--input_evaluation_inicial_datastore", dest="input_evaluation_inicial_datastore", type=str)
+    parser.add_argument("--input_evaluation_continuidad_horario_datastore", dest="input_evaluation_continuidad_horario_datastore", type=str)
+    parser.add_argument("--output_compare_datastore", dest="output_compare_datastore", type=str)
+    # parser.add_argument("--feats_version", dest="feats_version", type=str)
     parser.add_argument("--n_eval_periodos", dest="n_eval_periodos", type=int, default=-1)
     parser.add_argument("--model_periodo", dest="model_periodo", type=int)
+    parser.add_argument("--model_current_version", dest="model_current_version", type=str)
     parser.add_argument("--model_version", dest="model_version", type=str)
     parser.add_argument("--periodo", dest="periodo", type=int, default=-1)
-    parser.add_argument("--mode", dest="mode", type=str)
+    # parser.add_argument("--mode", dest="mode", type=str)
     parser.add_argument("--with_tipo", dest="with_tipo", type=str)
     args = parser.parse_args()
     return args
+
 
 def get_mapping_tipos(periodo: int) -> dict:
     """
@@ -55,3 +60,17 @@ def get_mapping_tipos(periodo: int) -> dict:
             }
         return tipos
     
+
+def get_n_lags(periodo: int, n: int):
+    periodo_date = datetime.strptime(str(periodo), '%Y%m')
+    return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
+
+
+def get_ahead_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos posteriores al periodo dado.
+    Ejemplo:
+        get_ahead_n_periodos(202306, 3) -> [202306, 202307, 202308]
+    """
+    return [get_n_lags(periodo, -lag) for lag in range(n)]
+

@@ -34,7 +34,10 @@ on:
       model_version:
         required: true
         type: string
-      with_tipo_predict:
+      # with_tipo_predict:
+      #   required: true
+      #   type: string
+      model_current_version:
         required: true
         type: string
   # push:

@@ -1,0 +1,57 @@
+# src/models/inicial_regular_v3.yml
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+name: model_inicial_regular
+version: 1
+display_name: Model Training - Inicial Regular
+type: command
+
+inputs:
+  input_evaluation_inicial_datastore:
+    type: uri_folder
+  input_evaluation_continuidad_horario_datastore:
+    type: uri_folder
+  n_eval_periodos:
+    type: integer
+  model_periodo:
+    type: integer
+  model_current_version:
+    type: string
+  model_version:
+    type: string
+  periodo:
+    type: integer
+  with_tipo:
+    type: string
+
+outputs:
+  output_compare_datastore:
+    type: uri_folder
+
+code: .
+
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file:
+    channels:
+      - conda-forge
+    dependencies:
+      - python=3.10
+      - pip
+      - pip:
+          - pandas
+          - pyarrow
+          - PyYAML
+          - Unidecode
+          - numpy
+
+command: >-
+  python compare.py 
+  --input_evaluation_inicial_datastore ${{inputs.input_evaluation_inicial_datastore}}
+  --input_evaluation_continuidad_horario_datastore ${{inputs.input_evaluation_continuidad_horario_datastore}}
+  --output_compare_datastore ${{outputs.output_compare_datastore}}
+  --n_eval_periodos ${{inputs.n_eval_periodos}}
+  --model_periodo ${{inputs.model_periodo}}
+  --model_current_version ${{inputs.model_current_version}}
+  --model_version ${{inputs.model_version}}
+  --periodo ${{inputs.periodo}}
+  --with_tipo ${{inputs.with_tipo}}

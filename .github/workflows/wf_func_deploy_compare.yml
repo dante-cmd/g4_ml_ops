@@ -34,13 +34,14 @@ on:
       model_version:
         required: true
         type: string
+      model_current_version:
+        required: true
+        type: string
+    
     outputs:
-      response_inicial:
-        description: "Evaluation response for inicial_regular"
-        value: ${{ jobs.run-pipeline.outputs.response_inicial }}
-      response_continuidad_horario:
-        description: "Evaluation response for continuidad_regular_horario"
-        value: ${{ jobs.run-pipeline.outputs.response_continuidad_horario }}
+      response_compare:
+        description: "Evaluation response for compare"
+        value: ${{ jobs.run-pipeline.outputs.response_compare }}
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -77,11 +78,11 @@ jobs:
       run: |
           # Submit job with only the provided parameters
           # JOB_ID=$(az ml job create \
-          #   --file pl_ml_deploy_evaluate.yml \
+          #   --file pl_ml_deploy_compare.yml \
           #   --query name -o tsv)
 
           JOB_ID=$(az ml job create \
-            --file pl_ml_deploy_evaluate.yml \
+            --file pl_ml_deploy_compare.yml \
             --set jobs.etl_job.inputs.platinum_version="${{ inputs.platinum_version }}" \
             --set jobs.etl_job.inputs.ult_periodo="${{ inputs.ult_periodo_data }}" \
             --set jobs.features_inicial_job.inputs.platinum_version="${{ inputs.platinum_version }}" \
@@ -153,6 +154,12 @@ jobs:
             --set jobs.model_evaluation_continuidad_horario_job.inputs.periodo="${{ inputs.periodo }}" \
             --set jobs.model_evaluation_continuidad_horario_job.inputs.mode="${{ inputs.mode }}" \
             --set jobs.model_evaluation_continuidad_horario_job.inputs.with_tipo="${{ inputs.with_tipo }}" \
+            --set jobs.compare_job.inputs.n_eval_periodos="${{ inputs.n_eval_periodos }}" \
+            --set jobs.compare_job.inputs.model_periodo="${{ inputs.model_periodo }}" \
+            --set jobs.compare_job.inputs.model_current_version="${{ inputs.model_current_version }}" \
+            --set jobs.compare_job.inputs.model_version="${{ inputs.model_version }}" \
+            --set jobs.compare_job.inputs.periodo="${{ inputs.periodo }}" \
+            --set jobs.compare_job.inputs.with_tipo="${{ inputs.with_tipo }}" \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
@@ -162,44 +169,29 @@ jobs:
           az ml job stream --name $JOB_ID
           # az ml job wait --name $JOB_ID
 
-          CHILD_JOB_NAME_INICIAL=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_inicial_job'].name | [0]" -o tsv)
-          CHILD_JOB_NAME_HORARIO=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='model_evaluation_continuidad_horario_job'].name | [0]" -o tsv)
+          CHILD_JOB_NAME=$(az ml job list --parent-job-name $JOB_ID --query "[?display_name=='compare_job'].name | [0]" -o tsv)
 
-          echo "Submitted children job inicial: $CHILD_JOB_NAME_INICIAL"
-          echo "Submitted children job horario: $CHILD_JOB_NAME_HORARIO"
+          echo "Submitted children job: $CHILD_JOB_NAME"
 
-          # az ml job show --name $CHILD_JOB_NAME_INICIAL
+          az ml job download --name $CHILD_JOB_NAME --output-name output_compare_datastore --download-path ./outputs_metrics_compare
 
-          az ml job download --name $CHILD_JOB_NAME_INICIAL --output-name output_evaluation_inicial_datastore --download-path ./outputs_metrics_inicial
-          az ml job download --name $CHILD_JOB_NAME_HORARIO --output-name output_evaluation_continuidad_horario_datastore --download-path ./outputs_metrics_horario
           
-          response_inicial_file=$(find ./outputs_metrics_inicial -name "response_*.txt" | head -n 1)
-          response_continuidad_horario_file=$(find ./outputs_metrics_horario -name "response_*.txt" | head -n 1)
+          response_compare_file=$(find ./outputs_metrics_compare -name "response_*.txt" | head -n 1)
           
-          if [ -f "$response_inicial_file" ]; then
-              response_inicial=$(cat "$response_inicial_file")
-              echo "El response obtenido desde archivo es: $response_inicial"
+          if [ -f "$response_compare_file" ]; then
+              response_compare=$(cat "$response_compare_file")
+              echo "El response obtenido desde archivo es: $response_compare"
           else
-              echo "Error: No se encontró el archivo response_inicial.txt"
-              response_inicial="failed"
-          fi
-        
-          if [ -f "$response_continuidad_horario_file" ]; then
-              response_continuidad_horario=$(cat "$response_continuidad_horario_file")
-              echo "El response obtenido desde archivo es: $response_continuidad_horario"
-          else
-              echo "Error: No se encontró el archivo response_continuidad_regular_horario.txt"
-              response_continuidad_horario="failed"
+              echo "Error: No se encontró el archivo response_compare.txt"
+              response_compare="failed"
           fi
           
-          echo "response_inicial=$response_inicial" >> $GITHUB_OUTPUT
-          echo "response_continuidad_horario=$response_continuidad_horario" >> $GITHUB_OUTPUT
+          echo "response_compare=$response_compare" >> $GITHUB_OUTPUT
 
-          if [ "$response_inicial" == "failed" ] || [ "$response_continuidad_horario" == "failed" ]; then
+          if [ "$response_compare" == "failed" ]; then
               exit 1
           fi
 
     outputs:
-      response_inicial: ${{ steps.submit_job.outputs.response_inicial }}
-      response_continuidad_horario: ${{ steps.submit_job.outputs.response_continuidad_horario }}
+      response_compare: ${{ steps.submit_job.outputs.response_compare }}
         

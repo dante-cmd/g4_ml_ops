@@ -91,6 +91,11 @@ outputs:
     path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular_horario
     mode: rw_mount
 
+  output_compare_datastore:
+    type: uri_folder
+    path: azureml://datastores/ml_data/paths/compare
+    mode: rw_mount
+
 
 jobs:
   # ETL Job
@@ -306,3 +311,19 @@ jobs:
       with_tipo: "True"
     outputs:
       output_evaluation_continuidad_horario_datastore: ${{parent.outputs.output_evaluation_continuidad_horario_datastore}}
+
+  # Compare Job
+  compare_job:
+    type: command
+    component: file:./src/compare/compare.yml
+    inputs:
+      input_evaluation_inicial_datastore: ${{parent.jobs.model_evaluation_inicial_job.outputs.output_evaluation_inicial_datastore}}
+      input_evaluation_continuidad_horario_datastore: ${{parent.jobs.model_evaluation_continuidad_horario_job.outputs.output_evaluation_continuidad_horario_datastore}}
+      n_eval_periodos: 5
+      model_periodo: 202506
+      model_current_version: "v1"
+      model_version: "v2"
+      periodo: -1
+      with_tipo: "True"
+    outputs:
+      output_compare_datastore: ${{parent.outputs.output_compare_datastore}}

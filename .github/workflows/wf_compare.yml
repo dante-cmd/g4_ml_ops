@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - prod
+      - dev
 
 jobs:
   load-params:
@@ -17,10 +17,13 @@ jobs:
       n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
       periodo: ${{ steps.read_params.outputs.periodo }}
       with_tipo: ${{ steps.read_params.outputs.with_tipo }}
+
       platinum_version: ${{ steps.read_params.outputs.platinum_version }}
       feats_version: ${{ steps.read_params.outputs.feats_version }}
       target_version: ${{ steps.read_params.outputs.target_version }}
       model_version: ${{ steps.read_params.outputs.model_version }}
+
+      model_current_version: ${{ steps.read_params.outputs.model_current_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -46,16 +49,53 @@ jobs:
           echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_dev.json)" >> $GITHUB_OUTPUT
           echo "periodo=$periodo" >> $GITHUB_OUTPUT
           echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
+
+          # For this workflow, the version dev is the version that is currently being tested
+          # The version prod is the version that is currently deployed
+          
+          platinum_current_version=$(jq -r '.platinum_version.prod' version.json)
+          feats_current_version=$(jq -r '.feats_version.prod' version.json)
+          target_current_version=$(jq -r '.target_version.prod' version.json)
+          model_current_version=$(jq -r '.model_version.prod' version.json)
+          
+          # echo "platinum_current_version=$platinum_current_version" >> $GITHUB_OUTPUT
+          # echo "feats_current_version=$feats_current_version" >> $GITHUB_OUTPUT
+          # echo "target_current_version=$target_current_version" >> $GITHUB_OUTPUT
+          # echo "model_current_version=$model_current_version" >> $GITHUB_OUTPUT
+
+          # Calculate new version based on prod version
+          # Extract number, increment, and create new version string (e.g., v1 -> v2)
+
+          current_platinum_v_num=$(echo $platinum_current_version | tr -dc '0-9')
+          new_platinum_v_num=$((current_platinum_v_num + 1))
+          platinum_version="v$new_platinum_v_num"
+
+          current_feats_v_num=$(echo $feats_current_version | tr -dc '0-9')
+          new_feats_v_num=$((current_feats_v_num + 1))
+          feats_version="v$new_feats_v_num"
+
+          current_target_v_num=$(echo $target_current_version | tr -dc '0-9')
+          new_target_v_num=$((current_target_v_num + 1))
+          target_version="v$new_target_v_num"
+
+          current_model_v_num=$(echo $model_current_version | tr -dc '0-9')
+          new_model_v_num=$((current_model_v_num + 1))
+          model_version="v$new_model_v_num"
+          
+          echo "platinum_version=$platinum_version" >> $GITHUB_OUTPUT
+          echo "feats_version=$feats_version" >> $GITHUB_OUTPUT
+          echo "target_version=$target_version" >> $GITHUB_OUTPUT
+          echo "model_version=$model_version" >> $GITHUB_OUTPUT
+          # For this workflow, the version dev is the version that is currently being tested
           echo "platinum_version=$(jq -r '.platinum_version.dev' version.json)" >> $GITHUB_OUTPUT
           echo "feats_version=$(jq -r '.feats_version.dev' version.json)" >> $GITHUB_OUTPUT
           echo "target_version=$(jq -r '.target_version.dev' version.json)" >> $GITHUB_OUTPUT
-          echo "model_version=$(jq -r '.model_version.dev' version.json)" >> $GITHUB_OUTPUT
 
   trigger-pl-ml-compare:
     needs: load-params
     if: always()
-    # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_deploy_compare.yml
+    uses: ./.github/workflows/wf_func_test.yml
+    # uses: ./.github/workflows/wf_func_deploy_compare.yml
     with:
       mode: ${{ needs.load-params.outputs.mode }}
       model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
@@ -67,22 +107,23 @@ jobs:
       feats_version: ${{ needs.load-params.outputs.feats_version }}
       target_version: ${{ needs.load-params.outputs.target_version }}
       model_version: ${{ needs.load-params.outputs.model_version }}
+      model_current_version: ${{ needs.load-params.outputs.model_current_version }}
     secrets: inherit
 
-  trigger-pl-ml-model:
-    needs: [load-params, trigger-pl-ml-compare]
-    if: always() && needs.trigger-pl-ml-compare.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-compare.outputs.response_continuidad_horario == 'approved'
-    # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_deploy_model.yml
-    with:
-      mode: ${{ needs.load-params.outputs.mode }}
-      model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
-      ult_periodo_data: ${{ fromJson(needs.load-params.outputs.ult_periodo_data) }}
-      n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
-      periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
-      with_tipo: ${{ needs.load-params.outputs.with_tipo }}
-      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
-      feats_version: ${{ needs.load-params.outputs.feats_version }}
-      target_version: ${{ needs.load-params.outputs.target_version }}
-      model_version: ${{ needs.load-params.outputs.model_version }}
-    secrets: inherit
+  # trigger-pl-ml-model:
+  #   needs: [load-params, trigger-pl-ml-compare]
+  #   if: always() && needs.trigger-pl-ml-compare.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-compare.outputs.response_continuidad_horario == 'approved'
+  #   # uses: ./.github/workflows/wf_func_test.yml
+  #   uses: ./.github/workflows/wf_func_deploy_model.yml
+  #   with:
+  #     mode: ${{ needs.load-params.outputs.mode }}
+  #     model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
+  #     ult_periodo_data: ${{ fromJson(needs.load-params.outputs.ult_periodo_data) }}
+  #     n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
+  #     periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
+  #     with_tipo: ${{ needs.load-params.outputs.with_tipo }}
+  #     platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+  #     feats_version: ${{ needs.load-params.outputs.feats_version }}
+  #     target_version: ${{ needs.load-params.outputs.target_version }}
+  #     model_version: ${{ needs.load-params.outputs.model_version }}
+  #   secrets: inherit
