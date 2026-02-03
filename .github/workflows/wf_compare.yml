@@ -94,8 +94,8 @@ jobs:
   trigger-pl-ml-compare:
     needs: load-params
     if: always()
-    # uses: ./.github/workflows/wf_func_test.yml
-    uses: ./.github/workflows/wf_func_deploy_compare.yml
+    uses: ./.github/workflows/wf_func_test.yml
+    # uses: ./.github/workflows/wf_func_deploy_compare.yml
     with:
       mode: ${{ needs.load-params.outputs.mode }}
       model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
