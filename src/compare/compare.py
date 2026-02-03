@@ -67,7 +67,9 @@ class Compare:
 
         for tipo in tipos:
             current_score = self.get_average_score(periodos, tipo, self.model_current_version, tipos[tipo])
+            print(f"Current score for {tipo}: {current_score}")
             new_score = self.get_average_score(periodos, tipo, self.model_version, tipos[tipo])
+            print(f"New score for {tipo}: {new_score}")
             if new_score > current_score:
                 evaluation_scores.append(True)
             else:
