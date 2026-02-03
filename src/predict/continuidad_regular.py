@@ -122,7 +122,8 @@ class TrainContinuidad:
             
         else:
             num_features = ['CANT_ALUMNOS_ANTERIOR']
-            x = num_features + cat_features
+            # x = num_features + cat_features
+            x = cat_features
             target = "CANT_ALUMNOS"
             predict = f"{target}_PREDICT"
 

@@ -1,4 +1,4 @@
-name: Daily Validator
+name: First Run
 
 on:
   workflow_dispatch:

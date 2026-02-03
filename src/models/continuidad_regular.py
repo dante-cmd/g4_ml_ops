@@ -60,7 +60,8 @@ class TrainContinuidad:
                     # 'PCT_ALUMNOS_SPLY'
                     ]
                 target = "CANT_ALUMNOS"
-                x = num_features + cat_features
+                # x = num_features + cat_features
+                x = cat_features
                 y = target
             
             data_model_train = data_model_train[
