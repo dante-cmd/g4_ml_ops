@@ -144,7 +144,7 @@ class TrainContinuidadToHorario:
         path_model_version.mkdir(parents=True, exist_ok=True)
         
         df_model_predict.to_parquet(
-            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet"
+            path_model_version / f"data_predict_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
         
         # path_model_version = self.output_predict_datastore / "test" 
