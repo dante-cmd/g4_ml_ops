@@ -58,10 +58,6 @@ jobs:
           target_current_version=$(jq -r '.target_version.prod' version.json)
           model_current_version=$(jq -r '.model_version.prod' version.json)
           
-          # echo "platinum_current_version=$platinum_current_version" >> $GITHUB_OUTPUT
-          # echo "feats_current_version=$feats_current_version" >> $GITHUB_OUTPUT
-          # echo "target_current_version=$target_current_version" >> $GITHUB_OUTPUT
-          # echo "model_current_version=$model_current_version" >> $GITHUB_OUTPUT
 
           # Calculate new version based on prod version
           # Extract number, increment, and create new version string (e.g., v1 -> v2)
@@ -86,10 +82,13 @@ jobs:
           echo "feats_version=$feats_version" >> $GITHUB_OUTPUT
           echo "target_version=$target_version" >> $GITHUB_OUTPUT
           echo "model_version=$model_version" >> $GITHUB_OUTPUT
+
+          echo "model_current_version=$model_current_version" >> $GITHUB_OUTPUT
+
           # For this workflow, the version dev is the version that is currently being tested
-          echo "platinum_version=$(jq -r '.platinum_version.dev' version.json)" >> $GITHUB_OUTPUT
-          echo "feats_version=$(jq -r '.feats_version.dev' version.json)" >> $GITHUB_OUTPUT
-          echo "target_version=$(jq -r '.target_version.dev' version.json)" >> $GITHUB_OUTPUT
+          # echo "platinum_version=$(jq -r '.platinum_version.dev' version.json)" >> $GITHUB_OUTPUT
+          # echo "feats_version=$(jq -r '.feats_version.dev' version.json)" >> $GITHUB_OUTPUT
+          # echo "target_version=$(jq -r '.target_version.dev' version.json)" >> $GITHUB_OUTPUT
 
   trigger-pl-ml-compare:
     needs: load-params
