@@ -1,11 +1,11 @@
 
-name: Daily Validator
+name: Pipeline Compare
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - prod
+      - test
 
 jobs:
   load-params:
