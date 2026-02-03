@@ -26,10 +26,10 @@ class Compare:
         self.model_version = model_version
         self.periodo = periodo
     
-    def get_score_evaluation(self, periodo:int, model_version:str, tipo:str):
+    def get_score_evaluation(self, path_file:Path, periodo:int, model_version:str, tipo:str):
         
         data_model_predict = pd.read_parquet(
-            self.input_evaluation_inicial_datastore
+            path_file # self.input_evaluation_inicial_datastore
             /'test'
             /f"data_evaluation_{model_version}_{self.model_periodo}_{tipo}_{periodo}.parquet")
         
@@ -43,10 +43,10 @@ class Compare:
         
         return score
 
-    def get_average_score(self, periodos:list, tipo:str, model_version:str):
+    def get_average_score(self, periodos:list[int], tipo:str, model_version:str, path_file:Path):
         scores = []
         for periodo in periodos:
-            score = self.get_score_evaluation(periodo, model_version, tipo)
+            score = self.get_score_evaluation(path_file, periodo, model_version, tipo)
             scores.append(score)
         
         return sum(scores)/len(scores)
@@ -60,13 +60,14 @@ class Compare:
         else:
             periodos = [self.periodo]
 
-        tipos = ['inicial_regular', 'continuidad_regular_horario']
-        
+        tipos = {'inicial_regular':self.input_evaluation_inicial_datastore,
+                  'continuidad_regular_horario':self.input_evaluation_continuidad_horario_datastore}
+    
         evaluation_scores = []
 
         for tipo in tipos:
-            current_score = self.get_average_score(periodos, tipo, self.model_current_version)
-            new_score = self.get_average_score(periodos, tipo, self.model_version)
+            current_score = self.get_average_score(periodos, tipo, self.model_current_version, tipos[tipo])
+            new_score = self.get_average_score(periodos, tipo, self.model_version, tipos[tipo])
             if new_score > current_score:
                 evaluation_scores.append(True)
             else:
