@@ -6,6 +6,9 @@ on:
     branches:
       - prod
 
+permissions:
+  contents: write
+
 jobs:
   load-params:
     runs-on: ubuntu-latest
