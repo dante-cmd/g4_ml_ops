@@ -75,9 +75,11 @@ class TrainContinuidad:
         else:
             num_features = ['CANT_ALUMNOS_ANTERIOR']
             target = "CANT_ALUMNOS"
-            x = num_features + cat_features
-            # x = cat_features
+            # x = num_features + cat_features
+            x = cat_features
             y = target
+            print("x", x)
+            print("y", y)
             data_model_train = data_model_train[
                 # (X_train['PERIODO_TARGET'] < periodo)
                 ~(data_model_train['PERIODO_TARGET'] % 100).isin(meses)
