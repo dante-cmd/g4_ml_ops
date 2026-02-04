@@ -111,7 +111,7 @@ jobs:
 
   trigger-pl-update-versions:
     needs: [load-params, trigger-pl-ml-compare]
-    if: always() && needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
+    if: needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
     uses: ./.github/workflows/wf_func_update_versions.yml
     with:
       platinum_version: ${{ needs.load-params.outputs.platinum_version }}
@@ -122,7 +122,7 @@ jobs:
     
   trigger-pl-ml-model:
     needs: [load-params, trigger-pl-ml-compare, trigger-pl-update-versions]
-    if: always() && needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
+    if: needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
     # uses: ./.github/workflows/wf_func_test.yml
     uses: ./.github/workflows/wf_func_deploy_model.yml
     with:
