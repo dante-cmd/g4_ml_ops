@@ -1,0 +1,47 @@
+name: Update Version File
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      platinum_version:
+        required: true
+        type: string
+      feats_version:
+        required: true
+        type: string
+      target_version:
+        required: true
+        type: string
+      model_version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Update version.json
+        run: |
+          # Update dev versions with the new versions
+          jq '.platinum_version.dev = "${{ inputs.platinum_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.feats_version.dev = "${{ inputs.feats_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.target_version.dev = "${{ inputs.target_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.model_version.dev = "${{ inputs.model_version }}"' version.json > tmp.json && mv tmp.json version.json
+          
+          echo "Updated version.json with new dev versions:"
+          cat version.json
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "Update dev versions: platinum=${{ inputs.platinum_version }}, feats=${{ inputs.feats_version }}, target=${{ inputs.target_version }}, model=${{ inputs.model_version }}"
+          git push

@@ -62,14 +62,14 @@ jobs:
     - name: Install Azure ML CLI extension
       run: |
           az extension add -n ml -y || az extension update -n ml
-          az configure --defaults workspace=${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }} group=${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup}}
+          az configure --defaults workspace=${{ fromJson(secrets.AZURE_RESOURCES_PROD).workspaceName }} group=${{ fromJson(secrets.AZURE_RESOURCES_PROD).resourceGroup}}
 
     - name: Submit pipeline job and print outputs
       id: submit_job
-      env:
-        AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-        AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_CREDENTIALS).resourceGroup }}
-        AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_CREDENTIALS).workspaceName }}
+      # env:
+      #   AZURE_SUBSCRIPTION_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+      #   AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_RESOURCES_DEV).resourceGroup }}
+      #   AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_RESOURCES_DEV).workspaceName }}
       run: |
           # Submit job with only the provided parameters
           # JOB_ID=$(az ml job create \

@@ -48,10 +48,16 @@ jobs:
           echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
           echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_prod.json)" >> $GITHUB_OUTPUT
           echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
+          
+          # --------------------------------------------------------------------------------------
+          # ---------------------------- Versions from version.json ------------------------------
+          # --------------------------------------------------------------------------------------
+
           echo "platinum_version=$(jq -r '.platinum_version.prod' version.json)" >> $GITHUB_OUTPUT
           echo "feats_version=$(jq -r '.feats_version.prod' version.json)" >> $GITHUB_OUTPUT
           echo "target_version=$(jq -r '.target_version.prod' version.json)" >> $GITHUB_OUTPUT
           echo "model_version=$(jq -r '.model_version.prod' version.json)" >> $GITHUB_OUTPUT
+          
           echo "with_tipo_predict=$with_tipo_predict" >> $GITHUB_OUTPUT
 
   trigger-pl-ml-predict:
