@@ -1,4 +1,4 @@
-name: First Run
+name: Pipeline ML First Run
 
 on:
   workflow_dispatch:

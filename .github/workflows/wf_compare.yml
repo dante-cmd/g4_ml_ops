@@ -1,5 +1,5 @@
 
-name: Pipeline Compare
+name: Pipeline ML Compare
 
 on:
   workflow_dispatch:

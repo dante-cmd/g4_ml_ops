@@ -1,4 +1,4 @@
-name: Deploy Scheduled Pipeline 
+name: Pipeline ML Scheduled (Listening) 
 
 on:
   schedule:

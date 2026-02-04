@@ -75,8 +75,8 @@ class TrainInicial:
         target = 'CANT_ALUMNOS'
         predict = f"{target}_PREDICT"
 
-        x = num_features + cat_features
-        # x = cat_features
+        # x = num_features + cat_features
+        x = cat_features
         print("x", x)
 
         data_model_eval = data_model_eval[base + num_features + cat_features].copy()
