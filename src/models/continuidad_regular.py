@@ -75,8 +75,8 @@ class TrainContinuidad:
         else:
             num_features = ['CANT_ALUMNOS_ANTERIOR']
             target = "CANT_ALUMNOS"
-            # x = num_features + cat_features
-            x = cat_features
+            x = num_features + cat_features
+            # x = cat_features
             y = target
             print("x", x)
             print("y", y)
