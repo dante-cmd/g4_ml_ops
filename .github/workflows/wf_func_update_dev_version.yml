@@ -42,13 +42,13 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add version.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit. Skipping push."
-            exit 0
+          if [[ -n $(git status --porcelain version.json) ]]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add version.json
+            git commit -m "Update dev versions: platinum=${{ inputs.platinum_version }}, feats=${{ inputs.feats_version }}, target=${{ inputs.target_version }}, model=${{ inputs.model_version }}"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push
+          else
+            echo "No changes detected in version.json. Skipping commit."
           fi
-          git commit -m "Update dev versions: platinum=${{ inputs.platinum_version }}, feats=${{ inputs.feats_version }}, target=${{ inputs.target_version }}, model=${{ inputs.model_version }}"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push
