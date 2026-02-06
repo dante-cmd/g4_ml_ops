@@ -13,6 +13,9 @@ from unidecode import unidecode
 
 
 class Utils:
+    """
+    Clase para parsear datos regulares.
+    """
     def __init__(self, tablas:dict):
         self.df_prog_acad = tablas['prog_acad'].copy()
         self.df_synthetic = tablas['synthetic'].copy()
@@ -28,12 +31,7 @@ class Utils:
 
     def add_flags(self, df:pd.DataFrame):
         """
-        Docstring for add_flags
         Add flags like 'FLAG_INICIAL', 'FLAG_ESTACIONAL' and the column 'CURSO_2'
-        
-        :param self: Description
-        :param df: Description
-        :type df: pd.DataFrame
         """
         assert np.isin(['CURSO_ACTUAL'], df.columns).all()
         assert not np.isin(
@@ -65,6 +63,9 @@ class Utils:
         return df_03
     
     def add_pe(self, df:pd.DataFrame, periodo_column:str= 'PERIODO'):
+        """
+        Agrega la columna 'PE' al DataFrame.
+        """
 
         assert np.isin(['CURSO_ACTUAL', periodo_column], df.columns).all()
         assert not np.isin(['PROGRAMA', 'PE'], df.columns).any()
@@ -104,6 +105,9 @@ class Utils:
         return df_03
     
     def add_vac_estandar(self, df:pd.DataFrame, periodo_column:str= 'PERIODO'):
+        """
+        Agrega la columna 'VAC_ACAD_ESTANDAR' al DataFrame.
+        """
         assert np.isin(['CURSO_ACTUAL', periodo_column], df.columns).all()
         assert not np.isin(['NIVEL', 'LINEA_DE_NEGOCIO', 'VAC_ACAD_ESTANDAR'], df.columns).any()
 
@@ -135,6 +139,9 @@ class Utils:
         return df_03
     
     def get_regular(self):
+        """
+        Obtiene los datos regulares.
+        """
         # synth
         df_prog_acad = self.df_prog_acad.copy()
 
@@ -159,6 +166,9 @@ class Utils:
         return df_prog_acad_03
     
     def get_regular_plus_synth(self):
+        """
+        Obtiene los datos regulares más los datos sintéticos.
+        """
         # synth
         if self.df_synthetic.empty:
             df_prog_acad = self.df_prog_acad.copy()
@@ -191,6 +201,9 @@ class Utils:
         return df_prog_acad_03
 
     def get_regular_plus_synth_plus_estacional(self):
+        """
+        Obtiene los datos regulares más los datos sintéticos más los datos estacionales.
+        """
         # synth
         if self.df_synthetic.empty:
             df_prog_acad = self.df_prog_acad.copy()

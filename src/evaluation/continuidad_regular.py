@@ -1,9 +1,11 @@
+"""Script para evaluar el modelo de continuidad regular."""
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos
 
 
 class TrainContinuidad:
+    """Clase para evaluar el modelo de continuidad regular."""
     def __init__(self, 
                  input_predict_datastore:str,
                  input_target_datastore:str,
@@ -21,6 +23,16 @@ class TrainContinuidad:
         self.tipo = tipo
 
     def get_data_predict(self, model_periodo:int, periodo:int):
+        """
+        Obtiene los datos de predicción para un periodo dado.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos de predicción.
+        """
         
         data_model_predict = pd.read_parquet(
             self.input_predict_datastore/'test'/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet")
@@ -28,11 +40,30 @@ class TrainContinuidad:
         return data_model_predict
 
     def get_data_target(self, periodo:int):
+        """
+        Obtiene los datos objetivo para un periodo dado.
+        
+        Args:
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos objetivo.
+        """
         data_model_target = pd.read_parquet(
             self.input_target_datastore/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
         return data_model_target
     
     def get_data_evaluation(self, model_periodo:int, periodo:int):
+        """
+        Obtiene los datos de evaluación para un periodo dado.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos de evaluación.
+        """
         on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL']
         
         data_model_predict = self.get_data_predict(model_periodo, periodo)
@@ -45,6 +76,16 @@ class TrainContinuidad:
     def upload_data_evaluation(
         self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame, 
         mode:str):
+        """
+        Sube los datos de evaluación al datastore.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            model_version (str): Versión del modelo.
+            periodo (int): Periodo de evaluación.
+            df_model_evaluation (pd.DataFrame): DataFrame con los datos de evaluación.
+            mode (str): Modo de evaluación.
+        """
 
         path_model = (self.output_evaluation_datastore/'test')
 
@@ -66,6 +107,12 @@ class TrainContinuidad:
             )
 
 def main(args):
+    """
+    Función principal para evaluar el modelo de continuidad regular.
+    
+    Args:
+        args: Argumentos de línea de comandos.
+    """
     
     input_predict_datastore = args.input_predict_datastore
     input_target_datastore = args.input_target_datastore

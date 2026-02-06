@@ -1,3 +1,5 @@
+"""Script para entrenar el modelo de continuidad regular."""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -6,6 +8,9 @@ from utils_model import parse_args, get_mapping_tipos
 
 
 class TrainContinuidad:
+    """
+    Clase para entrenar el modelo de continuidad regular.
+    """
     def __init__(self,
                  input_feats_datastore:str,
                  output_model_datastore:str,
@@ -21,15 +26,23 @@ class TrainContinuidad:
         self.tipo  = tipo
 
     def apply_filter(self, df_train:pd.DataFrame):
+        """
+        Aplica filtros al dataframe de entrenamiento.
+        """
         return df_train
     
     def get_data_train(self, periodo:int):
+        """
+        Obtiene los datos de entrenamiento para el periodo dado.
+        """
         data_model_train = pd.read_parquet(
             self.input_feats_datastore/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
         return data_model_train  
     
     def train_model(self, periodo:int):
-
+        """
+        Entrena el modelo de continuidad regular.
+        """
         data_model_train = self.get_data_train(periodo)
         data_model_train = self.apply_filter(data_model_train)
         
@@ -101,6 +114,9 @@ class TrainContinuidad:
         return model
 
     def save_model(self, model, periodo:int):
+        """
+        Guarda el modelo entrenado.
+        """
         
         path_model = self.output_model_datastore/'test'/self.model_version
         
@@ -111,6 +127,9 @@ class TrainContinuidad:
 
 
 def main(args):
+    """
+    Función principal para entrenar el modelo de continuidad regular.
+    """
     input_feats_datastore = args.input_feats_datastore
     output_model_datastore = args.output_model_datastore
     feats_version = args.feats_version

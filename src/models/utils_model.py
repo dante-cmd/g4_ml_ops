@@ -1,3 +1,5 @@
+"""Utils for models"""
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -6,6 +8,9 @@ import argparse
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--input_feats_datastore", dest='input_feats_datastore',

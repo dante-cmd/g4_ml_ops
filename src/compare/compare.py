@@ -40,6 +40,18 @@ class Compare:
     def get_score_evaluation(
         self, path_file: Path, periodo: int, model_version: str, tipo: str
     ) -> float:
+        """
+        Calcula el score de evaluación para un modelo y tipo dados.
+        
+        Args:
+            path_file (Path): Path al datastore de evaluación.
+            periodo (int): Periodo de evaluación.
+            model_version (str): Versión del modelo.
+            tipo (str): Tipo de evaluación.
+            
+        Returns:
+            float: Score de evaluación.
+        """
         data_model_predict = pd.read_parquet(
             path_file
             / "test"
@@ -73,6 +85,18 @@ class Compare:
         model_version: str,
         path_file: Path,
     ) -> float:
+        """
+        Calcula el score promedio de evaluación para un modelo y tipo dados.
+        
+        Args:
+            periodos (Iterable[int]): Periodos de evaluación.
+            tipo (str): Tipo de evaluación.
+            model_version (str): Versión del modelo.
+            path_file (Path): Path al datastore de evaluación.
+            
+        Returns:
+            float: Score promedio de evaluación.
+        """
         scores: List[float] = []
         for periodo in periodos:
             score = self.get_score_evaluation(path_file, periodo, model_version, tipo)
@@ -83,6 +107,9 @@ class Compare:
         return sum(scores) / len(scores)
 
     def upload_response(self) -> None:
+        """
+        Sube la respuesta al datastore.
+        """
 
         if self.periodo == -1:
             assert self.n_eval_periodos >= 1
@@ -133,6 +160,9 @@ class Compare:
 
 
 def main(args) -> None:
+    """
+    Función principal para comparar los modelos.
+    """
     input_evaluation_inicial_datastore = args.input_evaluation_inicial_datastore
     input_evaluation_continuidad_horario_datastore = args.input_evaluation_continuidad_horario_datastore
     output_compare_datastore = args.output_compare_datastore

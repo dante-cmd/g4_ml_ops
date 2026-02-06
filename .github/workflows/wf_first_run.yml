@@ -90,7 +90,7 @@ jobs:
     
 
   trigger-pl-ml-model:
-    needs: [load-params, trigger-pl-ml-evaluate]
+    needs: [load-params, trigger-pl-ml-evaluate, trigger-pl-update-versions]
     if: needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
     # always() &&
     # uses: ./.github/workflows/wf_func_test.yml
