@@ -6,7 +6,7 @@ from azure.ai.ml.entities import Data
 from azure.ai.ml.constants import AssetTypes
 from pathlib import Path
 import numpy as np
-from utils import mk_dirs, run_script
+from old.utils import mk_dirs, run_script
 import pandas as pd
 
 

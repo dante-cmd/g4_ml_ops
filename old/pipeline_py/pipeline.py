@@ -23,7 +23,7 @@ from models.inicial_estacional import TrainContinuidad as TrainContinuidadEstaci
 from models.continuidad_regular import TrainInicial as TrainInicialRegular
 from models.continuidad_regular import TrainContinuidad as TrainContinuidadRegular
 from models.continuidad_regular import TrainContinuidadToHorario as TrainContinuidadRegularToHorario
-from utils import calculate_classes, calculate_metrics, join_target,  save_output
+from old.utils import calculate_classes, calculate_metrics, join_target,  save_output
 from utils_azure import get_path_to_read, data_uploader
 import logging
 

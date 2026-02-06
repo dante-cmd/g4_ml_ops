@@ -1,8 +1,8 @@
 # src/models/inicial_regular_v3.yml
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-name: model_inicial_regular
+name: compare_models
 version: 1
-display_name: Model Training - Inicial Regular
+display_name: Model Comparison
 type: command
 
 inputs:
