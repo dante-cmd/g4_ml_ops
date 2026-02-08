@@ -1,0 +1,14 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+code: .
+command: >-
+  python src/main.py 
+  --model_periodo ${{inputs.model_periodo}}
+environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+compute: azureml:cpu-cluster
+experiment_name: scoring-experiment
+description: Entrenamiento del modelo
+
+inputs:
+  model_periodo: 
+    type: string
+    default: "202401"
