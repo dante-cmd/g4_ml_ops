@@ -72,6 +72,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install black flake8 isort mypy pylint
 
+
       - name: Run Black
         if: inputs.checkBlack && steps.changed_files.outputs.files != '0'
         run: black --check --config ${{ inputs.pyProjectDirectory }} ${{ steps.changed_files.outputs.files }}
