@@ -16,3 +16,4 @@ __pycache__
 data
 env*.json
 secrets.json
+.DS_Store
