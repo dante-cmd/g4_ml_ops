@@ -69,12 +69,7 @@ jobs:
         if: steps.changed_files.outputs.files != '0'
         run: |
           python3 -m pip install --upgrade pip
-          #pip install -r requirements.txt
-
-          # 1. Instala tus dependencias normales (si existe el archivo)
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          
-          # 2. INSTALA LAS HERRAMIENTAS DE CALIDAD (¡Esto es lo que falta!)
           pip install black flake8 isort mypy pylint
 
       - name: Run Black
