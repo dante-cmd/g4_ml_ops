@@ -16,17 +16,14 @@ inputs:
   input_model_inicial_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/models/inicial_regular
-    mode: rw_mount
   
   input_model_continuidad_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/models/continuidad_regular
-    mode: rw_mount
 
   input_model_continuidad_horario_datastore:
     type: uri_folder
     path: azureml://datastores/ml_data/paths/models/continuidad_regular_horario
-    mode: rw_mount
 
 outputs:
 
@@ -61,20 +58,20 @@ outputs:
     path: azureml://datastores/ml_data/paths/target/continuidad_regular_horario
     mode: rw_mount
 
-  output_model_inicial_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/models/inicial_regular
-    mode: rw_mount
+  # output_model_inicial_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/models/inicial_regular
+  #   mode: rw_mount
   
-  output_model_continuidad_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/models/continuidad_regular
-    mode: rw_mount
+  # output_model_continuidad_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/models/continuidad_regular
+  #   mode: rw_mount
 
-  output_model_continuidad_horario_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/models/continuidad_regular_horario
-    mode: rw_mount
+  # output_model_continuidad_horario_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/models/continuidad_regular_horario
+  #   mode: rw_mount
 
   output_predict_inicial_datastore:
     type: uri_folder
@@ -91,20 +88,20 @@ outputs:
     path: azureml://datastores/ml_data/paths/predict/continuidad_regular_horario
     mode: rw_mount
 
-  output_evaluation_inicial_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/evaluation/inicial_regular
-    mode: rw_mount
+  # output_evaluation_inicial_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/evaluation/inicial_regular
+  #   mode: rw_mount
 
-  output_evaluation_continuidad_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular
-    mode: rw_mount
+  # output_evaluation_continuidad_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular
+  #   mode: rw_mount
 
-  output_evaluation_continuidad_horario_datastore:
-    type: uri_folder
-    path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular_horario
-    mode: rw_mount
+  # output_evaluation_continuidad_horario_datastore:
+  #   type: uri_folder
+  #   path: azureml://datastores/ml_data/paths/evaluation/continuidad_regular_horario
+  #   mode: rw_mount
 
 
 jobs:
