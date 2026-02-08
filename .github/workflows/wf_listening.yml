@@ -22,7 +22,7 @@ jobs:
       n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
       periodo: ${{ steps.check_date.outputs.periodo }}
       with_tipo: ${{ steps.read_params.outputs.with_tipo }}
-      with_tipo_predict: ${{ steps.read_params.outputs.with_tipo_predict }}
+      # with_tipo_predict: ${{ steps.read_params.outputs.with_tipo_predict }}
       mode: ${{ steps.read_params.outputs.mode }}
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
         if: steps.check_date.outputs.should_run == 'true'
         run: |
           with_tipo="True"
-          with_tipo_predict="False"
+          # with_tipo_predict="False"
           n_eval_periodos=-1
 
           echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
@@ -60,7 +60,7 @@ jobs:
           echo "target_version=$(jq -r '.target_version.prod' version.json)" >> $GITHUB_OUTPUT
           echo "model_version=$(jq -r '.model_version.prod' version.json)" >> $GITHUB_OUTPUT
           
-          echo "with_tipo_predict=$with_tipo_predict" >> $GITHUB_OUTPUT
+          # echo "with_tipo_predict=$with_tipo_predict" >> $GITHUB_OUTPUT
 
   trigger-pl-ml-predict:
     needs: validate-date
@@ -78,5 +78,5 @@ jobs:
       feats_version: ${{ needs.validate-date.outputs.feats_version }}
       target_version: ${{ needs.validate-date.outputs.target_version }}
       model_version: ${{ needs.validate-date.outputs.model_version }}
-      with_tipo_predict: ${{ needs.validate-date.outputs.with_tipo_predict }}
+      # with_tipo_predict: ${{ needs.validate-date.outputs.with_tipo_predict }}
     secrets: inherit

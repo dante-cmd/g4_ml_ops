@@ -34,9 +34,9 @@ on:
       model_version:
         required: true
         type: string
-      with_tipo_predict:
-        required: true
-        type: string
+      # with_tipo_predict:
+      #   required: true
+      #   type: string
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -109,21 +109,21 @@ jobs:
             --set jobs.model_predict_inicial_job.inputs.n_eval_periodos="${{ inputs.n_eval_periodos }}" \
             --set jobs.model_predict_inicial_job.inputs.periodo="${{ inputs.periodo }}" \
             --set jobs.model_predict_inicial_job.inputs.mode="${{ inputs.mode }}" \
-            --set jobs.model_predict_inicial_job.inputs.with_tipo="${{ inputs.with_tipo_predict }}" \
+            --set jobs.model_predict_inicial_job.inputs.with_tipo="${{ inputs.with_tipo }}" \
             --set jobs.model_predict_continuidad_job.inputs.model_version="${{ inputs.model_version }}" \
             --set jobs.model_predict_continuidad_job.inputs.feats_version="${{ inputs.feats_version }}" \
             --set jobs.model_predict_continuidad_job.inputs.model_periodo="${{ inputs.model_periodo }}" \
             --set jobs.model_predict_continuidad_job.inputs.n_eval_periodos="${{ inputs.n_eval_periodos }}" \
             --set jobs.model_predict_continuidad_job.inputs.periodo="${{ inputs.periodo }}" \
             --set jobs.model_predict_continuidad_job.inputs.mode="${{ inputs.mode }}" \
-            --set jobs.model_predict_continuidad_job.inputs.with_tipo="${{ inputs.with_tipo_predict }}" \
+            --set jobs.model_predict_continuidad_job.inputs.with_tipo="${{ inputs.with_tipo }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.model_version="${{ inputs.model_version }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.feats_version="${{ inputs.feats_version }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.model_periodo="${{ inputs.model_periodo }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.n_eval_periodos="${{ inputs.n_eval_periodos }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.periodo="${{ inputs.periodo }}" \
             --set jobs.model_predict_continuidad_horario_job.inputs.mode="${{ inputs.mode }}" \
-            --set jobs.model_predict_continuidad_horario_job.inputs.with_tipo="${{ inputs.with_tipo_predict }}" \
+            --set jobs.model_predict_continuidad_horario_job.inputs.with_tipo="${{ inputs.with_tipo }}" \
             --query name -o tsv)
 
           echo "Submitted job: $JOB_ID"
