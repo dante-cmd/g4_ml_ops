@@ -14,6 +14,9 @@ from utils_loader import get_all_periodos, validate_periodos, parse_args
 
 
 class Loader:
+    """
+    Clase para cargar datos desde el datastore.
+    """
 
     def __init__(self, 
                  input_datastore: str, 
@@ -28,36 +31,57 @@ class Loader:
         # self.periodos = validate_periodos(n_periodos, ult_periodo, all_periodos)
     
     def fetch_tabla_curso_actual(self):
+        """
+        Obtiene la tabla de cursos actuales.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'cursos_actual.parquet'
         df_curso_actual = pd.read_parquet(path)
         return df_curso_actual
 
     def fetch_tabla_curso_acumulado(self):
+        """
+        Obtiene la tabla de cursos acumulados.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'tabla_curso_acumulado.parquet'
         df_curso_acumulado = pd.read_parquet(path)
         return df_curso_acumulado
 
     def fetch_tabla_turno_disponible(self):
+        """
+        Obtiene la tabla de turnos disponibles.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'turno_disponible.parquet'
         df_turno_disponible = pd.read_parquet(path)
         return df_turno_disponible
 
     def fetch_tabla_vac_estandar(self):
+        """
+        Obtiene la tabla de vacantes estándar.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'tabla_vac_estandar.parquet'
         df_tabla_vac_estandar = pd.read_parquet(path)
         return df_tabla_vac_estandar
 
     def fetch_tabla_pe(self):
+        """
+        Obtiene la tabla de periodos académicos.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'tabla_pe.parquet'
         tabla_pe = pd.read_parquet(path)
         return tabla_pe
 
     def fetch_tabla_horario(self):
+        """
+        Obtiene la tabla de horarios.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'tabla_horario.parquet'
         tabla_horario = pd.read_parquet(path)
         return tabla_horario
     
     def fetch_tabla_curso_diario_to_sabatino(self):
+        """
+        Obtiene la tabla de cursos de diario a sabatino.
+        """
         path = (
                 self.input_datastore /
                 'dim'/self.platinum_version/'tabla_curso_diario_to_sabatino.parquet')
@@ -65,6 +89,9 @@ class Loader:
         return tabla_pe
 
     def fetch_tabla_horario_diario_to_sabatino(self):
+        """
+        Obtiene la tabla de horarios de diario a sabatino.
+        """
         path = (
                 self.input_datastore /
                 'dim'/self.platinum_version/'tabla_horario_diario_to_sabatino.parquet')
@@ -72,17 +99,25 @@ class Loader:
         return tabla_pe
 
     def fetch_synthetic(self):
+        """
+        Obtiene la tabla sintética.
+        """
         path =  self.input_datastore /'synthetic'/self.platinum_version/'synthetic.parquet'
         synthetic = pd.read_parquet(path)
         return synthetic
 
     def fetch_tabla_curso_inicial(self):
+        """
+        Obtiene la tabla de cursos iniciales.
+        """
         path =  self.input_datastore /'dim'/self.platinum_version/'tabla_curso_inicial.parquet'
         df_tabla_curso_inicial = pd.read_parquet(path)
         return df_tabla_curso_inicial
 
     def fetch_prog_acad(self):
-
+        """
+        Obtiene la tabla de programas académicos.
+        """
         collection = []
         periodos = get_all_periodos(self.ult_periodo)
         for periodo in periodos:
@@ -99,6 +134,9 @@ class Loader:
         return prog_acad_consol
     
     def fetch_all(self) -> dict:
+        """
+        Obtiene todas las tablas necesarias para el pipeline.
+        """
         tablas = {}
         tabla_curso_actual = self.fetch_tabla_curso_actual()
         tabla_curso_acumulado = self.fetch_tabla_curso_acumulado()
@@ -128,6 +166,9 @@ class Loader:
 
 
 def main(args):
+    """
+    Función principal para ejecutar el pipeline de carga de datos.
+    """
     input_datastore=args.input_datastore
     ult_periodo=args.ult_periodo
     platinum_version=args.platinum_version

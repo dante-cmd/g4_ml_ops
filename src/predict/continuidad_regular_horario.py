@@ -1,3 +1,7 @@
+"""
+Script para predecir la continuidad regular horario
+"""
+
 import pandas as pd
 import numpy as np
 from catboost import CatBoostRegressor, Pool
@@ -8,6 +12,9 @@ import argparse
 
 
 class TrainContinuidadToHorario:
+    """
+    Clase para entrenar el modelo de continuidad regular horario.
+    """
     def __init__(self,
                  input_feats_datastore:str,
                  input_predict_datastore:str,
@@ -29,7 +36,9 @@ class TrainContinuidadToHorario:
         self.model_version = model_version
     
     def get_data_test(self, periodo: int):
-        
+        """
+        Obtiene los datos de test para el periodo dado.
+        """
         data_model_test = pd.read_parquet(
             self.input_feats_datastore
             / "test"
@@ -39,6 +48,9 @@ class TrainContinuidadToHorario:
         return data_model_test
 
     def load_model(self, model_periodo:int):
+        """
+        Carga el modelo entrenado.
+        """
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
         
@@ -50,7 +62,9 @@ class TrainContinuidadToHorario:
         return model
     
     def get_data_input_predict(self, model_periodo:int, periodo:int):
-
+        """
+        Obtiene los datos de input para el periodo dado.
+        """
         data_model_test = pd.read_parquet(
             self.input_predict_datastore/"test"/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo_continuidad}_{periodo}.parquet")
         return data_model_test    
@@ -138,6 +152,9 @@ class TrainContinuidadToHorario:
     def upload_data_predict(
         self, model_version: str, model_periodo: int, periodo: int, 
         df_model_predict: pd.DataFrame, mode:str):
+        """
+        Sube los datos de predicción al datastore.
+        """
         
         path_model_version = self.output_predict_datastore/"test"
             
@@ -161,6 +178,9 @@ class TrainContinuidadToHorario:
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
@@ -180,6 +200,9 @@ def parse_args():
 
 
 def main(args):
+    """
+    Función principal para entrenar el modelo de continuidad regular horario.
+    """
     input_feats_datastore = args.input_feats_datastore
     input_predict_datastore = args.input_predict_datastore
     input_model_datastore = args.input_model_datastore

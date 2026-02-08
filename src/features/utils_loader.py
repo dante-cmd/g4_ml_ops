@@ -11,6 +11,9 @@ import argparse
 
 
 def parse_args():
+    """
+    Parse arguments for the feature engineering pipeline.
+    """
     # setup arg parser
     parser = argparse.ArgumentParser()
 
@@ -29,15 +32,30 @@ def parse_args():
 
 
 def get_n_lags(periodo: int, n: int):
+    """
+    Obtiene el periodo n meses antes del periodo dado.
+    Ejemplo:
+        get_n_lags(202306, 1) -> 202305
+    """
     periodo_date = datetime.strptime(str(periodo), '%Y%m')
     return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 
 
 def get_last_n_periodos(periodo: int, n: int):
+    """
+    Obtiene los n periodos anteriores al periodo dado.
+    Ejemplo:
+        get_last_n_periodos(202306, 3) -> [202306, 202305, 202304]
+    """
     return [get_n_lags(periodo, lag) for lag in range(n)]
 
 
 def get_all_periodos(periodo: int):
+    """
+    Obtiene todos los periodos desde el periodo inicial hasta el periodo dado.
+    Ejemplo:
+        get_all_periodos(202306) -> [202211, 202212, 202301, 202302, 202303, 202304, 202305, 202306]
+    """
     periodos = pd.period_range(
             start=datetime(2022, 11, 1),
             end=datetime(periodo // 100, periodo % 100, 1),
@@ -47,6 +65,9 @@ def get_all_periodos(periodo: int):
 
 
 def validate_periodos(n_periodos:int|None, ult_periodo:int, all_periodos:bool):
+    """
+    Valida los periodos de entrenamiento.
+    """
     if n_periodos is not None:
         periodos = get_last_n_periodos(ult_periodo, n_periodos)
         min_periodo = int(np.min(periodos))
@@ -80,12 +101,18 @@ def get_training_periodos(periodo: int):
 
 
 def get_training_periodos_estacionales(periodo: int, meses: list[int]):
+    """
+    Obtiene los periodos de entrenamiento estacionales.
+    """
     periodos = get_training_periodos(periodo)
     periodos_selected = [per for per in periodos if per % 100 in meses]
     return periodos_selected
 
 
 def filter_by_hora_atencion(df_idx: pd.DataFrame, df_turno_disponible: pd.DataFrame, df_horario: pd.DataFrame):
+    """
+    Filtra los datos por hora de atención.
+    """
     df_idx_clone = df_idx.copy()
 
     df_idx_clone_01 = df_idx_clone.merge(

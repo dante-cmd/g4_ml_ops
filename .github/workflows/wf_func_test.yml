@@ -34,12 +34,12 @@ on:
       model_version:
         required: true
         type: string
-      # with_tipo_predict:
-      #   required: true
-      #   type: string
-      model_current_version:
+      with_tipo_predict:
         required: true
         type: string
+      # model_current_version:
+      #   required: true
+      #   type: string
   # push:
   #   branches:
   #     - prod
@@ -65,4 +65,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python sample.py --mode ${{ inputs.mode }} --model_periodo ${{ inputs.model_periodo }} --ult_periodo_data ${{ inputs.ult_periodo_data }} --n_eval_periodos ${{ inputs.n_eval_periodos }} --periodo ${{ inputs.periodo }} --with_tipo ${{ inputs.with_tipo }} --platinum_version ${{ inputs.platinum_version }} --feats_version ${{ inputs.feats_version }} --target_version ${{ inputs.target_version }} --model_version ${{ inputs.model_version }}
-        echo ${{ inputs.model_current_version }}
+        
+        
+        # echo ${{ inputs.model_current_version }}

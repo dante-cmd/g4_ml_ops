@@ -3,7 +3,7 @@ import pandas as pd
 # from src.features.loader import Loader as DataTrain
 # calculate_classes, calculate_metrics, join_target,  save_output,
 from pathlib import Path
-from utils import mk_dirs, run_script
+from old.utils import mk_dirs, run_script
 
 
 def get_mapping_tipos(periodo_string: str) -> dict:
