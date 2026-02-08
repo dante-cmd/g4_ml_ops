@@ -257,7 +257,7 @@ jobs:
     type: command
     component: file:./src/predict/continuidad_regular_horario.yml
     inputs:
-      input_model_continuidad_horario_datastore: ${{parent.jobs.inputs.output_model_continuidad_horario_datastore}}
+      input_model_continuidad_horario_datastore: ${{parent.inputs.input_model_continuidad_horario_datastore}}
       input_feats_continuidad_horario_datastore: ${{parent.jobs.features_continuidad_horario_job.outputs.output_feats_continuidad_horario_datastore}}
       input_predict_continuidad_datastore: ${{parent.jobs.model_predict_continuidad_job.outputs.output_predict_continuidad_datastore}}
       feats_version: "v1"
