@@ -175,8 +175,7 @@ class ContinuidadToHorario(Utils):
             #     'HORARIO_ACTUAL', 'HORARIO_(+1)']].drop_duplicates()
                 
             return df_continuidad_03
-
-            
+        
         def apply_filter_migracion(df_full:pd.DataFrame):
 
             es_nivel = df_full['NIVEL'].isin(['ST1', 'ST2', 'SY', 'IST'])
