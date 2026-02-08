@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 env:
-  RG: "mi-resource-group"
-  WS: "mi-workspace-ml"
+  RG: "ml-prod-rg"
+  WS: "mlprod98355597mlws"
 
 jobs:
   train-register-deploy:
@@ -39,8 +39,9 @@ jobs:
       - name: Submit Training Job
         id: train_job
         run: |
-          run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
-          
+          # run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+          run_id=$(az ml job create --file pipeline_ml.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+      
           echo "Job submitted with ID: $run_id"
           
           # Esperar a que termine (stream logs)
