@@ -40,7 +40,7 @@ jobs:
         id: train_job
         run: |
           # run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
-          run_id=$(az ml job create --file pipeline_ml.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+          run_id=$(az ml job create --file pl_ml_deploy_model.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
       
           echo "Job submitted with ID: $run_id"
           
