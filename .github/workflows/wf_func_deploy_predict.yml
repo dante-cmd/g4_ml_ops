@@ -71,10 +71,6 @@ jobs:
       #   AZURE_RESOURCE_GROUP: ${{ fromJson(secrets.AZURE_RESOURCES_DEV).resourceGroup }}
       #   AZURE_WORKSPACE_NAME: ${{ fromJson(secrets.AZURE_RESOURCES_DEV).workspaceName }}
       run: |
-          # Submit job with only the provided parameters
-          # JOB_ID=$(az ml job create \
-          #   --file pl_ml_deploy_evaluate.yml \
-          #   --query name -o tsv)
 
           JOB_ID=$(az ml job create \
             --file pl_ml_deploy_predict.yml \
