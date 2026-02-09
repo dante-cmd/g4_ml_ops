@@ -1,15 +1,15 @@
 name: MLOps Production Pipeline
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "testing" ]
 
 permissions:
   id-token: write  # Requerido para OIDC (Login sin contraseñas)
   contents: read
 
 env:
-  RG: "mi-resource-group"
-  WS: "mi-workspace-ml"
+  RG: "ml-prod-rg"
+  WS: "mlprod98355597mlws"
 
 jobs:
   train-register-deploy:
@@ -26,6 +26,7 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       # 3. Instalar la extensión de ML para el CLI
       - name: Install ML Extension
@@ -38,8 +39,9 @@ jobs:
       - name: Submit Training Job
         id: train_job
         run: |
-          run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
-          
+          # run_id=$(az ml job create --file mlops/job.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+          run_id=$(az ml job create --file pl_ml_deploy_model.yml --resource-group $RG --workspace-name $WS --query name -o tsv)
+      
           echo "Job submitted with ID: $run_id"
           
           # Esperar a que termine (stream logs)
