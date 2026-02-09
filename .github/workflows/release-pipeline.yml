@@ -44,11 +44,14 @@ jobs:
       
           echo "Job submitted with ID: $run_id"
           
+          # Exportamos el ID para que los pasos de Registro y Despliegue lo usen
           # Esperar a que termine (stream logs)
           az ml job stream --name $run_id --resource-group $RG --workspace-name $WS
           
           # Guardar el ID como output para el siguiente paso
           echo "RUN_ID=$run_id" >> $GITHUB_OUTPUT
+          echo "Ejecución de entrenamiento iniciada con ID: $run_id"
+          
 
       # ---------------------------------------------------------
       # PASO B: REGISTRO DEL MODELO
@@ -58,16 +61,18 @@ jobs:
         id: register_model
         run: |
           # Usamos la sintaxis 'azureml://jobs/{id}/outputs/artifacts/...'
-          model_path="azureml://jobs/${{ steps.train_job.outputs.RUN_ID }}/outputs/artifacts/paths/model"
+          # model_path="azureml://jobs/${{ steps.train_job.outputs.RUN_ID }}/outputs/artifacts/paths/model"
+          MODEL_PATH="azureml://jobs/${{ steps.train_job.outputs.RUN_ID }}/outputs/output_model_continuidad_horario_datastore/paths/model"
           
-          # Creamos una nueva versión del modelo
-          az ml model create --name iris-model \
-                             --path $model_path \
-                             --type mlflow_model \
+          # Registramos el modelo en el Workspace
+          az ml model create --name "modelo_continuidad_horario" \
+                             --path $MODEL_PATH \
+                             --type custom_model \
                              --resource-group $RG \
                              --workspace-name $WS
           
-          echo "Model registered successfully."
+          echo "Modelo registrado con la versión más reciente."
+         
 
       # ---------------------------------------------------------
       # PASO C: DESPLIEGUE (DEPLOYMENT)
@@ -75,10 +80,31 @@ jobs:
       # ---------------------------------------------------------
       - name: Deploy to Endpoint
         run: |
-          # Actualizar el deployment existente con la ultima versión del modelo
-          az ml online-deployment update --name blue-deployment \
-                                         --endpoint-name my-iris-endpoint-2026 \
-                                         --model iris-model@latest \
+          # CONFIGURACIÓN: Modifica estos valores según tu entorno
+          ENDPOINT_NAME="mi-endpoint-universidad"
+          DEPLOYMENT_NAME="blue-deployment"
+          MODEL_ID="modelo_continuidad_horario@latest"
+          VM_SIZE="Standard_DS3_v2" # Tipo de máquina para el despliegue
+
+          echo "Paso 1: Verificando si el Endpoint existe..."
+          az ml online-endpoint show --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS || \
+          az ml online-endpoint create --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS
+
+          echo "Paso 2: Intentando actualizar el despliegue '$DEPLOYMENT_NAME'..."
+          
+          # Intentamos UPDATE, si falla (porque no existe), ejecutamos CREATE
+          az ml online-deployment update --name $DEPLOYMENT_NAME \
+                                         --endpoint-name $ENDPOINT_NAME \
+                                         --model $MODEL_ID \
                                          --resource-group $RG \
                                          --workspace-name $WS \
-                                         --all-traffic
+                                         --all-traffic || \
+          (echo "El despliegue no existe. Creando nuevo despliegue con máquina $VM_SIZE..." && \
+           az ml online-deployment create --name $DEPLOYMENT_NAME \
+                                          --endpoint-name $ENDPOINT_NAME \
+                                          --model $MODEL_ID \
+                                          --instance-type $VM_SIZE \
+                                          --instance-count 1 \
+                                          --resource-group $RG \
+                                          --workspace-name $WS \
+                                          --all-traffic)                                
