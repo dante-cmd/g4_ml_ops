@@ -80,21 +80,17 @@ jobs:
       # ---------------------------------------------------------
       - name: Deploy to Endpoint
         run: |
-          # 1. Definición de Variables
+          # 1. Variables
           ENDPOINT_NAME="mi-endpoint-universidad"
           DEPLOYMENT_NAME="blue-deployment"
           MODEL_ID="modelo_continuidad_horario@latest"
           VM_SIZE="Standard_DS2_v2"
 
-          echo "Paso 1: Verificando Endpoint..."
+          echo "Paso 1: Verificando/Creando el Endpoint..."
           az ml online-endpoint show --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS || \
           az ml online-endpoint create --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS
 
-          echo "Paso 2: Limpiando despliegues fallidos (Force Clean)..."
-          # Borramos el deployment si existe para asegurar una instalación limpia desde cero
-          az ml online-deployment delete --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS --yes --no-wait || echo "Nada que borrar."
-
-          echo "Paso 3: Generando archivo de configuración temporal..."
+          echo "Paso 2: Generando archivo de configuración..."
           cat <<EOF > deploy_config.yml
           name: $DEPLOYMENT_NAME
           endpoint_name: $ENDPOINT_NAME
@@ -104,8 +100,10 @@ jobs:
           environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
           EOF
 
-          echo "Paso 4: Ejecutando creación limpia del despliegue..."
-          # Ahora que está limpio, el create funcionará sin problemas
+          echo "Paso 3: Ejecutando Despliegue..."
+          # Intentamos actualizar primero. Si el despliegue existe (aunque esté fallido), el update suele resetearlo.
+          # Si falla porque NO EXISTE, entonces ejecutamos el CREATE.
+          az ml online-deployment update --file deploy_config.yml --resource-group $RG --workspace-name $WS || \
           az ml online-deployment create --file deploy_config.yml --resource-group $RG --workspace-name $WS --all-traffic
           
           echo "Proceso finalizado correctamente."
