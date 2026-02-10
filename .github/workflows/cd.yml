@@ -44,7 +44,7 @@ jobs:
           # -----------------------------------------------------------------------------------
           
           with_tipo="True"
-          n_eval_periodos= "-1"
+          n_eval_periodos="-1"
 
           # mode must be set to "prod"
           
@@ -97,6 +97,7 @@ jobs:
   semantic_version:
     name: Generate Version
     uses: ./.github/workflows/reusable_semantic_version.yml
+    needs: [trigger-pl-ml-model]
     with:
       tag_prefix: v
       module_path: .
