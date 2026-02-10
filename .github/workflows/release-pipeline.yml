@@ -84,7 +84,7 @@ jobs:
           ENDPOINT_NAME="mi-endpoint-universidad"
           DEPLOYMENT_NAME="blue-deployment"
           MODEL_ID="modelo_continuidad_horario@latest"
-          VM_SIZE="Standard_DS3_v2"
+          VM_SIZE="Standard_DS2_v2" 
 
           echo "Paso 1: Verificando/Creando el Endpoint..."
           # Si el endpoint no existe, se crea primero (es el contenedor)
