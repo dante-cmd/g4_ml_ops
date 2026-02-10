@@ -51,6 +51,8 @@ jobs:
           # Guardar el ID como output para el siguiente paso
           echo "RUN_ID=$run_id" >> $GITHUB_OUTPUT
           echo "Ejecución de entrenamiento iniciada con ID: $run_id"
+
+          
           
 
       # ---------------------------------------------------------
@@ -73,40 +75,7 @@ jobs:
           
           echo "Modelo registrado con la versión más reciente."
 
-
-      # ---------------------------------------------------------
-      # PASO C: DESPLIEGUE (DEPLOYMENT)
-      # Actualizamos el deployment 'blue' con el modelo recién registrado
-      # ---------------------------------------------------------
-      - name: Deploy to Endpoint
-        run: |
-          # 1. Variables
-          ENDPOINT_NAME="mi-endpoint-universidad"
-          DEPLOYMENT_NAME="blue-deployment"
-          MODEL_ID="modelo_continuidad_horario@latest"
-          VM_SIZE="Standard_DS2_v2"
-
-          echo "Paso 1: Verificando/Creando el Endpoint..."
-          az ml online-endpoint show --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS || \
-          az ml online-endpoint create --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS
-
-          echo "Paso 2: Generando archivo de configuración..."
-          cat <<EOF > deploy_config.yml
-          name: $DEPLOYMENT_NAME
-          endpoint_name: $ENDPOINT_NAME
-          model: azureml:$MODEL_ID
-          instance_type: $VM_SIZE
-          instance_count: 1
-          environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
-          EOF
-
-          echo "Paso 3: Ejecutando Despliegue..."
-          # Intentamos actualizar primero. Si el despliegue existe (aunque esté fallido), el update suele resetearlo.
-          # Si falla porque NO EXISTE, entonces ejecutamos el CREATE.
-          az ml online-deployment update --file deploy_config.yml --resource-group $RG --workspace-name $WS || \
-          az ml online-deployment create --file deploy_config.yml --resource-group $RG --workspace-name $WS --all-traffic
           
-          echo "Proceso finalizado correctamente."
 
 
                           
