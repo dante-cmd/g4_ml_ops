@@ -47,10 +47,16 @@ jobs:
 
           # mode must be set to "prod"
           
-          echo "mode=$(jq -r '.mode' params_prod.json)" >> $GITHUB_OUTPUT
+          
+          mode=$(jq -r '.mode' params_prod.json)
+          echo "mode=$mode" >> $GITHUB_OUTPUT
   
-          echo "model_periodo=$(jq -r '.model_periodo' params_prod.json)" >> $GITHUB_OUTPUT
-          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)" >> $GITHUB_OUTPUT
+          model_periodo=$(jq -r '.model_periodo' params_prod.json)
+          echo "model_periodo=$model_periodo" >> $GITHUB_OUTPUT
+          
+          ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)
+          echo "ult_periodo_data=$ult_periodo_data" >> $GITHUB_OUTPUT
+          
           echo "n_eval_periodos=$n_eval_periodos" >> $GITHUB_OUTPUT
           
           # --------------------------------------------------------------------------------------
