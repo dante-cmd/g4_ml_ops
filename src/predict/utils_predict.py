@@ -1,3 +1,5 @@
+"""Utils for predict"""
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -6,6 +8,9 @@ import argparse
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
@@ -56,6 +61,11 @@ def get_mapping_tipos(periodo: int) -> dict:
 
 
 def get_n_lags(periodo: int, n: int):
+    """
+    Obtiene el periodo n meses antes del periodo dado.
+    Ejemplo:
+        get_n_lags(202306, 3) -> 202303
+    """
     periodo_date = datetime.strptime(str(periodo), '%Y%m')
     return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 

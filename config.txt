@@ -1,1 +1,5 @@
-git config --global --add safe.directory /mnt/batch/tasks/shared/LS_root/mounts/clusters/cimlops/code/g4_ops
+Configuration of secrets (Github)
+
+1. Go to "Settings" of the repository 
+2. Go to "Secrets and variables" > "Actions"
+3. 

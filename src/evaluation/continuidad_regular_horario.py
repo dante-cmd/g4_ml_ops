@@ -1,3 +1,4 @@
+"""Script para evaluar el modelo de continuidad regular horario."""
 import pandas as pd
 from pathlib import Path
 from utils_evaluation import parse_args, calculate_metrics, join_target, get_ahead_n_periodos, get_mapping_tipos, treshold_tipos
@@ -21,6 +22,16 @@ class TrainContinuidadToHorario:
         self.tipo = tipo
 
     def get_data_predict(self, model_periodo:int, periodo:int):
+        """
+        Obtiene los datos de predicción para un periodo dado.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos de predicción.
+        """
         
         data_model_predict = pd.read_parquet(
             self.input_predict_datastore/'test'/f"data_predict_{self.model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet")
@@ -28,11 +39,31 @@ class TrainContinuidadToHorario:
         return data_model_predict
 
     def get_data_target(self, periodo:int):
+        """
+        Obtiene los datos objetivo para un periodo dado.
+        
+        Args:
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos objetivo.
+        """
         data_model_target = pd.read_parquet(
             self.input_target_datastore/'test'/self.target_version/f"data_target_{self.tipo}_{periodo}.parquet")
         return data_model_target
     
     def get_data_evaluation(self, model_periodo:int, periodo:int):
+        """
+        Obtiene los datos de evaluación para un periodo dado.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            pd.DataFrame: DataFrame con los datos de evaluación.
+        """
+
         on_cols = ['PERIODO_TARGET', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL']
         
         data_model_predict = self.get_data_predict(model_periodo, periodo)
@@ -45,6 +76,16 @@ class TrainContinuidadToHorario:
     def upload_data_evaluation(
         self, model_periodo:int, model_version:str, periodo:int, df_model_evaluation:pd.DataFrame, 
         mode:str):
+        """
+        Sube los datos de evaluación al datastore.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            model_version (str): Versión del modelo.
+            periodo (int): Periodo de evaluación.
+            df_model_evaluation (pd.DataFrame): DataFrame con los datos de evaluación.
+            mode (str): Modo de evaluación.
+        """
 
         path_model = (self.output_evaluation_datastore/'test')
 
@@ -53,6 +94,8 @@ class TrainContinuidadToHorario:
         df_model_evaluation.to_parquet(
             path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
+
+        print(path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet")
 
         assert mode in ['prod', 'dev']
         
@@ -66,6 +109,16 @@ class TrainContinuidadToHorario:
             )
         
     def get_precision(self, model_periodo:int, periodo:int):
+        """
+        Calcula la precisión del modelo para un periodo dado.
+        
+        Args:
+            model_periodo (int): Periodo del modelo.
+            periodo (int): Periodo de evaluación.
+            
+        Returns:
+            float: Precisión del modelo.
+        """
         
         df_forecast = self.get_data_predict(model_periodo, periodo)
         df_target = self.get_data_target(periodo)
@@ -77,6 +130,12 @@ class TrainContinuidadToHorario:
         return metrics['precision']
 
     def upload_response(self, scores:list):
+        """
+        Sube la respuesta al datastore.
+        
+        Args:
+            scores (list): Lista de precisiones.
+        """
         precision = sum(scores)/len(scores)
         
         threshold = treshold_tipos[self.tipo]
@@ -101,10 +160,17 @@ class TrainContinuidadToHorario:
 
 
 def main(args):
+    """
+    Función principal para evaluar el modelo de continuidad regular horario.
+    
+    Args:
+        args: Argumentos de línea de comandos.
+    """
     
     input_predict_datastore = args.input_predict_datastore
     input_target_datastore = args.input_target_datastore
     output_evaluation_datastore = args.output_evaluation_datastore
+    
     target_version = args.target_version
     model_periodo = args.model_periodo
     model_version = args.model_version

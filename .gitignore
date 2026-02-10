@@ -14,3 +14,6 @@ catboost_info
 venv
 __pycache__
 data
+env*.json
+secrets.json
+.DS_Store

@@ -1,3 +1,5 @@
+"""Utilerías para métricas de predicción."""
+
 import pandas as pd
 import numpy as np
 import argparse
@@ -64,6 +66,17 @@ def join_target(df_forecast: pd.DataFrame, df_target:pd.DataFrame, on_cols: list
 
 
 def calculate_metrics(df_forecast:pd.DataFrame, df_target:pd.DataFrame, on_cols: list[str]):
+    """
+    Calculate metrics for the forecast data.
+        
+    Args:
+        df_forecast (pd.DataFrame): DataFrame with forecast data.
+        df_target (pd.DataFrame): DataFrame with target data.
+        on_cols (list[str]): List of columns to join the data.
+        
+    Returns:
+        dict: Dictionary with metrics.
+    """
     
     # logging.info(f' Mode: {mode} {periodo}'.center(50, '=').upper())
     # logging.info(f'Tipo: {tipo}'.upper())

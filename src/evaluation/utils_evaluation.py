@@ -1,3 +1,5 @@
+"""Utilerías para evaluación de modelos de continuidad regular."""
+
 import pandas as pd
 import numpy as np
 import argparse
@@ -7,14 +9,20 @@ from dateutil.relativedelta import relativedelta
 
 
 treshold_tipos =  {
-            'inicial_estacional':0.7, 
-            'continuidad_estacional':0.7,
-            'inicial_regular':0.6, 
-            'continuidad_regular':0.6, 
-            'continuidad_regular_horario':0.85}
+            'inicial_estacional':0.5, 
+            'continuidad_estacional':0.5,
+            'inicial_regular':0.3, 
+            'continuidad_regular':0.5, 
+            'continuidad_regular_horario':0.5}
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    
+    Returns:
+        argparse.Namespace: Objeto con los argumentos parseados.
+    """
     # setup arg parser
     parser = argparse.ArgumentParser()
 
@@ -233,6 +241,11 @@ def fac_to_cant(df_forecast_fac: pd.DataFrame, df_forecast_cant:pd.DataFrame) ->
 
 
 def get_n_lags(periodo: int, n: int):
+    """
+    Obtiene el periodo n meses antes del periodo dado.
+    Ejemplo:
+        get_n_lags(202306, 1) -> 202305
+    """
     periodo_date = datetime.strptime(str(periodo), '%Y%m')
     return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 

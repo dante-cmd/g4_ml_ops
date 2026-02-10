@@ -33,6 +33,9 @@ SKIPPED_FEATURES_PERIODOS = [
 
 
 class Continuidad(Utils):
+    """
+    Clase para el cálculo de features de continuidad regular.
+    """
     def __init__(self, tablas:dict):
         super().__init__(tablas)
         self.tipo = 'continuidad_regular'
@@ -42,7 +45,9 @@ class Continuidad(Utils):
         self.dummy_columns = None
 
     def get_idx(self, periodo: int):
-        
+        """
+        Obtiene el índice de continuidad regular para un periodo dado.
+        """
         lag_01 = get_n_lags(periodo, 1)
         lag_02 = get_n_lags(periodo, 2)
         lag_12 = get_n_lags(periodo, 12)
@@ -153,6 +158,9 @@ class Continuidad(Utils):
         return df_regular_continuidad_full_09
 
     def get_idx_predict(self, periodo):
+        """
+        Obtiene el índice de continuidad regular para un periodo dado.
+        """
         idx = self.get_idx(periodo)
         idx_01 = idx.drop_duplicates(
             ['PERIODO_TARGET', 'PERIODO', 'SEDE',
@@ -160,6 +168,9 @@ class Continuidad(Utils):
         return idx_01
 
     def add_anterior(self, df_idx: pd.DataFrame):
+        """
+        Agrega información del periodo anterior.
+        """
         df_regular_full = self.df_regular_full[
             ['PERIODO', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL',
              'CANT_CLASES', 'CANT_ALUMNOS']].copy()
@@ -196,6 +207,9 @@ class Continuidad(Utils):
         return df_idx_02
 
     def add_lag_n(self, df_idx: pd.DataFrame, n:int):
+        """
+        Agrega información del periodo lag n.
+        """
         df_regular_full = self.df_regular_full[
             ['PERIODO', 'SEDE', 'CURSO_ACTUAL', 'HORARIO_ACTUAL',
              'CANT_CLASES', 'CANT_ALUMNOS']].copy()
@@ -225,7 +239,9 @@ class Continuidad(Utils):
         return df_idx_01
 
     def add_diff_sply(self, df_idx: pd.DataFrame):
-        
+        """
+        Agrega información de diferencia de oferta entre el periodo target y el periodo lag 12.
+        """
         periodo = df_idx.PERIODO_TARGET.unique()[0]
         lag_12 = get_n_lags(periodo, 12)
         lag_12_df_idx = self.get_idx(lag_12)
@@ -270,12 +286,18 @@ class Continuidad(Utils):
         return df_idx_01
     
     def add_quantitative_feats(self, df_idx):
+        """
+        Agrega features cuantitativas al índice.
+        """
         df_idx_01 = self.add_anterior(df_idx)
         df_idx_02 = self.add_lag_n(df_idx_01, 12)
         df_idx_03 = self.add_diff_sply(df_idx_02)
         return df_idx_03
 
     def add_categorical_feats(self, df_idx):
+        """
+        Agrega features categóricas al índice.
+        """
         df_idx_01 = df_idx.merge(
             self.df_curso_actual[['CURSO_ACTUAL', 'NIVEL', 'CURSO_2', 'FRECUENCIA',
                                   'DURACION']].copy(),
@@ -288,6 +310,9 @@ class Continuidad(Utils):
         return df_idx_01
 
     def get_target(self, periodo: int):
+        """
+        Obtiene el target de continuidad regular para un periodo dado.
+        """
         df_real = self.df_real.copy()
         df_real_01 = df_real[
             (df_real['PERIODO'] == periodo)
@@ -310,6 +335,9 @@ class Continuidad(Utils):
         return df_real_03
 
     def get_model_by_periodo(self, periodo: int):
+        """
+        Obtiene el modelo de continuidad regular para un periodo dado.
+        """
         data_idx = self.get_idx(periodo)
         data_target = self.get_target(periodo)
 
@@ -329,6 +357,9 @@ class Continuidad(Utils):
         return data_model
 
     def get_model(self, periodos: list[int]):
+        """
+        Obtiene el modelo de continuidad regular para un periodo dado.
+        """
         collection = []
         for periodo in periodos:
             # print(periodo)
@@ -344,7 +375,9 @@ class Continuidad(Utils):
         return data_model_consol_01
 
     def get_features(self, periodo: int) -> tuple[pd.DataFrame, pd.DataFrame]:
-
+        """
+        Obtiene las features de continuidad regular para un periodo dado.
+        """
         periodos = get_training_periodos(periodo)
         data_model = self.get_model(periodos)
 
@@ -372,6 +405,9 @@ class Continuidad(Utils):
         return (data_model_train, data_model_test)
 
     def load_features(self, periodo:int, version:str, output_feats_continuidad_datastore:str,with_tipo:str):
+        """
+        Carga las features de continuidad regular para un periodo dado.
+        """
         eval_tipo = eval(with_tipo)
         
         if not eval_tipo:
@@ -384,6 +420,9 @@ class Continuidad(Utils):
             f"{output_feats_continuidad_datastore}/test/{version}/data_feats_{self.tipo}_{periodo}.parquet", index=False)
 
     def load_target(self, periodo:int, version:str, output_target_continuidad_datastore:str,with_tipo:str):
+        """
+        Carga el target de continuidad regular para un periodo dado.
+        """
         eval_tipo = eval(with_tipo)
         
         if not eval_tipo:
@@ -399,6 +438,9 @@ class Continuidad(Utils):
 
 
 def main(args):
+    """
+    Función principal para ejecutar el pipeline de continuidad regular.
+    """
     input_datastore=args.input_datastore
     ult_periodo=args.ult_periodo
 

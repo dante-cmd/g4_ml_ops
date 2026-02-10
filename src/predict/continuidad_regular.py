@@ -1,3 +1,7 @@
+"""
+Script para predecir la continuidad regular.
+"""
+
 import pandas as pd
 # from sklearn.ensemble import RandomForestRegressor # type: ignore
 # from sklearn.ensemble import HistGradientBoostingRegressor, GradientBoostingRegressor # type: ignore
@@ -12,6 +16,9 @@ from utils_metrics import calculate_classes , calculate_metrics, fac_to_cant
 
 
 class TrainContinuidad:
+    """
+    Clase para entrenar el modelo de continuidad regular.
+    """
     def __init__(self,
                  input_model_datastore: str,
                  input_feats_datastore: str,
@@ -29,6 +36,9 @@ class TrainContinuidad:
         self.model_version = model_version
 
     def get_data_test(self, periodo: int):
+        """
+        Lee los datos de prueba del datastore.
+        """
         data_model_test = pd.read_parquet(
             self.input_feats_datastore
             / "test"
@@ -38,6 +48,9 @@ class TrainContinuidad:
         return data_model_test
 
     def load_model(self, model_periodo:int):
+        """
+        Carga el modelo desde el datastore.
+        """
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
 
@@ -123,6 +136,8 @@ class TrainContinuidad:
         else:
             num_features = ['CANT_ALUMNOS_ANTERIOR']
             x = num_features + cat_features
+            # x = cat_features
+            print("x", x)
             target = "CANT_ALUMNOS"
             predict = f"{target}_PREDICT"
 
@@ -145,6 +160,9 @@ class TrainContinuidad:
     def upload_data_predict(
         self, model_version: str, model_periodo: int, periodo: int, 
         df_model_predict: pd.DataFrame, mode:str):
+        """
+        Sube los datos de predicción al datastore.
+        """
       
         path_model_version = self.output_predict_datastore/"test"
             
@@ -168,6 +186,9 @@ class TrainContinuidad:
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
@@ -188,6 +209,9 @@ def parse_args():
 
 
 def main(args):
+    """
+    Función principal para entrenar el modelo de continuidad regular.
+    """
     input_model_datastore = args.input_model_datastore
     input_feats_datastore = args.input_feats_datastore
     

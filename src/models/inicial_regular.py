@@ -1,3 +1,5 @@
+"""Script para entrenar el modelo de inicial regular."""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -6,6 +8,9 @@ from utils_model import parse_args, get_mapping_tipos
 
 
 class TrainInicial:
+    """
+    Clase para entrenar el modelo de inicial regular.
+    """
     def __init__(self, 
                  input_feats_datastore:str,
                  output_model_datastore:str,
@@ -21,14 +26,23 @@ class TrainInicial:
         self.tipo = tipo
     
     def apply_filter(self, df_train:pd.DataFrame):
+        """
+        Aplica filtros al dataframe de entrenamiento.
+        """
         return df_train
     
     def get_data_train(self, periodo:int):
+        """
+        Obtiene los datos de entrenamiento para el periodo dado.
+        """
         data_model_train = pd.read_parquet(
             self.input_feats_datastore/"train"/self.feats_version/f"data_feats_{self.tipo}_{periodo}.parquet")
         return data_model_train  
 
     def train_model(self, periodo:int):
+        """
+        Entrena el modelo de inicial regular.
+        """
         data_model_train = self.get_data_train(periodo)
         
         data_model_train = self.apply_filter(data_model_train)
@@ -59,7 +73,10 @@ class TrainInicial:
                 ].copy()
             
         x = num_features + cat_features
+        # x = cat_features
         y = target
+        print("x", x)
+        print("y", y)
 
         X_train = data_model_train[x].copy()
         y_train = data_model_train[y].copy()
@@ -84,6 +101,9 @@ class TrainInicial:
         return model
 
     def save_model(self, model, periodo:int):
+        """
+        Guarda el modelo entrenado.
+        """
         
         path_model = self.output_model_datastore/'test'/self.model_version
         
@@ -94,6 +114,9 @@ class TrainInicial:
 
 
 def main(args):
+    """
+    Función principal para entrenar el modelo de inicial regular.
+    """
 
     # 1. Habilitar Autologging (Clave para Azure ML v2)
     # mlflow.sklearn.autolog()

@@ -1,10 +1,13 @@
-name: Daily Validator
+name: Pipeline ML First Run
 
 on:
   workflow_dispatch:
   push:
     branches:
       - prod
+
+permissions:
+  contents: write
 
 jobs:
   load-params:
@@ -45,10 +48,15 @@ jobs:
           echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_prod.json)" >> $GITHUB_OUTPUT
           echo "periodo=$periodo" >> $GITHUB_OUTPUT
           echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
-          echo "platinum_version=$(jq -r '.platinum_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "feats_version=$(jq -r '.feats_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "target_version=$(jq -r '.target_version.prod' version.json)" >> $GITHUB_OUTPUT
-          echo "model_version=$(jq -r '.model_version.prod' version.json)" >> $GITHUB_OUTPUT
+
+          # --------------------------------------------------------------------------------------
+          # ---------------------------- Versions from version.json ------------------------------
+          # --------------------------------------------------------------------------------------
+
+          echo "platinum_version=$(jq -r '.platinum_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "feats_version=$(jq -r '.feats_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "target_version=$(jq -r '.target_version.dev' version.json)" >> $GITHUB_OUTPUT
+          echo "model_version=$(jq -r '.model_version.dev' version.json)" >> $GITHUB_OUTPUT
 
   trigger-pl-ml-evaluate:
     needs: load-params
@@ -62,15 +70,29 @@ jobs:
       n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
       periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
       with_tipo: ${{ needs.load-params.outputs.with_tipo }}
+
       platinum_version: ${{ needs.load-params.outputs.platinum_version }}
       feats_version: ${{ needs.load-params.outputs.feats_version }}
       target_version: ${{ needs.load-params.outputs.target_version }}
       model_version: ${{ needs.load-params.outputs.model_version }}
     secrets: inherit
+  
+  trigger-pl-update-versions:
+    needs: [load-params, trigger-pl-ml-evaluate]
+    if: needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
+    uses: ./.github/workflows/wf_func_update_prod_version.yml
+    with:
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+    secrets: inherit
+    
 
   trigger-pl-ml-model:
-    needs: [load-params, trigger-pl-ml-evaluate]
-    if: always() && needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
+    needs: [load-params, trigger-pl-ml-evaluate, trigger-pl-update-versions]
+    if: needs.trigger-pl-ml-evaluate.outputs.response_inicial == 'approved' && needs.trigger-pl-ml-evaluate.outputs.response_continuidad_horario == 'approved'
+    # always() &&
     # uses: ./.github/workflows/wf_func_test.yml
     uses: ./.github/workflows/wf_func_deploy_model.yml
     with:

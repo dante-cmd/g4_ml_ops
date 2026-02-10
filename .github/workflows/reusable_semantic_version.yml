@@ -1,0 +1,66 @@
+name: Reusable Semantic Versioning
+
+on:
+  workflow_call:
+    inputs:
+      tag_prefix:
+        required: false
+        type: string
+        default: "v"
+      module_path:
+        required: false
+        type: string
+        default: "."
+    outputs:
+      version:
+        description: "Full version tag (e.g., v1.2.3)"
+        value: ${{ jobs.versioning_generator.outputs.version }}
+      prev_version:
+        description: "Previous version tag"
+        value: ${{ jobs.versioning_generator.outputs.prev_version }}
+      sem_version:
+        description: "Semantic version (e.g., 1.2.3)"
+        value: ${{ jobs.versioning_generator.outputs.semantic_version }}
+      changed_path:
+        description: "Whether path has changes"
+        value: ${{ jobs.versioning_generator.outputs.changed }}
+    secrets:
+      GIT_TOKEN:
+        required: false
+
+jobs:
+  versioning_generator:
+    runs-on: ubuntu-latest
+    name: SemVer Generator
+
+    outputs:
+      version: ${{ steps.print_version.outputs.versiontag }}
+      prev_version: ${{ steps.print_version.outputs.prevsemver }}
+      semantic_version: ${{ steps.print_version.outputs.semver }}
+      changed: ${{ steps.print_version.outputs.changed }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Calculate Semantic Version
+        uses: PaulHatch/semantic-version@v5.4.0
+        id: generated_version
+        with:
+          tag_prefix: "${{ inputs.tag_prefix }}"
+          major_pattern: "(BREAKING CHANGE:|feat!:)"
+          minor_pattern: "feat:"
+          version_format: "${major}.${minor}.${patch}"
+          change_path: ${{ inputs.module_path }}
+          bump_each_commit: false
+          search_commit_body: true
+
+      - name: Output Version Info
+        id: print_version
+        run: |
+          echo "versiontag=${{ steps.generated_version.outputs.version_tag }}" >> $GITHUB_OUTPUT
+          echo "semver=${{ steps.generated_version.outputs.major }}.${{ steps.generated_version.outputs.minor }}.${{ steps.generated_version.outputs.patch }}" >> $GITHUB_OUTPUT
+          echo "prevsemver=${{ steps.generated_version.outputs.previous_version }}" >> $GITHUB_OUTPUT
+          echo "changed=${{ steps.generated_version.outputs.changed }}" >> $GITHUB_OUTPUT

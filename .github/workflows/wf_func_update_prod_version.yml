@@ -1,0 +1,54 @@
+name: Update Version File
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      platinum_version:
+        required: true
+        type: string
+      feats_version:
+        required: true
+        type: string
+      target_version:
+        required: true
+        type: string
+      model_version:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Update version.json
+        run: |
+          # Update prod versions with the new versions
+          jq '.platinum_version.prod = "${{ inputs.platinum_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.feats_version.prod = "${{ inputs.feats_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.target_version.prod = "${{ inputs.target_version }}"' version.json > tmp.json && mv tmp.json version.json
+          jq '.model_version.prod = "${{ inputs.model_version }}"' version.json > tmp.json && mv tmp.json version.json
+          
+          echo "Updated version.json with new prod versions:"
+          cat version.json
+
+      - name: Commit and push changes
+        run: |
+          if [[ -n $(git status --porcelain version.json) ]]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add version.json
+            git commit -m "Update prod versions: platinum=${{ inputs.platinum_version }}, feats=${{ inputs.feats_version }}, target=${{ inputs.target_version }}, model=${{ inputs.model_version }}"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push
+          else
+            echo "No changes detected in version.json. Skipping commit."
+          fi

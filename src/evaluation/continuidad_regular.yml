@@ -31,19 +31,19 @@ outputs:
 
 code: .
 
-environment:
-  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
-  conda_file:
-    channels:
-      - conda-forge
-    dependencies:
-      - python=3.10
-      - pip
-      - pip:
-          - pandas
-          - numpy
-          - pyarrow
-          - PyYAML
+environment: azureml:customized-env:1
+  # image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  # conda_file:
+  #   channels:
+  #     - conda-forge
+  #   dependencies:
+  #     - python=3.10
+  #     - pip
+  #     - pip:
+  #         - pandas
+  #         - numpy
+  #         - pyarrow
+  #         - PyYAML
           # - catboost
           # - mlflow
           # - mlflow-azureml
