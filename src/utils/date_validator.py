@@ -1,3 +1,5 @@
+"""script para validar fechas"""
+
 import csv
 import datetime
 import os

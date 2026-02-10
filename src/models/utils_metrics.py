@@ -1,3 +1,5 @@
+"""Utils for models"""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -63,6 +65,17 @@ def join_target(df_forecast: pd.DataFrame, df_target:pd.DataFrame, on_cols: list
 
 
 def calculate_metrics(df_forecast:pd.DataFrame, df_target:pd.DataFrame, on_cols: list[str]):
+    """
+    Calcula las métricas del modelo.
+    
+    Args:
+        df_forecast (pd.DataFrame): DataFrame con forecast data.
+        df_target (pd.DataFrame): DataFrame con target data.
+        on_cols (list[str]): Columnas para join.
+        
+    Returns:
+        dict: Diccionario con las métricas calculadas.
+    """
     
     # logging.info(f' Mode: {mode} {periodo}'.center(50, '=').upper())
     # logging.info(f'Tipo: {tipo}'.upper())

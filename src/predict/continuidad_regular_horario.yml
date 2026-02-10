@@ -33,21 +33,21 @@ outputs:
 
 code: .
 
-environment:
-  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
-  conda_file:
-    channels:
-      - conda-forge
-    dependencies:
-      - python=3.10
-      - pip
-      - pip:
-          - pandas
-          - numpy
-          - catboost
-          - pyarrow
-          - PyYAML
-          - Unidecode
+environment: azureml:customized-env:1
+  # image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  # conda_file:
+  #   channels:
+  #     - conda-forge
+  #   dependencies:
+  #     - python=3.10
+  #     - pip
+  #     - pip:
+  #         - pandas
+  #         - numpy
+  #         - catboost
+  #         - pyarrow
+  #         - PyYAML
+  #         - Unidecode
 
 command: >-
   python continuidad_regular_horario.py 

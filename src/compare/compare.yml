@@ -1,8 +1,8 @@
 # src/models/inicial_regular_v3.yml
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-name: model_inicial_regular
+name: compare_models
 version: 1
-display_name: Model Training - Inicial Regular
+display_name: Model Comparison
 type: command
 
 inputs:
@@ -29,20 +29,20 @@ outputs:
 
 code: .
 
-environment:
-  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
-  conda_file:
-    channels:
-      - conda-forge
-    dependencies:
-      - python=3.10
-      - pip
-      - pip:
-          - pandas
-          - pyarrow
-          - PyYAML
-          - Unidecode
-          - numpy
+environment: azureml:customized-env:1
+  # image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  # conda_file:
+  #   channels:
+  #     - conda-forge
+  #   dependencies:
+  #     - python=3.10
+  #     - pip
+  #     - pip:
+  #         - pandas
+  #         - pyarrow
+  #         - PyYAML
+  #         - Unidecode
+  #         - numpy
 
 command: >-
   python compare.py 

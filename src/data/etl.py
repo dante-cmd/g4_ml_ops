@@ -1,3 +1,5 @@
+"""ETL module to extract, transform, and load data for ICPNA analysis."""
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -10,6 +12,7 @@ from utils_data import validate_periodos
 
 
 class Etl:
+    """ETL class to handle data extraction, transformation, and loading."""
 
     def __init__(self, 
                  input_datastore: str, 
@@ -28,6 +31,11 @@ class Etl:
         self.periodos = validate_periodos(n_periodos, ult_periodo, all_periodos)
 
     def fetch_tabla_horario(self):
+        """
+        Docstring for fetch_tabla_horario
+        Fetch and transform tabla_horario
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Horarios Merge.xlsx'
         tabla_horario = pd.read_excel(path, sheet_name='Hoja1')
 
@@ -39,8 +47,8 @@ class Etl:
             id_vars=['HORARIO'],
             value_vars=['TURNO_1', 'TURNO_2', 'TURNO_3', 'TURNO_4'],
             var_name='N_TURNO',
-            value_name='FRANJA'
-        )
+            value_name='FRANJA')
+
         tabla_horario_normal_01 = tabla_horario_normal[~tabla_horario_normal.FRANJA.isnull()].copy()
         hora_inicial = tabla_horario_normal_01['FRANJA'].str.replace(
             r"(\d{2})\:(\d{2}) - (\d{2})\:(\d{2})", r"\1", regex=True).astype('int32')
@@ -60,11 +68,9 @@ class Etl:
                 column='HORA_INICIO',
                 aggfunc='min'
                 ),
-        HORA_MAX=pd.NamedAgg(
-            column='HORA_FIN',
-            aggfunc='max'
-            )
-    )
+                HORA_MAX=pd.NamedAgg(
+                    column='HORA_FIN',
+                    aggfunc='max'))
 
         tabla_horario_01 = tabla_horario.merge(
             tabla_horario_normal_02,
@@ -75,6 +81,12 @@ class Etl:
         return tabla_horario_01
 
     def fetch_tabla_curso_actual(self):
+        """
+        Docstring for fetch_tabla_curso_actual
+        
+        Fetch and transform tabla_curso_actual
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Cursos Actual.xlsx'
         tabla_curso_actual = pd.read_excel(path, sheet_name='BBDD')
         
@@ -86,6 +98,13 @@ class Etl:
         return tabla_curso_actual
 
     def fetch_tabla_curso_acumulado(self):
+        """
+        Docstring for fetch_tabla_curso_acumulado
+
+        Fetch and transform tabla_curso_acumulado
+        
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Cursos Acumulado.xlsx'
         
         tabla_curso_acumulado = pd.read_excel(path, sheet_name='BBDD')
@@ -97,6 +116,12 @@ class Etl:
         return tabla_curso_acumulado
 
     def fetch_tabla_curso_estacional(self):
+        """
+        Docstring for fetch_tabla_curso_estacional
+        
+        Fetch and transform tabla_curso_estacional
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Cursos Actual.xlsx'
         
         tabla_curso_estacional = pd.read_excel(path, sheet_name='ESTACIONAL')
@@ -108,6 +133,12 @@ class Etl:
         return tabla_curso_estacional
 
     def fetch_tabla_sede(self):
+        """
+        Docstring for fetch_tabla_sede
+        
+        Fetch and transform tabla_sede
+        :param self: Description
+        """
 
         path = self.input_datastore / 'dim'/'Total Aulas.xlsx'
         
@@ -120,6 +151,11 @@ class Etl:
         return tabla_sede
 
     def fetch_tabla_curso_inicial(self):
+        """
+        Docstring for fetch_tabla_curso_inicial
+        Fetch and transform tabla_curso_inicial
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Cursos Iniciales.xlsx'
         
         tabla_curso_inicial = pd.read_excel(path, sheet_name='CURSOS_INICIALES')
@@ -131,6 +167,12 @@ class Etl:
         return tabla_curso_inicial
 
     def fetch_tabla_aula(self):
+        """
+        Docstring for fetch_tabla_aula
+        Fetch and transform tabla_aula
+        :param self: Description
+        """
+
         path = self.input_datastore / 'dim'/ 'Total Aulas.xlsx'
         
         tabla_aula = pd.read_excel(path, sheet_name='BBDD')
@@ -142,6 +184,12 @@ class Etl:
         return tabla_aula
 
     def fetch_tabla_turno_disponible(self):
+        """
+        Docstring for fetch_tabla_turno_disponible
+        
+        Fetch and transform tabla_turno_disponible
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/ 'Total Aulas.xlsx'
         
         tabla_turno_disponible = pd.read_excel(path, sheet_name='HORARIOS_ATENCION')
@@ -191,6 +239,11 @@ class Etl:
         return horas_de_atencion
 
     def fetch_tabla_vac_estandar(self):
+        """
+        Docstring for fetch_tabla_vac_estandar
+        Fetch and transform tabla_vac_estandar
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Total Aulas.xlsx'
         
         tabla_vac_estandar = pd.read_excel(path, sheet_name='VAC_ACAD_ESTANDAR')
@@ -202,6 +255,11 @@ class Etl:
         return tabla_vac_estandar
 
     def fetch_tabla_pe(self):
+        """
+        Docstring for fetch_tabla_pe
+        Fetch and transform tabla_pe
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Total Aulas.xlsx'
         tabla_pe = pd.read_excel(path, sheet_name='PE')
      
@@ -212,6 +270,11 @@ class Etl:
         return tabla_pe
 
     def fetch_synthetic(self):
+        """
+        Docstring for fetch_synthetic
+        Fetch and transform synthetic
+        :param self: Description
+        """
         path = self.input_datastore / 'synthetic'/'synthetic.xlsx'
         synthetic = pd.read_excel(path)
         synthetic.columns = synthetic.columns.astype('string')
@@ -221,6 +284,11 @@ class Etl:
         return synthetic
 
     def fetch_tabla_curso_diario_to_sabatino(self):
+        """
+        Docstring for fetch_tabla_curso_diario_to_sabatino
+        Fetch and transform tabla_curso_diario_to_sabatino
+        :param self: Description
+        """
 
         path = self.input_datastore / 'dim'/'Cursos Actual.xlsx'
         tabla_estacional = pd.read_excel(path, sheet_name='ESTACIONAL')
@@ -232,6 +300,11 @@ class Etl:
         return tabla_estacional_01
 
     def fetch_tabla_horario_diario_to_sabatino(self):
+        """
+        Docstring for fetch_tabla_horario_diario_to_sabatino
+        Fetch and transform tabla_horario_diario_to_sabatino
+        :param self: Description
+        """
         path = self.input_datastore / 'dim'/'Horarios Merge.xlsx'
         tabla_horario_estacional = pd.read_excel(path, sheet_name='ESTACIONAL')
 
@@ -267,15 +340,30 @@ class Etl:
     
     @staticmethod
     def filter_model(df_prog_acad: pd.DataFrame):
+        """
+        Docstring for filter_model
+        
+        :param df_prog_acad: Description
+        :type df_prog_acad: pd.DataFrame
+        
+        Filtros aplicados para el modelo
+        """
         es_satelite = df_prog_acad['SEDE'].isin(
             ['San Juan de Lurigancho Satélite', 'San Juan de Miraflores Satélite'])
 
         return df_prog_acad[~es_satelite].copy()
 
     def fetch_prog_acad_by_periodo(self, periodo: int):
+        """
+        Docstring for fetch_prog_acad_by_periodo
+        :param periodo: Description
+        :type periodo: int
+        
+        Fetch program by periodo
+        """
         assert isinstance(periodo, int)
         year = periodo // 100
-        # print(os.getcwd())
+        
         path = self.input_datastore / 'prog-acad' / str(year) / f'{periodo}.xlsx'
         prog_acad = pd.read_excel(path, sheet_name='Sheet1', skiprows=1)
         prog_acad.columns = prog_acad.columns.astype('string')
@@ -313,6 +401,12 @@ class Etl:
         return prog_acad
 
     def fetch_prog_acad(self):
+        """
+        Obtiene y consolida la programación académica para todos los periodos definidos en la instancia.
+
+        Returns:
+            pd.DataFrame: DataFrame consolidado con la información de todos los periodos.
+        """
 
         collection = []
         for periodo in self.periodos:
@@ -322,54 +416,155 @@ class Etl:
 
         return prog_acad_consol
 
-    def pull_tabla_curso_actual(self, df_curso_actual: pd.DataFrame):
+    def push_tabla_curso_actual(self, df_curso_actual: pd.DataFrame):
+        """
+        Docstring for push_tabla_curso_actual
+
+        :param df_curso_actual: Description
+        :type df_curso_actual: pd.DataFrame
+        
+        Push tabla_curso_actual
+        """
         path = self.output_datastore /'dim'/ self.platinum_version/'cursos_actual.parquet'
         df_curso_actual.to_parquet(path, index=False)
 
-    def pull_tabla_turno_disponible(self, df_turno_disponible: pd.DataFrame):
+    def push_tabla_turno_disponible(self, df_turno_disponible: pd.DataFrame):
+        """
+        Docstring for push_tabla_turno_disponible
+
+        :param df_turno_disponible: Description
+        :type df_turno_disponible: pd.DataFrame
+        
+        Push df_turno_disponible
+        """
+
         path = self.output_datastore /'dim'/ self.platinum_version/'turno_disponible.parquet'
         df_turno_disponible.to_parquet(path, index=False)
 
-    def pull_tabla_vac_estandar(self, df_tabla_vac_estandar: pd.DataFrame):
+    def push_tabla_vac_estandar(self, df_tabla_vac_estandar: pd.DataFrame):
+        """
+        Docstring for push_tabla_vac_estandar
+
+        :param df_tabla_vac_estandar: Description
+        :type df_tabla_vac_estandar: pd.DataFrame
+        
+        Push df_tabla_vac_estandar
+        """
         path = self.output_datastore /'dim'/ self.platinum_version/'tabla_vac_estandar.parquet'
         df_tabla_vac_estandar.to_parquet(path, index=False)
 
-    def pull_tabla_pe(self, df_tabla_pe: pd.DataFrame):
+    def push_tabla_pe(self, df_tabla_pe: pd.DataFrame):
+        """
+        Docstring for push_tabla_pe
+
+        :param push_tabla_pe: Description
+        :type push_tabla_pe: pd.DataFrame
+        
+        Push push_tabla_pe
+        """
         path = self.output_datastore /'dim'/ self.platinum_version/'tabla_pe.parquet'
         df_tabla_pe.to_parquet(path, index=False)
 
-    def pull_tabla_horario(self, df_tabla_horario: pd.DataFrame):
+    def push_tabla_horario(self, df_tabla_horario: pd.DataFrame):
+        """
+        Docstring for push_tabla_horario
+
+        :param push_tabla_horario: Description
+        :type push_tabla_horario: pd.DataFrame
+        
+        Push push_tabla_horario
+        """
         path = self.output_datastore /'dim'/ self.platinum_version/'tabla_horario.parquet'
         df_tabla_horario.to_parquet(path, index=False)
 
-    def pull_tabla_curso_diario_to_sabatino(
+    def push_tabla_curso_diario_to_sabatino(
             self, df_tabla_curso_diario_to_sabatino: pd.DataFrame):
+        """
+        Docstring for tabla_curso_diario_to_sabatino
+
+        :param tabla_curso_diario_to_sabatino: Description
+        :type tabla_curso_diario_to_sabatino: pd.DataFrame
+        
+        Push tabla_curso_diario_to_sabatino
+        """
         path = self.output_datastore /'dim'/ self.platinum_version/'tabla_curso_diario_to_sabatino.parquet'
         df_tabla_curso_diario_to_sabatino.to_parquet(path, index=False)
 
-    def pull_tabla_horario_diario_to_sabatino(
+    def push_tabla_horario_diario_to_sabatino(
             self,
             df_tabla_horario_diario_to_sabatino: pd.DataFrame):
+        
+        """
+        Docstring for tabla_horario_diario_to_sabatino
+
+        :param tabla_horario_diario_to_sabatino: Description
+        :type tabla_horario_diario_to_sabatino: pd.DataFrame
+        
+        Push tabla_horario_diario_to_sabatino
+        """
+
         path = self.output_datastore /'dim'/ self.platinum_version/'tabla_horario_diario_to_sabatino.parquet'
         df_tabla_horario_diario_to_sabatino.to_parquet(path, index=False)
 
-    def pull_synthetic(self, df_synthetic: pd.DataFrame):
+    def push_synthetic(self, df_synthetic: pd.DataFrame):
+
+        """
+        Docstring for synthetic
+
+        :param synthetic: Description
+        :type synthetic: pd.DataFrame
+        
+        Push synthetic
+        """
         path = self.output_datastore / 'synthetic'/ self.platinum_version/'synthetic.parquet'
         df_synthetic.to_parquet(path, index=False)
 
-    def pull_tabla_curso_inicial(self, df_tabla_curso_inicial: pd.DataFrame):
+    def push_tabla_curso_inicial(self, df_tabla_curso_inicial: pd.DataFrame):
+        """
+        Docstring for tabla_curso_inicial
+
+        :param tabla_curso_inicial: Description
+        :type tabla_curso_inicial: pd.DataFrame
+        
+        Push tabla_curso_inicial
+        """
         path = self.output_datastore / 'dim'/self.platinum_version/'tabla_curso_inicial.parquet'
         df_tabla_curso_inicial.to_parquet(path, index=False)
 
-    def pull_tabla_curso_estacional(self, df_tabla_curso_estacional: pd.DataFrame):
+    def push_tabla_curso_estacional(self, df_tabla_curso_estacional: pd.DataFrame):
+        """
+        Docstring for tabla_curso_estacional
+
+        :param tabla_curso_estacional: Description
+        :type tabla_curso_estacional: pd.DataFrame
+        
+        Push tabla_curso_estacional
+        """
         path = self.output_datastore / 'dim'/self.platinum_version/'tabla_curso_estacional.parquet'
         df_tabla_curso_estacional.to_parquet(path, index=False)
 
-    def pull_tabla_curso_acumulado(self, df_tabla_curso_acumulado: pd.DataFrame):
+    def push_tabla_curso_acumulado(self, df_tabla_curso_acumulado: pd.DataFrame):
+        """
+        Docstring for tabla_curso_acumulado
+
+        :param tabla_curso_acumulado: Description
+        :type tabla_curso_acumulado: pd.DataFrame
+        
+        Push tabla_curso_acumulado
+        """
         path = self.output_datastore / 'dim'/self.platinum_version/'tabla_curso_acumulado.parquet'
         df_tabla_curso_acumulado.to_parquet(path, index=False)
 
-    def pull_prog_acad(self, df_prog_acad: pd.DataFrame):
+    def push_prog_acad(self, df_prog_acad: pd.DataFrame):
+
+        """
+        Docstring for prog_acad
+
+        :param prog_acad: Description
+        :type prog_acad: pd.DataFrame
+        
+        Push prog_acad
+        """
 
         for idx, prog_acad in df_prog_acad.groupby('PERIODO'):
             assert isinstance(idx, int)
@@ -382,21 +577,20 @@ class Etl:
             
             prog_acad.to_parquet(path, index=False)
 
-    def fetch_and_transform_and_pull(self):
+    def fetch_and_transform_and_push(self):
+        """
+
+        Docstring for prog_acad
+
+        :param self: Description
+        
+        Fetch and push all dim and prog_acad
+
+        """
         
         # ---------------------------------------------------------------------
         # --------------------------- Fetch -----------------------------------
-        # ---------------------------------------------------------------------
-
-        # if not (self.output_datastore /self.raw_version/ 'dim').exists():
-        #     (self.output_datastore /self.raw_version/ 'dim').mkdir(parents=True, exist_ok=True)
-
-        # if not (self.output_datastore /self.raw_version/ 'prog-acad').exists():
-        #     (self.output_datastore /self.raw_version/ 'prog-acad').mkdir(parents=True, exist_ok=True)
-
-        # if not (self.output_datastore /self.raw_version/ 'synthetic').exists():
-        #     (self.output_datastore /self.raw_version/ 'synthetic').mkdir(parents=True, exist_ok=True)
-        
+        # ---------------------------------------------------------------------        
 
         tabla_horario = self.fetch_tabla_horario()
         tabla_curso_actual = self.fetch_tabla_curso_actual()
@@ -425,9 +619,14 @@ class Etl:
 
         horario = tabla_horario[['HORARIO', 'HORARIO_ACTUAL']].copy()
 
-        # ---------------------------------------------------------------------
+        # =====================================================================
         # -------------------------- Transform --------------------------------
-        # ---------------------------------------------------------------------
+        # =====================================================================
+        
+        # -------------------------------------------------------------------
+        # ----------------------- Prog Acad ---------------------------------
+        # -------------------------------------------------------------------
+
         prog_acad['SEDE'] = prog_acad['SEDE'].str.replace('Provincias - ', '')
 
         prog_acad['SEDE'] = np.where(
@@ -466,8 +665,10 @@ class Etl:
         if not zero_null_on_horario_actual:
             prog_acad_null_horario_actual = prog_acad_02.loc[
                 any_null_on_horario_actual, 
-                ['PERIODO', 'SEDE', 'CODIGO_DE_CURSO','HORARIO', 'HORARIO_ACTUAL']].copy()
-            print("NULL on Curso Actual in Prog Acad", prog_acad_null_horario_actual)     
+                ['PERIODO', 'SEDE', 'CODIGO_DE_CURSO',
+                 'HORARIO', 'HORARIO_ACTUAL']].copy()
+            print("NULL on Curso Actual in Prog Acad", 
+                  prog_acad_null_horario_actual)     
 
         assert prog_acad_02['HORARIO_ACTUAL'].isnull().sum() == 0
 
@@ -482,7 +683,10 @@ class Etl:
             )
         )
 
-        # join in synthetic
+        # -------------------------------------------------------------------
+        # ------------------------ Synthetic --------------------------------
+        # -------------------------------------------------------------------
+
         synthetic_01 = synthetic.merge(
             curso_acumulado,
             how='left',
@@ -512,7 +716,8 @@ class Etl:
         if not zero_null_on_horario_actual:
             prog_acad_null_horario_actual = synthetic_02.loc[
                 any_null_on_horario_actual, 
-                ['PERIODO', 'SEDE', 'CODIGO_DE_CURSO','HORARIO', 'HORARIO_ACTUAL']].copy()
+                ['PERIODO', 'SEDE', 'CODIGO_DE_CURSO',
+                 'HORARIO', 'HORARIO_ACTUAL']].copy()
             print("NULL on Curso Actual in Prog Acad", prog_acad_null_horario_actual)     
 
         
@@ -529,9 +734,9 @@ class Etl:
             )
         )
         
-        # ---------------------------------------------------------------------
-        # --------------------------- Pull ---------------------------------
-        # ---------------------------------------------------------------------
+        # =====================================================================
+        # ---------------------------- Push -----------------------------------
+        # =====================================================================
         if not (self.output_datastore / 'dim'/self.platinum_version).exists():
             (self.output_datastore / 'dim'/self.platinum_version).mkdir(parents=True, exist_ok=True)
 
@@ -541,18 +746,19 @@ class Etl:
         if not (self.output_datastore / 'synthetic'/self.platinum_version).exists():
             (self.output_datastore / 'synthetic'/self.platinum_version).mkdir(parents=True, exist_ok=True)
         
-        self.pull_prog_acad(prog_acad_03)
-        self.pull_synthetic(synthetic_03)
-        self.pull_tabla_turno_disponible(tabla_turno_disponible)
-        self.pull_tabla_curso_actual(tabla_curso_actual)
-        self.pull_tabla_curso_acumulado(tabla_curso_acumulado)
-        self.pull_tabla_vac_estandar(tabla_vac_estandar)
-        self.pull_tabla_curso_inicial(tabla_curso_inicial)
-        self.pull_tabla_curso_estacional(tabla_curso_estacional)
-        self.pull_tabla_curso_diario_to_sabatino(tabla_curso_diario_to_sabatino)
-        self.pull_tabla_horario_diario_to_sabatino(tabla_horario_diario_to_sabatino)
-        self.pull_tabla_pe(tabla_pe)
-        self.pull_tabla_horario(tabla_horario)
+        self.push_prog_acad(prog_acad_03)
+        self.push_synthetic(synthetic_03)
+        self.push_tabla_turno_disponible(tabla_turno_disponible)
+        self.push_tabla_curso_actual(tabla_curso_actual)
+        self.push_tabla_curso_acumulado(tabla_curso_acumulado)
+        self.push_tabla_vac_estandar(tabla_vac_estandar)
+        self.push_tabla_curso_inicial(tabla_curso_inicial)
+        self.push_tabla_curso_estacional(tabla_curso_estacional)
+        self.push_tabla_curso_diario_to_sabatino(tabla_curso_diario_to_sabatino)
+        self.push_tabla_horario_diario_to_sabatino(tabla_horario_diario_to_sabatino)
+        self.push_tabla_pe(tabla_pe)
+        self.push_tabla_horario(tabla_horario)
+
 
 def parse_args():
     # setup arg parser
@@ -578,6 +784,7 @@ def parse_args():
     # return args
     return args
 
+
 def main(args):
     input_datastore=args.input_datastore
     output_datastore=args.output_datastore
@@ -594,7 +801,7 @@ def main(args):
         n_periodos, 
         all_periodos)
     
-    etl.fetch_and_transform_and_pull()
+    etl.fetch_and_transform_and_push()
 
 if __name__ == '__main__':
     # input_datastore =  base_data

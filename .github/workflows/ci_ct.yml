@@ -1,0 +1,179 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Code Quality
+    uses: ./.github/workflows/lint.yml
+    with:
+      pyProjectDirectory: "pyproject.toml"
+      python-version: "['3.10']"
+      checkBlack: true
+      checkFlake8: true
+      checkIsort: true
+      checkPylint: true
+      checkMypy: true
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  load-params:
+    runs-on: ubuntu-latest
+    needs: [lint]
+    outputs:
+      mode: ${{ steps.read_params.outputs.mode }}
+      model_periodo: ${{ steps.read_params.outputs.model_periodo }}
+      ult_periodo_data: ${{ steps.read_params.outputs.ult_periodo_data }}
+      n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
+      periodo: ${{ steps.read_params.outputs.periodo }}
+      with_tipo: ${{ steps.read_params.outputs.with_tipo }}
+
+      platinum_version: ${{ steps.read_params.outputs.platinum_version }}
+      feats_version: ${{ steps.read_params.outputs.feats_version }}
+      target_version: ${{ steps.read_params.outputs.target_version }}
+      model_version: ${{ steps.read_params.outputs.model_version }}
+
+      model_current_version: ${{ steps.read_params.outputs.model_current_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - name: Set up Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: '3.8'
+
+      # - name: Check Date
+      #   id: check_date
+      #   run: python src/utils/date_validator.py
+
+      - name: Read Parameters
+        id: read_params
+        if: always()
+        run: |
+          
+          # -----------------------------------------------------------------------------------
+          # -----------------------------------------------------------------------------------
+          # -----------------------------------------------------------------------------------
+          
+          with_tipo="True"
+          periodo="-1"
+          # mode must be set to "dev"
+          echo "mode=$(jq -r '.mode' params_dev.json)" >> $GITHUB_OUTPUT
+          # They should be the same as prod for first run
+          echo "model_periodo=$(jq -r '.model_periodo' params_dev.json)" >> $GITHUB_OUTPUT
+          echo "ult_periodo_data=$(jq -r '.ult_periodo_data' params_dev.json)" >> $GITHUB_OUTPUT
+          echo "n_eval_periodos=$(jq -r '.n_eval_periodos' params_dev.json)" >> $GITHUB_OUTPUT
+          # --------------------------------------------------------------------------------------
+          echo "periodo=$periodo" >> $GITHUB_OUTPUT
+          echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
+
+        
+          # prod is the version that is currently deployed
+          
+          platinum_current_version=$(jq -r '.platinum_version.prod' version.json)
+          feats_current_version=$(jq -r '.feats_version.prod' version.json)
+          target_current_version=$(jq -r '.target_version.prod' version.json)
+          model_current_version=$(jq -r '.model_version.prod' version.json)
+          
+
+          # --------------------------------------------------------------------------------
+          # -------------- Calculate new version based on prod version ---------------------
+          # --------------------------------------------------------------------------------
+
+          # 1. Extract number, increment, and create new version string (e.g., v1 -> v2)
+
+          current_platinum_v_num=$(echo $platinum_current_version | tr -dc '0-9')
+          new_platinum_v_num=$((current_platinum_v_num + 1))
+          platinum_version="v$new_platinum_v_num"
+
+          current_feats_v_num=$(echo $feats_current_version | tr -dc '0-9')
+          new_feats_v_num=$((current_feats_v_num + 1))
+          feats_version="v$new_feats_v_num"
+
+          current_target_v_num=$(echo $target_current_version | tr -dc '0-9')
+          new_target_v_num=$((current_target_v_num + 1))
+          target_version="v$new_target_v_num"
+
+          current_model_v_num=$(echo $model_current_version | tr -dc '0-9')
+          new_model_v_num=$((current_model_v_num + 1))
+          model_version="v$new_model_v_num"
+
+          # 2. Add new version to outputs
+          
+          echo "platinum_version=$platinum_version" >> $GITHUB_OUTPUT
+          echo "feats_version=$feats_version" >> $GITHUB_OUTPUT
+          echo "target_version=$target_version" >> $GITHUB_OUTPUT
+          echo "model_version=$model_version" >> $GITHUB_OUTPUT
+
+          # 3. Add current versions to outputs for comparison
+          echo "model_current_version=$model_current_version" >> $GITHUB_OUTPUT
+    
+  trigger-pl-update-dev-version:
+    needs: [load-params]
+    if: always() 
+    # needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
+    uses: ./.github/workflows/wf_func_update_dev_version.yml
+    with:
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+    secrets: inherit
+  
+  trigger-pl-ml-compare:
+    needs: load-params
+    if: always()
+    # uses: ./.github/workflows/wf_func_test.yml
+    uses: ./.github/workflows/wf_func_deploy_compare.yml
+    with:
+      mode: ${{ needs.load-params.outputs.mode }}
+      model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
+      ult_periodo_data: ${{ fromJson(needs.load-params.outputs.ult_periodo_data) }}
+      n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
+      periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
+      with_tipo: ${{ needs.load-params.outputs.with_tipo }}
+      # For the new versions to compare
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+      # For the currently deployed model
+      model_current_version: ${{ needs.load-params.outputs.model_current_version }}
+    secrets: inherit
+
+  trigger-pl-update-prod-version:
+    needs: [load-params, trigger-pl-update-dev-version, trigger-pl-ml-compare]
+    if: needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
+    uses: ./.github/workflows/wf_func_update_prod_version.yml
+    with:
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+    secrets: inherit
+
+  pr_comment:
+    name: PR Status
+    needs: [trigger-pl-ml-compare, lint]
+    if: always()
+    uses: ./.github/workflows/pr_comment.yml  
+    with:
+      message: |
+        ## CI Pipeline Results
+
+        | Check | Status |
+        |-------|--------|
+        | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+        **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
+        **Model**: ${{needs.trigger-pl-ml-compare.outputs.response_compare == 'approved' && '✅ Model Comparison Approved' || '❌ Model Comparison Pending' }}
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}

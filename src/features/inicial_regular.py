@@ -29,6 +29,9 @@ SKIPPED_FEATURES_PERIODOS = [
     
 
 class Inicial(Utils):
+    """
+    Clase para generar features de continuidad regular.
+    """
     def __init__(self, tablas:dict):
         super().__init__(tablas)
         self.df_regular = self.get_regular_plus_synth()
@@ -37,6 +40,9 @@ class Inicial(Utils):
         self.dummy_columns = None
 
     def get_idx(self, periodo: int):
+        """
+        Obtiene el índice de continuidad regular para un periodo dado.
+        """
         meses = [1, 2]
         df_regular = self.df_regular.copy()
 
@@ -128,6 +134,9 @@ class Inicial(Utils):
         return df_regular_inicial_07
 
     def add_lag_n(self, df_idx: pd.DataFrame, n:int):
+        """
+        Agrega información del periodo lag n.
+        """
         df_regular = self.df_regular[['PERIODO', 'SEDE',
                                       'CURSO_ACTUAL', 'HORARIO_ACTUAL',
                                       'CANT_CLASES', 'CANT_ALUMNOS']].copy()
@@ -152,6 +161,9 @@ class Inicial(Utils):
         return df_idx_01
 
     def add_quantitative_feats(self, df_idx:pd.DataFrame):
+        """
+        Agrega features cuantitativas al índice.
+        """
         df_idx_01 = self.add_lag_n(df_idx, 1)
         df_idx_02 = self.add_lag_n(df_idx_01, 2)
         df_idx_03 = self.add_lag_n(df_idx_02, 3)
@@ -159,6 +171,9 @@ class Inicial(Utils):
         return df_idx_12
 
     def add_categorical_feats(self, df_idx:pd.DataFrame):
+        """
+        Agrega features categóricas al índice.
+        """
         df_idx_01 = df_idx.merge(
             self.df_curso_actual[
                 ['CURSO_ACTUAL', 'NIVEL', 'CURSO_2',
@@ -172,6 +187,9 @@ class Inicial(Utils):
         return df_idx_01
 
     def get_target(self, periodo: int):
+        """
+        Obtiene el target de continuidad regular para un periodo dado.
+        """
         df_real = self.df_real.copy()
         df_real_01 = df_real[
             (df_real['PERIODO'] == periodo)
@@ -196,6 +214,9 @@ class Inicial(Utils):
         return df_real_03
 
     def get_model_by_periodo(self, periodo: int):
+        """
+        Obtiene el modelo de continuidad regular para un periodo dado.
+        """
         data_idx = self.get_idx(periodo)
         data_target = self.get_target(periodo)
 
@@ -215,6 +236,9 @@ class Inicial(Utils):
         return data_model
 
     def get_model(self, periodos: list[int]):
+        """
+        Obtiene el modelo de continuidad regular para un periodo dado.
+        """
         collection = []
         for periodo in periodos:
             # print(f'-------TrainContinuidad(periodo={periodo})-------')
@@ -230,6 +254,9 @@ class Inicial(Utils):
         return data_model_consol_01
 
     def get_features(self, periodo: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Obtiene las features de continuidad regular para un periodo dado.
+        """
         periodos = get_training_periodos(periodo)
         data_model = self.get_model(periodos)
 
@@ -260,6 +287,9 @@ class Inicial(Utils):
                       output_feats_datastore:str,
                       with_tipo:str
                       ):
+        """
+        Carga las features de continuidad regular para un periodo dado.
+        """
         # output_feats_train_datastore:str,
         # output_feats_test_datastore:str
         
@@ -278,6 +308,9 @@ class Inicial(Utils):
             index=False)
     
     def load_target(self, periodo:int, version:str, output_target_datastore:str,with_tipo:str):
+        """
+        Carga el target de continuidad regular para un periodo dado.
+        """
         eval_tipo = eval(with_tipo)
         
         if not eval_tipo:
@@ -293,6 +326,9 @@ class Inicial(Utils):
 
 
 def main(args):
+    """
+    Función principal para ejecutar el pipeline de continuidad regular.
+    """
     
     # python src/features/inicial_regular.py --input_datastore "./data/ml_data/platinumdata/v1/" --output_feats_datastore "./data/ml_data/features/" --output_target_datastore "./data/ml_data/target/" --feats_version "v1" --target_version "v1" --periodo 202506 --ult_periodo 202506
     # for Loader

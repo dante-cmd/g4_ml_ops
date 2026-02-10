@@ -1,3 +1,4 @@
+"""utilities for model comparison"""
 
 import argparse
 from datetime import datetime
@@ -5,6 +6,9 @@ from dateutil.relativedelta import relativedelta
 
 
 def parse_args():
+    """
+    Parse command line arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--input_evaluation_inicial_datastore", dest="input_evaluation_inicial_datastore", type=str)
@@ -62,6 +66,15 @@ def get_mapping_tipos(periodo: int) -> dict:
     
 
 def get_n_lags(periodo: int, n: int):
+    """
+    Docstring for get_n_lags
+    
+    Obtiene el periodo n meses antes del periodo dado.
+    :param periodo: Description
+    :type periodo: int
+    :param n: Description
+    :type n: int
+    """
     periodo_date = datetime.strptime(str(periodo), '%Y%m')
     return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 

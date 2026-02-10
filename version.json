@@ -1,18 +1,18 @@
 {
   "platinum_version": {
-    "prod": "v2",
-    "dev": "v2"
+    "prod": "v3",
+    "dev": "v4"
   },
   "feats_version": {
-    "prod": "v2",
-    "dev": "v2"
+    "prod": "v3",
+    "dev": "v4"
   },
   "target_version": {
-    "prod": "v2",
-    "dev": "v2"
+    "prod": "v3",
+    "dev": "v4"
   },
   "model_version": {
-    "prod": "v2",
-    "dev": "v2"
+    "prod": "v3",
+    "dev": "v4"
   }
 }

@@ -1,0 +1,137 @@
+name: CD Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  
+  load-params:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.read_params.outputs.mode }}
+      model_periodo: ${{ steps.read_params.outputs.model_periodo }}
+      ult_periodo_data: ${{ steps.read_params.outputs.ult_periodo_data }}
+      n_eval_periodos: ${{ steps.read_params.outputs.n_eval_periodos }}
+      periodo: ${{ steps.read_params.outputs.periodo }}
+      with_tipo: ${{ steps.read_params.outputs.with_tipo }}
+
+      platinum_version: ${{ steps.read_params.outputs.platinum_version }}
+      feats_version: ${{ steps.read_params.outputs.feats_version }}
+      target_version: ${{ steps.read_params.outputs.target_version }}
+      model_version: ${{ steps.read_params.outputs.model_version }}
+      # model_current_version: ${{ steps.read_params.outputs.model_current_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Read Parameters
+        id: read_params
+        if: always()
+        run: |
+          
+          # -----------------------------------------------------------------------------------
+          # -----------------------------------------------------------------------------------
+          # -----------------------------------------------------------------------------------
+          
+          with_tipo="True"
+          n_eval_periodos="-1"
+
+          # mode must be set to "prod"
+          
+          
+          mode=$(jq -r '.mode' params_prod.json)
+          echo "mode=$mode" >> $GITHUB_OUTPUT
+  
+          model_periodo=$(jq -r '.model_periodo' params_prod.json)
+          echo "model_periodo=$model_periodo" >> $GITHUB_OUTPUT
+          
+          ult_periodo_data=$(jq -r '.ult_periodo_data' params_prod.json)
+          echo "ult_periodo_data=$ult_periodo_data" >> $GITHUB_OUTPUT
+          
+          echo "n_eval_periodos=$n_eval_periodos" >> $GITHUB_OUTPUT
+          
+          # --------------------------------------------------------------------------------------
+          echo "periodo=$model_periodo" >> $GITHUB_OUTPUT
+          echo "with_tipo=$with_tipo" >> $GITHUB_OUTPUT
+
+        
+          # prod is the version that is currently deployed
+          
+          platinum_version=$(jq -r '.platinum_version.prod' version.json)
+          feats_version=$(jq -r '.feats_version.prod' version.json)
+          target_version=$(jq -r '.target_version.prod' version.json)
+          model_version=$(jq -r '.model_version.prod' version.json)
+          
+
+          # 2. Add new version to outputs
+          
+          echo "platinum_version=$platinum_version" >> $GITHUB_OUTPUT
+          echo "feats_version=$feats_version" >> $GITHUB_OUTPUT
+          echo "target_version=$target_version" >> $GITHUB_OUTPUT
+          echo "model_version=$model_version" >> $GITHUB_OUTPUT
+    
+
+  trigger-pl-ml-model:
+    needs: [load-params]
+    if: always() # needs.trigger-pl-ml-compare.outputs.response_compare == 'approved'
+    # uses: ./.github/workflows/wf_func_test.yml
+    uses: ./.github/workflows/wf_func_deploy_model.yml
+    with:
+      mode: ${{ needs.load-params.outputs.mode }}
+      model_periodo: ${{ fromJson(needs.load-params.outputs.model_periodo) }}
+      ult_periodo_data: ${{ fromJson(needs.load-params.outputs.ult_periodo_data) }}
+      n_eval_periodos: ${{ fromJson(needs.load-params.outputs.n_eval_periodos) }}
+      periodo: ${{ fromJson(needs.load-params.outputs.periodo) }}
+      with_tipo: ${{ needs.load-params.outputs.with_tipo }}
+      
+      platinum_version: ${{ needs.load-params.outputs.platinum_version }}
+      feats_version: ${{ needs.load-params.outputs.feats_version }}
+      target_version: ${{ needs.load-params.outputs.target_version }}
+      model_version: ${{ needs.load-params.outputs.model_version }}
+    secrets: inherit
+  
+  semantic_version:
+    name: Generate Version
+    uses: ./.github/workflows/reusable_semantic_version.yml
+    needs: [trigger-pl-ml-model]
+    with:
+      tag_prefix: v
+      module_path: .
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create_tag:
+    name: Create Tag
+    needs: [semantic_version]
+    if: needs.semantic_version.outputs.changed_path == 'true'
+    permissions: write-all
+    uses: ./.github/workflows/reusable_create_tag.yml
+    with:
+      tag: ${{ needs.semantic_version.outputs.version }}
+      tag_message: "Release ${{ needs.semantic_version.outputs.version }}"
+      on_tag_exists: skip
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create_release:
+    name: Create Release
+    needs: [semantic_version, create_tag]
+    permissions: write-all
+    uses: ./.github/workflows/reusable_create_release.yml
+    with:
+      project_name: gitops-lab
+      project_dir: .
+      version: ${{ needs.semantic_version.outputs.sem_version }}
+      changelog: "Automated release for version ${{ needs.semantic_version.outputs.version }}"
+      tag: ${{ needs.semantic_version.outputs.version }}
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}

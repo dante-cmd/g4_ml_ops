@@ -47,6 +47,9 @@ def get_mapping_tipos(periodo: int) -> dict:
 
 
 def parse_args():
+    """
+    Parse arguments for the feature engineering pipeline.
+    """
     # setup arg parser
     parser = argparse.ArgumentParser()
     
@@ -85,6 +88,11 @@ def parse_args():
 
 
 def get_n_lags(periodo: int, n: int):
+    """
+    Obtiene el periodo n meses antes del periodo dado.
+    Ejemplo:
+        get_n_lags(202306, 1) -> 202305
+    """
     periodo_date = datetime.strptime(str(periodo), '%Y%m')
     return int((periodo_date - relativedelta(months=n)).strftime('%Y%m'))
 
@@ -108,6 +116,11 @@ def get_ahead_n_periodos(periodo: int, n: int):
 
 
 def get_all_periodos(periodo: int):
+    """
+    Obtiene todos los periodos desde el periodo inicial hasta el periodo dado.
+    Ejemplo:
+        get_all_periodos(202306) -> [202211, 202212, 202301, 202302, 202303, 202304, 202305, 202306]
+    """
     periodos = pd.period_range(
             start=datetime(2022, 11, 1),
             end=datetime(periodo // 100, periodo % 100, 1),
@@ -117,6 +130,9 @@ def get_all_periodos(periodo: int):
 
 
 def validate_periodos(n_periodos:int|None, ult_periodo:int, all_periodos:bool):
+    """
+    Valida los periodos de entrenamiento.
+    """
     if n_periodos is not None:
         periodos = get_last_n_periodos(ult_periodo, n_periodos)
         min_periodo = int(np.min(periodos))
@@ -133,13 +149,7 @@ def validate_periodos(n_periodos:int|None, ult_periodo:int, all_periodos:bool):
 
 def get_training_periodos(periodo: int):
     """
-    Returns a list of training periods for a given period.
-    The minimum period is 202401 and the maximum period is the given period.    
-    Args:
-        periodo (int): The period for which to generate training periods.
-    
-    Returns:
-        list: A list of training periods.
+    Obtiene los periodos de entrenamiento.
     """
     periodos = pd.period_range(
             start=datetime(2024, 3, 1),
@@ -150,12 +160,18 @@ def get_training_periodos(periodo: int):
 
 
 def get_training_periodos_estacionales(periodo: int, meses: list[int]):
+    """
+    Obtiene los periodos de entrenamiento estacionales.
+    """
     periodos = get_training_periodos(periodo)
     periodos_selected = [per for per in periodos if per % 100 in meses]
     return periodos_selected
 
 
 def filter_by_hora_atencion(df_idx: pd.DataFrame, df_turno_disponible: pd.DataFrame, df_horario: pd.DataFrame):
+    """
+    Filtra los datos por hora de atención.
+    """
     df_idx_clone = df_idx.copy()
 
     df_idx_clone_01 = df_idx_clone.merge(

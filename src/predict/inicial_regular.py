@@ -1,3 +1,7 @@
+"""
+Script para predecir la continuidad regular.
+"""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -8,6 +12,9 @@ from utils_predict import get_mapping_tipos, get_ahead_n_periodos
 
 
 class TrainInicial:
+    """
+    Clase para entrenar el modelo de continuidad regular.
+    """
     def __init__(
         self,
         input_model_datastore: str,
@@ -26,7 +33,9 @@ class TrainInicial:
         self.model_version = model_version
 
     def get_data_test(self, periodo: int):
-
+        """
+        Lee los datos de prueba del datastore.
+        """
         data_model_test = pd.read_parquet(
             self.input_feats_datastore
             / "test"
@@ -36,6 +45,9 @@ class TrainInicial:
         return data_model_test
 
     def load_model(self, model_periodo:int):
+        """
+        Carga el modelo desde el datastore.
+        """
         print(f"Cargando modelo desde: {self.input_model_datastore}")
         model = CatBoostRegressor()
         
@@ -98,6 +110,9 @@ class TrainInicial:
         self, 
         model_version: str, model_periodo: int, periodo: int, 
         df_model_predict: pd.DataFrame, mode:str):
+        """
+        Sube los datos de predicción al datastore.
+        """
       
         path_model_version = self.output_predict_datastore/"test"
             
@@ -120,6 +135,9 @@ class TrainInicial:
 
 
 def parse_args():
+    """
+    Parsea los argumentos de la línea de comandos.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_model_datastore", dest="input_model_datastore", type=str)
     parser.add_argument("--input_feats_datastore", dest="input_feats_datastore", type=str)
@@ -136,7 +154,9 @@ def parse_args():
 
 
 def main(args):
-
+    """
+    Función principal para entrenar el modelo de continuidad regular.
+    """
     input_model_datastore = args.input_model_datastore
     input_feats_datastore = args.input_feats_datastore
     
