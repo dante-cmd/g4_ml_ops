@@ -45,10 +45,17 @@ jobs:
           if [[ -n $(git status --porcelain version.json) ]]; then
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            
+            # -----------------------------------------------------------------------------------
+            # Determine the branch name. 
+            # In a PR, head_ref is the source branch. In a push, ref_name is the branch.
+            BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+            
             git add version.json
             git commit -m "Update dev versions: platinum=${{ inputs.platinum_version }}, feats=${{ inputs.feats_version }}, target=${{ inputs.target_version }}, model=${{ inputs.model_version }}"
-            git pull --rebase origin ${{ github.ref_name }}
-            git push
+            
+            git pull --rebase origin $BRANCH_NAME
+            git push origin HEAD:$BRANCH_NAME
           else
             echo "No changes detected in version.json. Skipping commit."
           fi
