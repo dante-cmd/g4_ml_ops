@@ -25,12 +25,12 @@ class Compare:
         model_version: str,
         periodo: int,
     ) -> None:
-        self.input_evaluation_inicial_datastore = Path(input_evaluation_inicial_datastore)
+        self.input_evaluation_inicial_datastore = Path(
+            input_evaluation_inicial_datastore)
         self.input_evaluation_continuidad_horario_datastore = Path(
             input_evaluation_continuidad_horario_datastore
         )
         self.output_compare_datastore = Path(output_compare_datastore)
-        
         self.n_eval_periodos = n_eval_periodos
         self.model_periodo = model_periodo
         self.model_current_version = model_current_version
@@ -55,16 +55,19 @@ class Compare:
         data_model_predict = pd.read_parquet(
             path_file
             / "test"
-            / f"data_evaluation_{model_version}_{self.model_periodo}_{tipo}_{periodo}.parquet"
+            / f"data_evaluation_{model_version}_"\
+                "{self.model_periodo}_{tipo}_{periodo}.parquet"
         )
 
         print(
             "Data loaded from",
             path_file
             / "test"
-            / f"data_evaluation_{model_version}_{self.model_periodo}_{tipo}_{periodo}.parquet",
+            / f"data_evaluation_{model_version}_"\
+                "{self.model_periodo}_{tipo}_{periodo}.parquet",
         )
-        filtro = (data_model_predict["CANT_CLASES_PREDICT"] == 0) & (
+        filtro = (
+            data_model_predict["CANT_CLASES_PREDICT"] == 0) & (
             data_model_predict["CANT_CLASES"] == 0
         )
 
@@ -130,10 +133,13 @@ class Compare:
                 periodos, tipo, self.model_current_version, tipos[tipo]
             )
 
-            print("model_current_version, model_version", self.model_current_version, self.model_version)
+            print("model_current_version, model_version", 
+                  self.model_current_version, self.model_version)
             print(f"Current score for {tipo}: {current_score}")
 
-            new_score = self.get_average_score(periodos, tipo, self.model_version, tipos[tipo])
+            new_score = self.get_average_score(
+                periodos, tipo, 
+                self.model_version, tipos[tipo])
             print(f"New score for {tipo}: {new_score}")
             if new_score > current_score:
                 evaluation_scores.append(True)
