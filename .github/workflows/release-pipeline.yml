@@ -72,7 +72,7 @@ jobs:
                              --workspace-name $WS
           
           echo "Modelo registrado con la versión más reciente."
-         
+
 
       # ---------------------------------------------------------
       # PASO C: DESPLIEGUE (DEPLOYMENT)
