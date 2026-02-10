@@ -95,6 +95,8 @@ class TrainContinuidadToHorario:
             path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet"
         )
 
+        print(path_model/f"data_evaluation_{model_version}_{model_periodo}_{self.tipo}_{periodo}.parquet")
+
         assert mode in ['prod', 'dev']
         
         if mode == 'dev':
