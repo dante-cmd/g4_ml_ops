@@ -52,20 +52,22 @@ class Compare:
         Returns:
             float: Score de evaluación.
         """
-        data_model_predict = pd.read_parquet(
-            path_file
-            / "test"
-            / f"data_evaluation_{model_version}_"\
-                "{self.model_periodo}_{tipo}_{periodo}.parquet"
-        )
-
         print(
             "Data loaded from",
             path_file
             / "test"
             / f"data_evaluation_{model_version}_"\
-                "{self.model_periodo}_{tipo}_{periodo}.parquet",
+                f"{self.model_periodo}_{tipo}_{periodo}.parquet",
         )
+        
+        data_model_predict = pd.read_parquet(
+            path_file
+            / "test"
+            / f"data_evaluation_{model_version}_"\
+                f"{self.model_periodo}_{tipo}_{periodo}.parquet"
+        )
+
+        
         filtro = (
             data_model_predict["CANT_CLASES_PREDICT"] == 0) & (
             data_model_predict["CANT_CLASES"] == 0
