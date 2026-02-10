@@ -80,31 +80,34 @@ jobs:
       # ---------------------------------------------------------
       - name: Deploy to Endpoint
         run: |
-          # CONFIGURACIÓN: Modifica estos valores según tu entorno
+          # 1. Definición de Variables
           ENDPOINT_NAME="mi-endpoint-universidad"
           DEPLOYMENT_NAME="blue-deployment"
           MODEL_ID="modelo_continuidad_horario@latest"
-          VM_SIZE="Standard_DS3_v2" # Tipo de máquina para el despliegue
+          VM_SIZE="Standard_DS3_v2"
 
-          echo "Paso 1: Verificando si el Endpoint existe..."
+          echo "Paso 1: Verificando/Creando el Endpoint..."
+          # Si el endpoint no existe, se crea primero (es el contenedor)
           az ml online-endpoint show --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS || \
           az ml online-endpoint create --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS
 
-          echo "Paso 2: Intentando actualizar el despliegue '$DEPLOYMENT_NAME'..."
-          
-          # Intentamos UPDATE, si falla (porque no existe), ejecutamos CREATE
-          az ml online-deployment update --name $DEPLOYMENT_NAME \
-                                         --endpoint-name $ENDPOINT_NAME \
-                                         --model $MODEL_ID \
-                                         --resource-group $RG \
-                                         --workspace-name $WS \
-                                         --all-traffic || \
-          (echo "El despliegue no existe. Creando nuevo despliegue con máquina $VM_SIZE..." && \
-           az ml online-deployment create --name $DEPLOYMENT_NAME \
-                                          --endpoint-name $ENDPOINT_NAME \
-                                          --model $MODEL_ID \
-                                          --instance-type $VM_SIZE \
-                                          --instance-count 1 \
-                                          --resource-group $RG \
-                                          --workspace-name $WS \
-                                          --all-traffic)                                
+          echo "Paso 2: Generando archivo de configuración temporal..."
+          # Creamos el YAML que Azure necesita para evitar el error de 'unrecognized arguments'
+          cat <<EOF > deploy_config.yml
+          name: $DEPLOYMENT_NAME
+          endpoint_name: $ENDPOINT_NAME
+          model: azureml:$MODEL_ID
+          instance_type: $VM_SIZE
+          instance_count: 1
+          EOF
+
+          echo "Paso 3: Ejecutando el despliegue..."
+          # Intentamos CREAR primero. Si ya existe, fallará y pasará al UPDATE.
+          # Usamos --file para cumplir con el requisito de Azure CLI v2
+          az ml online-deployment create --file deploy_config.yml --resource-group $RG --workspace-name $WS --all-traffic || \
+          (echo "El despliegue ya existe. Actualizando con el nuevo modelo..." && \
+           az ml online-deployment update --file deploy_config.yml --resource-group $RG --workspace-name $WS)
+
+          echo "Proceso finalizado correctamente." 
+
+                          
