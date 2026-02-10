@@ -24,7 +24,7 @@ jobs:
     secrets:
       GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    pr_comment:
+  pr_comment:
      name: PR Status
      needs: [lint]
      if: always()
