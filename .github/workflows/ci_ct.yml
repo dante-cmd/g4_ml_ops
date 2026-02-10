@@ -24,25 +24,10 @@ jobs:
     secrets:
       GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  pr_comment:
-    name: PR Status
-    needs: [lint]
-    if: always()
-    uses: ./.github/workflows/pr_comment.yml  
-    with:
-      message: |
-        ## CI Pipeline Results
 
-        | Check | Status |
-        |-------|--------|
-        | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
-
-        **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
-    secrets:
-      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
   load-params:
     runs-on: ubuntu-latest
+    needs: [lint]
     outputs:
       mode: ${{ steps.read_params.outputs.mode }}
       model_periodo: ${{ steps.read_params.outputs.model_periodo }}
@@ -175,3 +160,20 @@ jobs:
       target_version: ${{ needs.load-params.outputs.target_version }}
       model_version: ${{ needs.load-params.outputs.model_version }}
     secrets: inherit
+
+  pr_comment:
+    name: PR Status
+    needs: [trigger-pl-ml-compare, lint]
+    if: always()
+    uses: ./.github/workflows/pr_comment.yml  
+    with:
+      message: |
+        ## CI Pipeline Results
+
+        | Check | Status |
+        |-------|--------|
+        | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+        **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
+        **Model**: ${{needs.trigger-pl-ml-compare.outputs.response_compare == 'approved' && '✅ Model Comparison Approved' || '❌ Model Comparison Pending' }}
+    secrets:
+      GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
