@@ -100,17 +100,24 @@ class TrainContinuidadToHorario:
         Guarda el modelo entrenado.
         """
         
-        path_model = self.output_model_datastore/'test'/self.model_version
+         #path_model = self.output_model_datastore/'test'/self.model_version
+         # 1. Definimos la ruta
+        path_model = self.output_model_datastore / "model"
         
-        path_model.mkdir(parents=True, exist_ok=True)        
-        model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
-        
-        print(f"Guardando modelo en: {path_model/f'{self.tipo}_{periodo}.cbm'}")
+         # 2. AGREGAR ESTA LÍNEA: Crea la carpeta físicamente en el disco
+        path_model.mkdir(parents=True, exist_ok=True)
+         # 3. Guardamos el modelo
+        model.save_model(path_model / f"{self.tipo}_{periodo}.cbm")
+              
+       
+        print(f"Modelo guardado exitosamente en: {path_model / f'{self.tipo}_{periodo}.cbm'}") 
+        #print(f"Guardando modelo en: {path_model/f'{self.tipo}_{periodo}.cbm'}")
         
         # path_model.mkdir(parents=True, exist_ok=True)        
         # model.save_model(path_model/f"{self.tipo}_{periodo}.cbm")
         
         # print(f"Guardando modelo en: {path_model/f'{self.tipo}_{periodo}.cbm'}")
+
 
 
 def main(args):
