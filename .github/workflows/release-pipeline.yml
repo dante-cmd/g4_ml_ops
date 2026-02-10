@@ -84,30 +84,30 @@ jobs:
           ENDPOINT_NAME="mi-endpoint-universidad"
           DEPLOYMENT_NAME="blue-deployment"
           MODEL_ID="modelo_continuidad_horario@latest"
-          VM_SIZE="Standard_DS2_v2" 
+          VM_SIZE="Standard_DS2_v2"
 
-          echo "Paso 1: Verificando/Creando el Endpoint..."
-          # Si el endpoint no existe, se crea primero (es el contenedor)
+           echo "Paso 1: Verificando/Creando el Endpoint..."
           az ml online-endpoint show --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS || \
           az ml online-endpoint create --name $ENDPOINT_NAME --resource-group $RG --workspace-name $WS
 
           echo "Paso 2: Generando archivo de configuración temporal..."
-          # Creamos el YAML que Azure necesita para evitar el error de 'unrecognized arguments'
+          # AGREGAMOS 'environment' para que Azure sepa qué librerías usar (CatBoost, Pandas, etc.)
+          # Usamos la imagen oficial de Azure ML para inferencia de Scikit-Learn/Python
           cat <<EOF > deploy_config.yml
           name: $DEPLOYMENT_NAME
           endpoint_name: $ENDPOINT_NAME
           model: azureml:$MODEL_ID
           instance_type: $VM_SIZE
           instance_count: 1
+          environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
           EOF
 
-          echo "Paso 3: Ejecutando el despliegue..."
-          # Intentamos CREAR primero. Si ya existe, fallará y pasará al UPDATE.
-          # Usamos --file para cumplir con el requisito de Azure CLI v2
+           echo "Paso 3: Ejecutando el despliegue..."
           az ml online-deployment create --file deploy_config.yml --resource-group $RG --workspace-name $WS --all-traffic || \
-          (echo "El despliegue ya existe. Actualizando con el nuevo modelo..." && \
+          (echo "El despliegue ya existe. Actualizando..." && \
            az ml online-deployment update --file deploy_config.yml --resource-group $RG --workspace-name $WS)
 
-          echo "Proceso finalizado correctamente." 
+          echo "Proceso finalizado correctamente."
+
 
                           
