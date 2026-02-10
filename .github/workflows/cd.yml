@@ -28,8 +28,7 @@ jobs:
       feats_version: ${{ steps.read_params.outputs.feats_version }}
       target_version: ${{ steps.read_params.outputs.target_version }}
       model_version: ${{ steps.read_params.outputs.model_version }}
-
-      model_current_version: ${{ steps.read_params.outputs.model_current_version }}
+      # model_current_version: ${{ steps.read_params.outputs.model_current_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
