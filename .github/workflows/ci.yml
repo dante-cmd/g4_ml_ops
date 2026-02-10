@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [main_2]
+    branches: [testing]
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -24,19 +24,19 @@ jobs:
     secrets:
       GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # pr_comment:
-  #   name: PR Status
-  #   needs: [lint]
-  #   if: always()
-  #   uses: ./.github/workflows/pr_comment.yml
-  #   with:
-  #     message: |
-  #       ## CI Pipeline Results
+    pr_comment:
+     name: PR Status
+     needs: [lint]
+     if: always()
+     uses: ./.github/workflows/pr_comment.yml
+     with:
+       message: |
+         ## CI Pipeline Results
 
-  #       | Check | Status |
-  #       |-------|--------|
-  #       | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+         | Check | Status |
+         |-------|--------|
+         | Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |
 
-  #       **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
-  #   secrets:
-  #     GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         **Overall**: ${{ needs.lint.result == 'success' && '✅ Ready to merge' || '❌ Requires fixes' }}
+     secrets:
+       GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
