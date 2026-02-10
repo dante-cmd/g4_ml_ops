@@ -3,7 +3,7 @@ name: CD Pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [main__aa]
+    branches: [main_2]
     paths-ignore:
       - "**.md"
       - ".gitignore"
