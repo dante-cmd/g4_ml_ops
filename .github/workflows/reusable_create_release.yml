@@ -1,0 +1,58 @@
+name: Reusable Create Release
+
+on:
+  workflow_call:
+    inputs:
+      project_name:
+        required: true
+        type: string
+      project_dir:
+        required: true
+        type: string
+      version:
+        required: false
+        type: string
+        default: "0.0.0"
+      changelog:
+        required: false
+        type: string
+        default: ""
+      tag:
+        required: false
+        type: string
+        default: "v0.0.0"
+    secrets:
+      GIT_TOKEN:
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    name: Create Release
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Set Release Date
+        run: echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: "zip"
+          filename: "${{ github.event.repository.name }}-${{ inputs.project_name }}-v${{ inputs.version }}.zip"
+          exclusions: "*.git* /*node_modules/* .editorconfig"
+          directory: ${{ inputs.project_dir }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "${{ inputs.tag }} (${{ env.NOW }})"
+          body: ${{ inputs.changelog }}
+          tag_name: ${{ inputs.tag }}
+          token: ${{ secrets.GIT_TOKEN }}
+          files: |
+            ${{ inputs.project_dir }}/${{ github.event.repository.name }}-${{ inputs.project_name }}-v${{ inputs.version }}.zip
